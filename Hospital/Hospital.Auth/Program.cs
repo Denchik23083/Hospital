@@ -1,0 +1,98 @@
+using Hospital.Core.Exceptions;
+using Hospital.Core.Models.Requests;
+using Hospital.Core.Utilities;
+using Hospital.Db;
+using Hospital.Db.Entities;
+using Hospital.Services.AuthService;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+builder.Services.AddScoped<SeedSystemUsersService>();
+
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
+builder.Services.AddControllers();
+builder.Services.AddOpenApi();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["Issuer"],
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["Audience"],
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(
+              Encoding.UTF8.GetBytes(builder.Configuration["SecretKey"]!))
+        };
+    });
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("angular", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:4200")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
+builder.Services.AddAuthorization();
+
+builder.Services.AddDbContext<HospitalContext>(option =>
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+    option.UseSqlServer(connectionString, sqlOptions =>
+    {
+        sqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 10,
+            maxRetryDelay: TimeSpan.FromSeconds(5),
+            errorNumbersToAdd: null);
+    });
+});
+
+builder.Services.AddAutoMapper(au =>
+{
+    au.CreateMap<RegisterRequest, User>()
+        .ForMember(dest => dest.PasswordHash, opt => opt.MapFrom(src => src.Password));
+});
+
+var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<HospitalContext>();
+    await context.Database.MigrateAsync();
+
+    var seedSystemUsersService = scope.ServiceProvider.GetRequiredService<SeedSystemUsersService>();
+    await seedSystemUsersService.SeedAsync();
+}
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+}
+
+app.UseExceptionHandler();
+
+app.UseCors("angular");
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();

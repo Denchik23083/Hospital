@@ -1,0 +1,64 @@
+﻿using AutoMapper;
+using Hospital.Core.Exceptions;
+using Hospital.Core.Models.Responce;
+using Hospital.Db;
+using Hospital.Db.Utilities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+
+namespace Hospital.Services.AdminService
+{
+    public class AdminService(HospitalContext context,
+            IMapper mapper,
+            ILogger<AdminService> logger) : IAdminService
+    {
+        private readonly HospitalContext _context = context;
+        private readonly ILogger<AdminService> _logger = logger;
+        private readonly IMapper _mapper = mapper;
+
+        public async Task<IEnumerable<UserResponce>> GetAllUsersAsync()
+        {
+            return await _context.Users
+                    .Where(_ => _.RoleType == RoleType.User)
+                    .Select(_ => new UserResponce
+                    {
+                        Id = _.Id,
+                        UserName = _.UserName,
+                        Email = _.Email
+                    }).ToListAsync();
+        }
+
+        public async Task<UserResponce> GetUserAsync(int userId)
+        {
+            var user = await _context.Users
+                    .Where(_ => _.RoleType == RoleType.User)
+                    .FirstOrDefaultAsync(_ => _.Id == userId);
+
+            if (user is null)
+            {
+                _logger.LogWarning("User not found");
+                throw new UserNotFoundException($"User with id: {userId} not found");
+            }
+
+            return _mapper.Map<UserResponce>(user);
+        }
+
+        public async Task DeleteUserAsync(int userId)
+        {
+            var userToDelete = await _context.Users
+                    .Where(_ => _.RoleType == RoleType.User)
+                    .FirstOrDefaultAsync(_ => _.Id == userId);
+
+            if (userToDelete is null)
+            {
+                _logger.LogWarning("User not found");
+                throw new UserNotFoundException($"User with id: {userId} not found");
+            }
+
+            _context.Users.Remove(userToDelete);
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("User was deleted");
+        }
+    }
+}
