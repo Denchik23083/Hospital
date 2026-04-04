@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Hospital.AdminPanel.Controllers
 {
-    [Route("api/admin/[controller]")]
+    [Route("api/admin-panel/[controller]")]
     [ApiController]
     public class GodController(IGodService service) : ControllerBase
     {

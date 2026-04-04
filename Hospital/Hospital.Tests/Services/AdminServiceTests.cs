@@ -41,7 +41,7 @@ namespace Hospital.Tests.Services
                     Id = 1,
                     UserName = "Denys",
                     Email = "foo@gmail.com",
-                    RoleType = RoleType.User,
+                    RoleType = RoleType.Patient,
                     PasswordHash = "hash"
                 },
                 new()
@@ -115,7 +115,7 @@ namespace Hospital.Tests.Services
                 Id = userId,
                 UserName = "Denys",
                 Email = "foo@gmail.com",
-                RoleType = RoleType.User,
+                RoleType = RoleType.Patient,
                 PasswordHash = "hash"
             };
 
@@ -180,7 +180,7 @@ namespace Hospital.Tests.Services
                 Id = userId,
                 UserName = "Denys",
                 Email = "foo@gmail.com",
-                RoleType = RoleType.User,
+                RoleType = RoleType.Patient,
                 PasswordHash = "hash"
             };
 

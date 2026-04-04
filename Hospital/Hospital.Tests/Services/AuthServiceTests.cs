@@ -41,7 +41,7 @@ namespace Hospital.Tests.Services
                 UserName = "Foo",
                 Email = "foo@gmail.com",
                 PasswordHash = "0000",
-                RoleType = RoleType.User
+                RoleType = RoleType.Patient
             };
 
             await _context.Users.AddAsync(user);
@@ -75,7 +75,7 @@ namespace Hospital.Tests.Services
 
             savedUser.UserName.Should().Be(register.UserName);
             savedUser.Email.Should().Be(register.Email);
-            savedUser.RoleType.Should().Be(RoleType.User);
+            savedUser.RoleType.Should().Be(RoleType.Patient);
             savedUser.PasswordHash.Should().NotBeNullOrWhiteSpace();
             savedUser.PasswordHash.Should().NotBe(register.Password);
 
@@ -102,7 +102,7 @@ namespace Hospital.Tests.Services
             {
                 UserName = "Foo",
                 Email = "foo@gmail.com",
-                RoleType = RoleType.User
+                RoleType = RoleType.Patient
             };
 
             user.PasswordHash = new PasswordHasher<User>()
@@ -125,7 +125,7 @@ namespace Hospital.Tests.Services
             {
                 UserName = "Foo",
                 Email = "foo@gmail.com",
-                RoleType = RoleType.User
+                RoleType = RoleType.Patient
             };
 
             user.PasswordHash = new PasswordHasher<User>()
@@ -164,7 +164,7 @@ namespace Hospital.Tests.Services
             {
                 UserName = "Foo",
                 Email = "foo@gmail.com",
-                RoleType = RoleType.User,
+                RoleType = RoleType.Patient,
                 RefreshToken = "refresh-token",
                 RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(1)
             };
@@ -189,7 +189,7 @@ namespace Hospital.Tests.Services
             {
                 UserName = "Foo",
                 Email = "foo@gmail.com",
-                RoleType = RoleType.User,
+                RoleType = RoleType.Patient,
                 RefreshToken = "refresh-token",
                 RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(-1)
             };
@@ -214,7 +214,7 @@ namespace Hospital.Tests.Services
             {
                 UserName = "Foo",
                 Email = "foo@gmail.com",
-                RoleType = RoleType.User,
+                RoleType = RoleType.Patient,
                 RefreshToken = "refresh-token",
                 RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(1)
             };

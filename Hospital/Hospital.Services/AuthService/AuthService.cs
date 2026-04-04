@@ -40,7 +40,7 @@ namespace Hospital.Services.AuthService
             mappedUser.PasswordHash = new PasswordHasher<User>()
                 .HashPassword(mappedUser, model.Password);
 
-            mappedUser.RoleType = RoleType.User;
+            mappedUser.RoleType = RoleType.Patient;
 
             await _context.Users.AddAsync(mappedUser);
             await _context.SaveChangesAsync();

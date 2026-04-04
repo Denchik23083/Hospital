@@ -4,6 +4,7 @@
     {
         God = 1,
         Admin = 2,
-        User = 3
+        Doctor = 3,
+        Patient = 4
     }
 }

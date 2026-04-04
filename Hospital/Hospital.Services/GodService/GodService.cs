@@ -43,10 +43,14 @@ namespace Hospital.Services.GodService
             return _mapper.Map<UserResponce>(admin);
         }
 
+        //TODO: Удалить эти 2 метода. сделать обычный CRUD. 
+        // Чтоб god создавал нового Администритора, изменял, и удалял
+
         public async Task MakeAdminAsync(int userId)
         {
             var userToAdmin = await _context.Users
-                .Where(_ => _.RoleType == RoleType.User)
+                .Where(_ => _.RoleType == RoleType.Doctor 
+                        || _.RoleType == RoleType.Patient)
                 .FirstOrDefaultAsync(_ => _.Id == userId);
 
             if (userToAdmin is null)
@@ -73,7 +77,7 @@ namespace Hospital.Services.GodService
                 throw new UserNotFoundException($"Admin with id: {adminId} not found");
             }
 
-            adminToUser.RoleType = RoleType.User;
+            adminToUser.RoleType = RoleType.Patient;
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("Admin become user");

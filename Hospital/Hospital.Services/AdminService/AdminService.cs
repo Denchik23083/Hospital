@@ -19,7 +19,8 @@ namespace Hospital.Services.AdminService
         public async Task<IEnumerable<UserResponce>> GetAllUsersAsync()
         {
             return await _context.Users
-                    .Where(_ => _.RoleType == RoleType.User)
+                    .Where(_ => _.RoleType == RoleType.Doctor 
+                            || _.RoleType == RoleType.Patient)
                     .Select(_ => new UserResponce
                     {
                         Id = _.Id,
@@ -31,7 +32,8 @@ namespace Hospital.Services.AdminService
         public async Task<UserResponce> GetUserAsync(int userId)
         {
             var user = await _context.Users
-                    .Where(_ => _.RoleType == RoleType.User)
+                    .Where(_ => _.RoleType == RoleType.Doctor
+                            || _.RoleType == RoleType.Patient)
                     .FirstOrDefaultAsync(_ => _.Id == userId);
 
             if (user is null)
@@ -46,7 +48,8 @@ namespace Hospital.Services.AdminService
         public async Task DeleteUserAsync(int userId)
         {
             var userToDelete = await _context.Users
-                    .Where(_ => _.RoleType == RoleType.User)
+                    .Where(_ => _.RoleType == RoleType.Doctor
+                            || _.RoleType == RoleType.Patient)
                     .FirstOrDefaultAsync(_ => _.Id == userId);
 
             if (userToDelete is null)

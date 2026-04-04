@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36915.13 d17.14
+VisualStudioVersion = 17.14.36915.13
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hospital.Auth", "Hospital.Auth\Hospital.Auth.csproj", "{7D2879AE-8378-47B5-9385-5591E6908094}"
 EndProject
@@ -14,6 +14,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hospital.AdminPanel", "Hospital.AdminPanel\Hospital.AdminPanel.csproj", "{7ED70B38-8ABC-49BB-80C3-2ABE98171DA9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hospital.Tests", "Hospital.Tests\Hospital.Tests.csproj", "{CCF153A3-8583-42DC-ABEB-1CD989306AA1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hospital.API", "Hospital.API\Hospital.API.csproj", "{D9B69FCE-C361-44BF-BC18-58EAC9F7B8AA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{CCF153A3-8583-42DC-ABEB-1CD989306AA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CCF153A3-8583-42DC-ABEB-1CD989306AA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CCF153A3-8583-42DC-ABEB-1CD989306AA1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D9B69FCE-C361-44BF-BC18-58EAC9F7B8AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9B69FCE-C361-44BF-BC18-58EAC9F7B8AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9B69FCE-C361-44BF-BC18-58EAC9F7B8AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9B69FCE-C361-44BF-BC18-58EAC9F7B8AA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

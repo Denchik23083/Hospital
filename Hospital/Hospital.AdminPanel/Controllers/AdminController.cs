@@ -6,13 +6,13 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Hospital.AdminPanel.Controllers
 {
-    [Route("api/admin/[controller]")]
+    [Route("api/admin-panel/[controller]")]
     [ApiController]
     public class AdminController(IAdminService service) : ControllerBase
     {
         private readonly IAdminService _service = service;
 
-        [Authorize(Roles = AppRoles.GodAdmin)]
+        [Authorize(Roles = AppRoles.AdminGod)]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserResponce>>> GetAllUsersAsync()
         {
@@ -21,7 +21,7 @@ namespace Hospital.AdminPanel.Controllers
             return Ok(users);
         }
 
-        [Authorize(Roles = AppRoles.GodAdmin)]
+        [Authorize(Roles = AppRoles.AdminGod)]
         [HttpGet("{id}")]
         public async Task<ActionResult<UserResponce>> GetUserAsync(int id)
         {
@@ -30,7 +30,7 @@ namespace Hospital.AdminPanel.Controllers
             return Ok(user);
         }
 
-        [Authorize(Roles = AppRoles.GodAdmin)]
+        [Authorize(Roles = AppRoles.AdminGod)]
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteUserAsync(int id)
         {
