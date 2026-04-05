@@ -1,20 +1,12 @@
 {
   "profiles": {
-    "http": {
+    "Hospital": {
       "commandName": "Project",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "http://localhost:5216"
-    },
-    "https": {
-      "commandName": "Project",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "dotnetRunMessages": true,
-      "applicationUrl": "https://localhost:7169;http://localhost:5216"
+      "applicationUrl": "https://localhost:6001;http://localhost:6000"
     },
     "Container (Dockerfile)": {
       "commandName": "Docker",
