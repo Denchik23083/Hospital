@@ -22,6 +22,37 @@ namespace Hospital.Db.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Hospital.Db.Entities.Booking", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BookingStatus")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DoctorSlotId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PatientId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DoctorSlotId")
+                        .IsUnique();
+
+                    b.HasIndex("PatientId");
+
+                    b.ToTable("Bookings");
+                });
+
             modelBuilder.Entity("Hospital.Db.Entities.Doctor", b =>
                 {
                     b.Property<int>("Id")
@@ -59,197 +90,36 @@ namespace Hospital.Db.Migrations
                         .HasFilter("[UserId] IS NOT NULL");
 
                     b.ToTable("Doctors");
+                });
 
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            ExperienceYears = 2,
-                            FirstName = "Глеб",
-                            GenderType = 1,
-                            LastName = "Романенко",
-                            SpecialtyId = 1
-                        },
-                        new
-                        {
-                            Id = 2,
-                            ExperienceYears = 3,
-                            FirstName = "Семен",
-                            GenderType = 1,
-                            LastName = "Лобанов",
-                            SpecialtyId = 1
-                        },
-                        new
-                        {
-                            Id = 3,
-                            ExperienceYears = 2,
-                            FirstName = "Борис",
-                            GenderType = 1,
-                            LastName = "Левин",
-                            SpecialtyId = 1
-                        },
-                        new
-                        {
-                            Id = 4,
-                            ExperienceYears = 1,
-                            FirstName = "Варвара",
-                            GenderType = 2,
-                            LastName = "Черноус",
-                            SpecialtyId = 1
-                        },
-                        new
-                        {
-                            Id = 5,
-                            ExperienceYears = 3,
-                            FirstName = "Мария",
-                            GenderType = 2,
-                            LastName = "Колисниченко",
-                            SpecialtyId = 2
-                        },
-                        new
-                        {
-                            Id = 6,
-                            ExperienceYears = 1,
-                            FirstName = "Светлана",
-                            GenderType = 2,
-                            LastName = "Чернышова",
-                            SpecialtyId = 2
-                        },
-                        new
-                        {
-                            Id = 7,
-                            ExperienceYears = 5,
-                            FirstName = "Вячеслав",
-                            GenderType = 1,
-                            LastName = "Селезнев",
-                            SpecialtyId = 2
-                        },
-                        new
-                        {
-                            Id = 8,
-                            ExperienceYears = 7,
-                            FirstName = "Станислав",
-                            GenderType = 1,
-                            LastName = "Башницен",
-                            SpecialtyId = 3
-                        },
-                        new
-                        {
-                            Id = 9,
-                            ExperienceYears = 3,
-                            FirstName = "Васелиса",
-                            GenderType = 2,
-                            LastName = "Шмид",
-                            SpecialtyId = 3
-                        },
-                        new
-                        {
-                            Id = 10,
-                            ExperienceYears = 4,
-                            FirstName = "Дарья",
-                            GenderType = 2,
-                            LastName = "Зайченко",
-                            SpecialtyId = 4
-                        },
-                        new
-                        {
-                            Id = 11,
-                            ExperienceYears = 1,
-                            FirstName = "Анатолий",
-                            GenderType = 1,
-                            LastName = "Войченко",
-                            SpecialtyId = 4
-                        },
-                        new
-                        {
-                            Id = 12,
-                            ExperienceYears = 5,
-                            FirstName = "Евгений",
-                            GenderType = 1,
-                            LastName = "Шевчук",
-                            SpecialtyId = 5
-                        },
-                        new
-                        {
-                            Id = 13,
-                            ExperienceYears = 2,
-                            FirstName = "Катерина",
-                            GenderType = 2,
-                            LastName = "Главко",
-                            SpecialtyId = 5
-                        },
-                        new
-                        {
-                            Id = 14,
-                            ExperienceYears = 3,
-                            FirstName = "Елизавета",
-                            GenderType = 2,
-                            LastName = "Сидорчук",
-                            SpecialtyId = 6
-                        },
-                        new
-                        {
-                            Id = 15,
-                            ExperienceYears = 8,
-                            FirstName = "Петр",
-                            GenderType = 1,
-                            LastName = "Иващенко",
-                            SpecialtyId = 6
-                        },
-                        new
-                        {
-                            Id = 16,
-                            ExperienceYears = 2,
-                            FirstName = "Тарас",
-                            GenderType = 1,
-                            LastName = "Гайдар",
-                            SpecialtyId = 7
-                        },
-                        new
-                        {
-                            Id = 17,
-                            ExperienceYears = 5,
-                            FirstName = "Анастасия",
-                            GenderType = 2,
-                            LastName = "Громова",
-                            SpecialtyId = 7
-                        },
-                        new
-                        {
-                            Id = 18,
-                            ExperienceYears = 4,
-                            FirstName = "Вероника",
-                            GenderType = 2,
-                            LastName = "Борова",
-                            SpecialtyId = 8
-                        },
-                        new
-                        {
-                            Id = 19,
-                            ExperienceYears = 2,
-                            FirstName = "Оксана",
-                            GenderType = 2,
-                            LastName = "Свиридова",
-                            SpecialtyId = 9
-                        },
-                        new
-                        {
-                            Id = 20,
-                            ExperienceYears = 3,
-                            FirstName = "Полина",
-                            GenderType = 2,
-                            LastName = "Ушакова",
-                            SpecialtyId = 9
-                        },
-                        new
-                        {
-                            Id = 21,
-                            ExperienceYears = 6,
-                            FirstName = "Денис",
-                            GenderType = 1,
-                            LastName = "Никифоров",
-                            SpecialtyId = 9
-                        });
+            modelBuilder.Entity("Hospital.Db.Entities.DoctorSlot", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<int>("DoctorId")
+                        .HasColumnType("int");
+
+                    b.Property<TimeSpan>("EndTime")
+                        .HasColumnType("time");
+
+                    b.Property<bool>("IsAvailible")
+                        .HasColumnType("bit");
+
+                    b.Property<TimeSpan>("StartTime")
+                        .HasColumnType("time");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DoctorId");
+
+                    b.ToTable("DoctorSlots");
                 });
 
             modelBuilder.Entity("Hospital.Db.Entities.Patient", b =>
@@ -403,6 +273,25 @@ namespace Hospital.Db.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("Hospital.Db.Entities.Booking", b =>
+                {
+                    b.HasOne("Hospital.Db.Entities.DoctorSlot", "DoctorSlot")
+                        .WithOne("Booking")
+                        .HasForeignKey("Hospital.Db.Entities.Booking", "DoctorSlotId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Hospital.Db.Entities.Patient", "Patient")
+                        .WithMany("Bookings")
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DoctorSlot");
+
+                    b.Navigation("Patient");
+                });
+
             modelBuilder.Entity("Hospital.Db.Entities.Doctor", b =>
                 {
                     b.HasOne("Hospital.Db.Entities.Specialty", "Specialty")
@@ -412,7 +301,7 @@ namespace Hospital.Db.Migrations
                         .IsRequired();
 
                     b.HasOne("Hospital.Db.Entities.User", "User")
-                        .WithOne()
+                        .WithOne("Doctor")
                         .HasForeignKey("Hospital.Db.Entities.Doctor", "UserId");
 
                     b.Navigation("Specialty");
@@ -420,10 +309,21 @@ namespace Hospital.Db.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Hospital.Db.Entities.DoctorSlot", b =>
+                {
+                    b.HasOne("Hospital.Db.Entities.Doctor", "Doctor")
+                        .WithMany("DoctorSlots")
+                        .HasForeignKey("DoctorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Doctor");
+                });
+
             modelBuilder.Entity("Hospital.Db.Entities.Patient", b =>
                 {
                     b.HasOne("Hospital.Db.Entities.User", "User")
-                        .WithOne()
+                        .WithOne("Patient")
                         .HasForeignKey("Hospital.Db.Entities.Patient", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -431,9 +331,31 @@ namespace Hospital.Db.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Hospital.Db.Entities.Doctor", b =>
+                {
+                    b.Navigation("DoctorSlots");
+                });
+
+            modelBuilder.Entity("Hospital.Db.Entities.DoctorSlot", b =>
+                {
+                    b.Navigation("Booking");
+                });
+
+            modelBuilder.Entity("Hospital.Db.Entities.Patient", b =>
+                {
+                    b.Navigation("Bookings");
+                });
+
             modelBuilder.Entity("Hospital.Db.Entities.Specialty", b =>
                 {
                     b.Navigation("Doctors");
+                });
+
+            modelBuilder.Entity("Hospital.Db.Entities.User", b =>
+                {
+                    b.Navigation("Doctor");
+
+                    b.Navigation("Patient");
                 });
 #pragma warning restore 612, 618
         }

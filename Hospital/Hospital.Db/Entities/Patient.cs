@@ -19,5 +19,7 @@ namespace Hospital.Db.Entities
         public GenderType GenderType { get; set; }
 
         public string Phone { get; set; } = string.Empty;
+
+        public List<Booking> Bookings { get; set; } = [];
     }
 }

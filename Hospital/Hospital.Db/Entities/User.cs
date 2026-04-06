@@ -17,5 +17,9 @@ namespace Hospital.Db.Entities
         public string? RefreshToken { get; set; }
 
         public DateTime RefreshTokenExpiryTime { get; set; }
+
+        public Doctor? Doctor { get; set; }
+
+        public Patient? Patient { get; set; }
     }
 }

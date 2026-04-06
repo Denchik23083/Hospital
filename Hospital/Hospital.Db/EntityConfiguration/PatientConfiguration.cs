@@ -19,7 +19,7 @@ namespace Hospital.Db.EntityConfiguration
                 .IsRequired();
 
             builder.HasOne(_ => _.User)
-                .WithOne()
+                .WithOne(_ => _.Patient)
                 .HasForeignKey<Patient>(_ => _.UserId);
         }
     }

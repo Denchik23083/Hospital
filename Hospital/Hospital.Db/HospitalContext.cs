@@ -13,6 +13,10 @@ namespace Hospital.Db
 
         public DbSet<Patient> Patients { get; set; }
 
+        public DbSet<DoctorSlot> DoctorSlots { get; set; }
+
+        public DbSet<Booking> Bookings { get; set; }
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(GetType().Assembly);

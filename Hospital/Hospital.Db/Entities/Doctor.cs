@@ -21,5 +21,7 @@ namespace Hospital.Db.Entities
         public int ExperienceYears { get; set; }
 
         public GenderType GenderType { get; set; }
+
+        public List<DoctorSlot> DoctorSlots { get; set; } = [];
     }
 }
