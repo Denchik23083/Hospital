@@ -3,6 +3,7 @@ using Hospital.Core.Models.Responce;
 using Hospital.Db;
 using Hospital.Db.Entities;
 using Hospital.Services.DoctorService;
+using Hospital.Services.DoctorSlotService;
 using Hospital.Services.SpecialtyService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<ISpecialtyService, SpecialtyService>();
 builder.Services.AddScoped<IDoctorService, DoctorService>();
+builder.Services.AddScoped<IDoctorSlotService, DoctorSlotService>();
 
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();

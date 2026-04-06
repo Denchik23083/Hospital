@@ -1,0 +1,19 @@
+﻿using Hospital.Db;
+using Microsoft.EntityFrameworkCore;
+
+namespace Hospital.Services.DoctorSlotService
+{
+    public class DoctorSlotService(HospitalContext context) : IDoctorSlotService
+    {
+        private readonly HospitalContext _context = context;
+
+        public async Task<IEnumerable<DateOnly>> GetAllDoctorSlotsDatesAsync(int doctorId)
+        {
+            return await _context.DoctorSlots
+                .Where(_ => _.DoctorId == doctorId)
+                .Select(_ => _.Date)
+                .Distinct()
+                .ToListAsync();
+        }
+    }
+}
