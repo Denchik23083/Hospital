@@ -39,7 +39,6 @@ namespace Hospital.Tests.Services
                 new()
                 {
                     Id = 1,
-                    UserName = "Denys",
                     Email = "foo@gmail.com",
                     RoleType = RoleType.Patient,
                     PasswordHash = "hash"
@@ -47,7 +46,6 @@ namespace Hospital.Tests.Services
                 new()
                 {
                     Id = 2,
-                    UserName = "God",
                     Email = "god@gmail.com",
                     RoleType = RoleType.God,
                     PasswordHash = "hash"
@@ -55,7 +53,6 @@ namespace Hospital.Tests.Services
                 new()
                 {
                     Id = 3,
-                    UserName = "Admin",
                     Email = "admin@gmail.com",
                     RoleType = RoleType.Admin,
                     PasswordHash = "hash"
@@ -68,9 +65,9 @@ namespace Hospital.Tests.Services
             var result = await _service.GetAllAdminsAsync();
 
             result.Should().HaveCount(expectedCount);
-            result.Should().Contain(u => u.UserName == "Admin");
-            result.Should().NotContain(u => u.UserName == "Denys");
-            result.Should().NotContain(u => u.UserName == "God");
+            result.Should().Contain(u => u.Email == "admin@gmail.com");
+            result.Should().NotContain(u => u.Email == "foo@gmail.com");
+            result.Should().NotContain(u => u.Email == "god@gmail.com");
         }
 
         [Fact]
@@ -91,7 +88,6 @@ namespace Hospital.Tests.Services
             var fakeAdmin = new User
             {
                 Id = adminId,
-                UserName = "God",
                 Email = "god@gmail.com",
                 RoleType = RoleType.God,
                 PasswordHash = "hash"
@@ -113,7 +109,6 @@ namespace Hospital.Tests.Services
             var adminDb = new User
             {
                 Id = adminId,
-                UserName = "Admin",
                 Email = "admin@gmail.com",
                 RoleType = RoleType.Admin,
                 PasswordHash = "hash"
@@ -122,7 +117,6 @@ namespace Hospital.Tests.Services
             var admin = new UserResponce
             {
                 Id = adminId,
-                UserName = "Admin",
                 Email = "admin@gmail.com",
             };
 
@@ -156,7 +150,6 @@ namespace Hospital.Tests.Services
             var user = new User
             {
                 Id = userId,
-                UserName = "Denys",
                 Email = "foo@gmail.com",
                 RoleType = RoleType.Admin,
                 PasswordHash = "hash"
@@ -178,7 +171,6 @@ namespace Hospital.Tests.Services
             var user = new User
             {
                 Id = userId,
-                UserName = "Denys",
                 Email = "foo@gmail.com",
                 RoleType = RoleType.Patient,
                 PasswordHash = "hash"
@@ -212,7 +204,6 @@ namespace Hospital.Tests.Services
             var admin = new User
             {
                 Id = adminId,
-                UserName = "Admin",
                 Email = "admin@gmail.com",
                 RoleType = RoleType.Patient,
                 PasswordHash = "hash"
@@ -235,7 +226,6 @@ namespace Hospital.Tests.Services
             var admin = new User
             {
                 Id = adminId,
-                UserName = "Admin",
                 Email = "admin@gmail.com",
                 RoleType = RoleType.Admin,
                 PasswordHash = "hash"

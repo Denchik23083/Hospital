@@ -31,7 +31,6 @@ namespace Hospital.Db.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("BookingStatus")
-                        .HasPrecision(18, 2)
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
@@ -78,7 +77,7 @@ namespace Hospital.Db.Migrations
                     b.Property<int>("SpecialtyId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("UserId")
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -86,8 +85,7 @@ namespace Hospital.Db.Migrations
                     b.HasIndex("SpecialtyId");
 
                     b.HasIndex("UserId")
-                        .IsUnique()
-                        .HasFilter("[UserId] IS NOT NULL");
+                        .IsUnique();
 
                     b.ToTable("Doctors");
                 });
@@ -109,9 +107,6 @@ namespace Hospital.Db.Migrations
                     b.Property<TimeSpan>("EndTime")
                         .HasColumnType("time");
 
-                    b.Property<bool>("IsAvailible")
-                        .HasColumnType("bit");
-
                     b.Property<TimeSpan>("StartTime")
                         .HasColumnType("time");
 
@@ -130,8 +125,8 @@ namespace Hospital.Db.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("BirthDate")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly>("BirthDate")
+                        .HasColumnType("date");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -255,15 +250,11 @@ namespace Hospital.Db.Migrations
                     b.Property<string>("RefreshToken")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("RefreshTokenExpiryTime")
+                    b.Property<DateTime?>("RefreshTokenExpiryTime")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("RoleType")
                         .HasColumnType("int");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -278,13 +269,13 @@ namespace Hospital.Db.Migrations
                     b.HasOne("Hospital.Db.Entities.DoctorSlot", "DoctorSlot")
                         .WithOne("Booking")
                         .HasForeignKey("Hospital.Db.Entities.Booking", "DoctorSlotId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Hospital.Db.Entities.Patient", "Patient")
                         .WithMany("Bookings")
                         .HasForeignKey("PatientId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("DoctorSlot");
@@ -302,7 +293,9 @@ namespace Hospital.Db.Migrations
 
                     b.HasOne("Hospital.Db.Entities.User", "User")
                         .WithOne("Doctor")
-                        .HasForeignKey("Hospital.Db.Entities.Doctor", "UserId");
+                        .HasForeignKey("Hospital.Db.Entities.Doctor", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Specialty");
 

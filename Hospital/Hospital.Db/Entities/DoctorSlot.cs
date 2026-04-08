@@ -14,8 +14,6 @@
 
         public TimeSpan EndTime { get; set; }
 
-        public bool IsAvailible { get; set; } = true;
-
         public Booking? Booking { get; set; }
     }
 }

@@ -1,4 +1,9 @@
-﻿namespace Hospital.Core.Models.Requests
+﻿using Hospital.Db.Utilities;
+
+namespace Hospital.Core.Models.Requests
 {
-    public record class RegisterRequest(string UserName, string Email, string Password);
+    public record class RegisterRequest(
+        string Email, string Password,
+        string FirstName, string LastName, string Phone,
+        DateOnly BirthDate, GenderType GenderType);
 }

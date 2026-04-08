@@ -23,7 +23,6 @@ namespace Hospital.Services.GodService
                 .Select(_ => new UserResponce
                 {
                     Id = _.Id,
-                    UserName = _.UserName,
                     Email = _.Email
                 }).ToListAsync();
         }

@@ -26,13 +26,11 @@ namespace Hospital.Tests.Controllers
                 new()
                 {
                     Id = 1,
-                    UserName = "Denys",
                     Email = "foo@gmail.com",
                 },
                 new()
                 {
                     Id = 2,
-                    UserName = "Timur",
                     Email = "fff@gmail.com",
                 }
             };
@@ -58,7 +56,6 @@ namespace Hospital.Tests.Controllers
             var user = new UserResponce
             {
                 Id = userId,
-                UserName = "Denys",
                 Email = "foo@gmail.com",
             };
 

@@ -19,12 +19,10 @@ namespace Hospital.Services.AuthService
 {
     public class AuthService(HospitalContext context, 
             IConfiguration configuration,
-            IMapper mapper,
             ILogger<AuthService> logger) : IAuthService
     {
         private readonly HospitalContext _context = context;
         private readonly IConfiguration _configuration = configuration;
-        private readonly IMapper _mapper = mapper;
         private readonly ILogger<AuthService> _logger = logger;
 
         public async Task RegisterAsync(RegisterRequest model)
@@ -34,15 +32,25 @@ namespace Hospital.Services.AuthService
                 _logger.LogWarning("User with this {Email} email is already exist", model.Email);
                 throw new ConflictException(model.Email);
             }
-            
-            var mappedUser = _mapper.Map<User>(model);
 
-            mappedUser.PasswordHash = new PasswordHasher<User>()
-                .HashPassword(mappedUser, model.Password);
+            var user = new User
+            {
+                Email = model.Email,
+                RoleType = RoleType.Patient,
+                Patient = new()
+                {
+                    FirstName = model.FirstName,
+                    LastName = model.LastName,
+                    BirthDate = model.BirthDate,
+                    GenderType = model.GenderType,
+                    Phone = model.Phone
+                }
+            };
 
-            mappedUser.RoleType = RoleType.Patient;
+            user.PasswordHash = new PasswordHasher<User>()
+                .HashPassword(user, model.Password);
 
-            await _context.Users.AddAsync(mappedUser);
+            await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
         }
 
@@ -93,7 +101,6 @@ namespace Hospital.Services.AuthService
             var claims = new List<Claim>
             {
                 new (ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new (ClaimTypes.Name, user.UserName),
                 new (ClaimTypes.Email, user.Email),
                 new (ClaimTypes.Role, user.RoleType.ToString()),
             };

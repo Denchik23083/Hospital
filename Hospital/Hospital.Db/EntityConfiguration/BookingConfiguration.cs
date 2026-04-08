@@ -12,16 +12,22 @@ namespace Hospital.Db.EntityConfiguration
 
             builder.Property(_ => _.CreatedAt).IsRequired();
             builder.Property(_ => _.BookingStatus)
-                .HasPrecision(18, 2)
+                .HasConversion<int>()
                 .IsRequired();
+
+            builder.HasIndex(_ => _.DoctorSlotId)
+                .IsUnique();
 
             builder.HasOne(_ => _.DoctorSlot)
                 .WithOne(_ => _.Booking)
-                .HasForeignKey<Booking>(_ => _.DoctorSlotId);
+                .HasForeignKey<Booking>(_ => _.DoctorSlotId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(_ => _.Patient)
                 .WithMany(_ => _.Bookings)
-                .HasForeignKey(_ => _.PatientId);
+                .HasForeignKey(_ => _.PatientId)
+                .OnDelete(DeleteBehavior.Restrict);
+
         }
     }
 }

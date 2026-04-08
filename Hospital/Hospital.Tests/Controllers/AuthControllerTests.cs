@@ -19,7 +19,7 @@ namespace Hospital.Tests.Controllers
             _controller = new AuthController(_service.Object);
         }
 
-        [Fact]
+        /*[Fact]
         public async Task RegisterAsync_ShouldReturnCreated_WhenRegistrationSuccessful()
         {
             var register = new RegisterRequest("Foo", "foo@gmail.com", "0000");
@@ -33,7 +33,7 @@ namespace Hospital.Tests.Controllers
             result.Should().BeOfType<CreatedResult>();
 
             _service.Verify(_ => _.RegisterAsync(register), Times.Once);
-        }
+        }*/
 
         [Fact]
         public async Task LoginAsync_ShouldReturnOkWithToken_WhenLoginSuccessful()

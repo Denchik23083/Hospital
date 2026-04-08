@@ -13,7 +13,6 @@ namespace Hospital.Db.EntityConfiguration
             builder.Property(_ => _.Date).IsRequired();
             builder.Property(_ => _.StartTime).IsRequired();
             builder.Property(_ => _.EndTime).IsRequired();
-            builder.Property(_ => _.IsAvailible).IsRequired();
 
             builder.HasOne(_ => _.Doctor)
                 .WithMany(_ => _.DoctorSlots)

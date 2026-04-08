@@ -10,7 +10,7 @@ namespace Hospital.Services.DoctorSlotService
         public async Task<IEnumerable<DateOnly>> GetAllDoctorSlotsDatesAsync(int doctorId)
         {
             return await _context.DoctorSlots
-                .Where(_ => _.DoctorId == doctorId)
+                .Where(_ => _.DoctorId == doctorId && _.Date > DateOnly.FromDateTime(DateTime.UtcNow))
                 .Select(_ => _.Date)
                 .Distinct()
                 .ToListAsync();

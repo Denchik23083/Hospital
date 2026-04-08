@@ -14,7 +14,7 @@ namespace Hospital.Db.Entities
 
         public string LastName { get; set; } = string.Empty;
 
-        public DateTime BirthDate { get; set; }
+        public DateOnly BirthDate { get; set; }
 
         public GenderType GenderType { get; set; }
 

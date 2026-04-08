@@ -26,7 +26,6 @@ namespace Hospital.Core.Utilities
 
         private async Task SeedGodAsync()
         {
-            var godUserName = _configuration["SeedGod:UserName"] ?? "god";
             var godEmail = _configuration["SeedGod:Email"];
             var godPassword = _configuration["SeedGod:Password"];
 
@@ -52,7 +51,6 @@ namespace Hospital.Core.Utilities
 
             var god = new User
             {
-                UserName = godUserName,
                 Email = godEmail,
                 RoleType = RoleType.God
             };
@@ -69,7 +67,6 @@ namespace Hospital.Core.Utilities
 
         private async Task SeedAdminAsync()
         {
-            var adminUserName = _configuration["SeedAdmin:UserName"] ?? "admin";
             var adminEmail = _configuration["SeedAdmin:Email"];
             var adminPassword = _configuration["SeedAdmin:Password"];
 
@@ -95,7 +92,6 @@ namespace Hospital.Core.Utilities
 
             var admin = new User
             {
-                UserName = adminUserName,
                 Email = adminEmail,
                 RoleType = RoleType.Admin
             };
@@ -112,29 +108,29 @@ namespace Hospital.Core.Utilities
 
         private async Task SeedDoctorsAsync()
         {
-            var doctorsToSeed = new List<(string UserName, string Email, string FirstName, string LastName, int ExperienceYears, int SpecialtyId, GenderType GenderType)>
+            var doctorsToSeed = new List<(string Email, string FirstName, string LastName, int ExperienceYears, int SpecialtyId, GenderType GenderType)>
 {
-                ("Doctor1", "doctor1@gmail.com", "Глеб", "Романенко", 2, 1, GenderType.Male),
-                ("Doctor2", "doctor2@gmail.com", "Семен", "Лобанов", 3, 1, GenderType.Male),
-                ("Doctor3", "doctor3@gmail.com", "Борис", "Левин", 2, 1, GenderType.Male),
-                ("Doctor4", "doctor4@gmail.com", "Варвара", "Черноус", 1, 1, GenderType.Female),
-                ("Doctor5", "doctor5@gmail.com", "Мария", "Колисниченко", 3, 2, GenderType.Female),
-                ("Doctor6", "doctor6@gmail.com", "Светлана", "Чернышова", 1, 2, GenderType.Female),
-                ("Doctor7", "doctor7@gmail.com", "Вячеслав", "Селезнев", 5, 2, GenderType.Male),
-                ("Doctor8", "doctor8@gmail.com", "Станислав", "Башницен", 7, 3, GenderType.Male),
-                ("Doctor9", "doctor9@gmail.com", "Васелиса", "Шмид", 3, 3, GenderType.Female),
-                ("Doctor10", "doctor10@gmail.com", "Дарья", "Зайченко", 4, 4, GenderType.Female),
-                ("Doctor11", "doctor11@gmail.com", "Анатолий", "Войченко", 1, 4, GenderType.Male),
-                ("Doctor12", "doctor12@gmail.com", "Евгений", "Шевчук", 5, 5, GenderType.Male),
-                ("Doctor13", "doctor13@gmail.com", "Катерина", "Главко", 2, 5, GenderType.Female),
-                ("Doctor14", "doctor14@gmail.com", "Елизавета", "Сидорчук", 3, 6, GenderType.Female),
-                ("Doctor15", "doctor15@gmail.com", "Петр", "Иващенко", 8, 6, GenderType.Male),
-                ("Doctor16", "doctor16@gmail.com", "Тарас", "Гайдар", 2, 7, GenderType.Male),
-                ("Doctor17", "doctor17@gmail.com", "Анастасия", "Громова", 5, 7, GenderType.Female),
-                ("Doctor18", "doctor18@gmail.com", "Вероника", "Борова", 4, 8, GenderType.Female),
-                ("Doctor19", "doctor19@gmail.com", "Оксана", "Свиридова", 2, 9, GenderType.Female),
-                ("Doctor20", "doctor20@gmail.com", "Полина", "Ушакова", 3, 9, GenderType.Female),
-                ("Doctor21", "doctor21@gmail.com", "Денис", "Никифоров", 6, 9, GenderType.Male)
+                ("doctor1@gmail.com", "Глеб", "Романенко", 2, 1, GenderType.Male),
+                ("doctor2@gmail.com", "Семен", "Лобанов", 3, 1, GenderType.Male),
+                ("doctor3@gmail.com", "Борис", "Левин", 2, 1, GenderType.Male),
+                ("doctor4@gmail.com", "Варвара", "Черноус", 1, 1, GenderType.Female),
+                ("doctor5@gmail.com", "Мария", "Колисниченко", 3, 2, GenderType.Female),
+                ("doctor6@gmail.com", "Светлана", "Чернышова", 1, 2, GenderType.Female),
+                ("doctor7@gmail.com", "Вячеслав", "Селезнев", 5, 2, GenderType.Male),
+                ("doctor8@gmail.com", "Станислав", "Башницен", 7, 3, GenderType.Male),
+                ("doctor9@gmail.com", "Васелиса", "Шмид", 3, 3, GenderType.Female),
+                ("doctor10@gmail.com", "Дарья", "Зайченко", 4, 4, GenderType.Female),
+                ("doctor11@gmail.com", "Анатолий", "Войченко", 1, 4, GenderType.Male),
+                ("doctor12@gmail.com", "Евгений", "Шевчук", 5, 5, GenderType.Male),
+                ("doctor13@gmail.com", "Катерина", "Главко", 2, 5, GenderType.Female),
+                ("doctor14@gmail.com", "Елизавета", "Сидорчук", 3, 6, GenderType.Female),
+                ("doctor15@gmail.com", "Петр", "Иващенко", 8, 6, GenderType.Male),
+                ("doctor16@gmail.com", "Тарас", "Гайдар", 2, 7, GenderType.Male),
+                ("doctor17@gmail.com", "Анастасия", "Громова", 5, 7, GenderType.Female),
+                ("doctor18@gmail.com", "Вероника", "Борова", 4, 8, GenderType.Female),
+                ("doctor19@gmail.com", "Оксана", "Свиридова", 2, 9, GenderType.Female),
+                ("doctor20@gmail.com", "Полина", "Ушакова", 3, 9, GenderType.Female),
+                ("doctor21@gmail.com", "Денис", "Никифоров", 6, 9, GenderType.Male)
             };
 
             var passwordHasher = new PasswordHasher<User>();
@@ -160,7 +156,6 @@ namespace Hospital.Core.Utilities
             {
                 var user = new User
                 {
-                    UserName = doctorData.UserName,
                     Email = doctorData.Email,
                     RoleType = RoleType.Doctor,
                     Doctor = new()

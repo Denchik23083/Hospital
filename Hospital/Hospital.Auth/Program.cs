@@ -63,12 +63,6 @@ builder.Services.AddDbContext<HospitalContext>(option =>
     });
 });
 
-builder.Services.AddAutoMapper(au =>
-{
-    au.CreateMap<RegisterRequest, User>()
-        .ForMember(dest => dest.PasswordHash, opt => opt.MapFrom(src => src.Password));
-});
-
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())

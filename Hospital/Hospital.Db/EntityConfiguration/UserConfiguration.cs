@@ -10,7 +10,6 @@ namespace Hospital.Db.EntityConfiguration
         {
             builder.HasKey(_ => _.Id);
 
-            builder.Property(_ => _.UserName).IsRequired();
             builder.Property(_ => _.PasswordHash).IsRequired();
             builder.Property(_ => _.RefreshToken);
             builder.Property(_ => _.RefreshTokenExpiryTime);
