@@ -39,6 +39,27 @@ namespace Hospital.Core.Exceptions
                     problemDetails.Detail = exception.Message;
                     break;
 
+                case PatientNotFoundException:
+                    httpContext.Response.StatusCode = StatusCodes.Status404NotFound;
+                    problemDetails.Status = StatusCodes.Status404NotFound;
+                    problemDetails.Title = "Patient not found";
+                    problemDetails.Detail = exception.Message;
+                    break;
+
+                case DoctorSlotNotFoundException:
+                    httpContext.Response.StatusCode = StatusCodes.Status404NotFound;
+                    problemDetails.Status = StatusCodes.Status404NotFound;
+                    problemDetails.Title = "Doctor slot not found";
+                    problemDetails.Detail = exception.Message;
+                    break;
+
+                case SlotAlreadyBookedException:
+                    httpContext.Response.StatusCode = StatusCodes.Status409Conflict;
+                    problemDetails.Status = StatusCodes.Status409Conflict;
+                    problemDetails.Title = "Slot already booked";
+                    problemDetails.Detail = exception.Message;
+                    break;
+                    
                 default:
                     _logger.LogError(exception, "Unhandled exception occurred");
 

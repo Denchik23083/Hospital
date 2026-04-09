@@ -24,16 +24,16 @@ namespace Hospital.Hospital.Controllers
             return Ok(dates);
         }
 
-        /*[Authorize(Roles = AppRoles.PatientAdminGod)]
+        [Authorize(Roles = AppRoles.PatientAdminGod)]
         [HttpGet("{doctorId}/available-times")]
-        public async Task<ActionResult<IEnumerable<SpecialtyResponce>>> GetAllDoctorSlotsTimeByDateAsync(int doctorId, DateOnly date)
+        public async Task<ActionResult<IEnumerable<DoctorSlotResponce>>> GetAllDoctorSlotsTimeByDateAsync(int doctorId, [FromQuery]DateOnly date)
         {
-            var doctorSpots = await _service.GetAllDoctorSlotsTimeByDateAsync(doctorId, date);
+            var doctorSlots = await _service.GetAllDoctorSlotsTimeByDateAsync(doctorId, date);
 
-            return Ok(doctorSpots);
+            return Ok(doctorSlots);
         }
 
-        [Authorize(Roles = AppRoles.PatientAdminGod)]
+        /*[Authorize(Roles = AppRoles.PatientAdminGod)]
         [HttpGet("{specialtyId}/doctors")]
         public async Task<ActionResult<IEnumerable<DoctorResponce>>> GetAllDoctorsBySpecialtyAsync(int specialtyId)
         {
