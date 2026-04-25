@@ -1,5 +1,4 @@
 ﻿using Hospital.Db.Entities;
-using Hospital.Db.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

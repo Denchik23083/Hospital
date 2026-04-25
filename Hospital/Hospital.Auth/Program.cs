@@ -1,8 +1,6 @@
 using Hospital.Core.Exceptions;
-using Hospital.Core.Models.Requests;
 using Hospital.Core.Utilities;
 using Hospital.Db;
-using Hospital.Db.Entities;
 using Hospital.Services.AuthService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;

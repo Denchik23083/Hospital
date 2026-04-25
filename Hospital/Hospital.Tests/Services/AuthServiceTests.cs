@@ -1,14 +1,6 @@
-﻿using AutoMapper;
-using FluentAssertions;
-using Hospital.Core.Exceptions;
-using Hospital.Core.Models.Requests;
-using Hospital.Db;
-using Hospital.Db.Entities;
-using Hospital.Db.Utilities;
+﻿using Hospital.Db;
 using Hospital.Services.AuthService;
 using Hospital.Tests.Helpers;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;

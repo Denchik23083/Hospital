@@ -14,6 +14,6 @@
 
         public TimeSpan EndTime { get; set; }
 
-        public Booking? Booking { get; set; }
+        public List<Booking> Bookings { get; set; } = [];
     }
 }

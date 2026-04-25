@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -8,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Hospital.Db.Migrations
 {
     /// <inheritdoc />
-    public partial class FixDb : Migration
+    public partial class FixDoctorSlot : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -168,7 +167,8 @@ namespace Hospital.Db.Migrations
                 name: "IX_Bookings_DoctorSlotId",
                 table: "Bookings",
                 column: "DoctorSlotId",
-                unique: true);
+                unique: true,
+                filter: "[BookingStatus] = 1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Bookings_PatientId",

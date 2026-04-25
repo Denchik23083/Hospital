@@ -1,11 +1,9 @@
 ﻿using Hospital.Core.Models.Responce;
 using Hospital.Core.Utilities;
-using Hospital.Services.DoctorService;
 using Hospital.Services.DoctorSlotService;
-using Hospital.Services.SpecialtyService;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Hospital.Hospital.Controllers
 {
@@ -15,11 +13,24 @@ namespace Hospital.Hospital.Controllers
     {
         private readonly IDoctorSlotService _service = service;
 
+        [Authorize(Roles = AppRoles.Doctor)]
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<DoctorSlotBookingResponce>>> GetAllDoctorSlotsByDoctorAsync()
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+            var doctorSlots = await _service.GetAllDoctorSlotsByDoctorAsync(userId);
+
+            return Ok(doctorSlots);
+        }
+
         [Authorize(Roles = AppRoles.PatientAdminGod)]
         [HttpGet("{doctorId}/available-dates")]
         public async Task<ActionResult<IEnumerable<DateOnly>>> GetAllDoctorSlotsDatesAsync(int doctorId)
         {
-            var dates = await _service.GetAllDoctorSlotsDatesAsync(doctorId);
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+            var dates = await _service.GetAllDoctorSlotsDatesAsync(doctorId, userId);
 
             return Ok(dates);
         }
@@ -28,19 +39,11 @@ namespace Hospital.Hospital.Controllers
         [HttpGet("{doctorId}/available-times")]
         public async Task<ActionResult<IEnumerable<DoctorSlotResponce>>> GetAllDoctorSlotsTimeByDateAsync(int doctorId, [FromQuery]DateOnly date)
         {
-            var doctorSlots = await _service.GetAllDoctorSlotsTimeByDateAsync(doctorId, date);
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+            var doctorSlots = await _service.GetAllDoctorSlotsTimeByDateAsync(doctorId, date, userId);
 
             return Ok(doctorSlots);
         }
-
-        /*[Authorize(Roles = AppRoles.PatientAdminGod)]
-        [HttpGet("{specialtyId}/doctors")]
-        public async Task<ActionResult<IEnumerable<DoctorResponce>>> GetAllDoctorsBySpecialtyAsync(int specialtyId)
-        {
-            var doctorsBySpecialty = await _doctorService.GetAllDoctorsBySpecialtyAsync(specialtyId);
-
-            return Ok(doctorsBySpecialty);
-        }*/
-        
     }
 }

@@ -1,4 +1,13 @@
-﻿namespace Hospital.Core.Models.Responce
+﻿using Hospital.Db.Utilities;
+
+namespace Hospital.Core.Models.Responce
 {
-    public record class BookingResponce(int SlotId, int UserId);
+    public class BookingResponce
+    {
+        public int Id { get; set; }
+
+        public DoctorSlotWithDoctorResponse? DoctorSlotWithDoctorResponse { get; set; }
+
+        public BookingStatus BookingStatus { get; set; }
+    }
 }

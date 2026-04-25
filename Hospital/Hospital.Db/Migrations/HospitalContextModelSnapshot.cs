@@ -45,7 +45,8 @@ namespace Hospital.Db.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("DoctorSlotId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[BookingStatus] = 1");
 
                     b.HasIndex("PatientId");
 
@@ -267,8 +268,8 @@ namespace Hospital.Db.Migrations
             modelBuilder.Entity("Hospital.Db.Entities.Booking", b =>
                 {
                     b.HasOne("Hospital.Db.Entities.DoctorSlot", "DoctorSlot")
-                        .WithOne("Booking")
-                        .HasForeignKey("Hospital.Db.Entities.Booking", "DoctorSlotId")
+                        .WithMany("Bookings")
+                        .HasForeignKey("DoctorSlotId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -331,7 +332,7 @@ namespace Hospital.Db.Migrations
 
             modelBuilder.Entity("Hospital.Db.Entities.DoctorSlot", b =>
                 {
-                    b.Navigation("Booking");
+                    b.Navigation("Bookings");
                 });
 
             modelBuilder.Entity("Hospital.Db.Entities.Patient", b =>

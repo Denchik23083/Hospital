@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Hospital.Core.Exceptions;
+﻿using Hospital.Core.Exceptions;
 using Hospital.Core.Models.Requests;
 using Hospital.Core.Models.Responce;
 using Hospital.Db;

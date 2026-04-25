@@ -4,8 +4,12 @@ namespace Hospital.Services.DoctorSlotService
 {
     public interface IDoctorSlotService
     {
-        Task<IEnumerable<DateOnly>> GetAllDoctorSlotsDatesAsync(int doctorId);
+        Task<IEnumerable<DoctorSlotBookingResponce>> GetAllDoctorSlotsByDoctorAsync(int userId);
         
-        Task<IEnumerable<DoctorSlotResponce>> GetAllDoctorSlotsTimeByDateAsync(int doctorId, DateOnly date);
+        Task<IEnumerable<DateOnly>> GetAllDoctorSlotsDatesAsync(int doctorId, int userId);
+        
+        Task<IEnumerable<DoctorSlotResponce>> GetAllDoctorSlotsTimeByDateAsync(int doctorId, DateOnly date, int userId);
+
+        //Task AddDoctorSlotsForTodayAsync
     }
 }

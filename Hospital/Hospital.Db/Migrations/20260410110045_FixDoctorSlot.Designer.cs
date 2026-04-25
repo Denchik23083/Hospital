@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Hospital.Db.Migrations
 {
     [DbContext(typeof(HospitalContext))]
-    [Migration("20260408204945_FixDb")]
-    partial class FixDb
+    [Migration("20260410110045_FixDoctorSlot")]
+    partial class FixDoctorSlot
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -48,7 +48,8 @@ namespace Hospital.Db.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("DoctorSlotId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[BookingStatus] = 1");
 
                     b.HasIndex("PatientId");
 
@@ -270,8 +271,8 @@ namespace Hospital.Db.Migrations
             modelBuilder.Entity("Hospital.Db.Entities.Booking", b =>
                 {
                     b.HasOne("Hospital.Db.Entities.DoctorSlot", "DoctorSlot")
-                        .WithOne("Booking")
-                        .HasForeignKey("Hospital.Db.Entities.Booking", "DoctorSlotId")
+                        .WithMany("Bookings")
+                        .HasForeignKey("DoctorSlotId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -334,7 +335,7 @@ namespace Hospital.Db.Migrations
 
             modelBuilder.Entity("Hospital.Db.Entities.DoctorSlot", b =>
                 {
-                    b.Navigation("Booking");
+                    b.Navigation("Bookings");
                 });
 
             modelBuilder.Entity("Hospital.Db.Entities.Patient", b =>

@@ -16,11 +16,12 @@ namespace Hospital.Db.EntityConfiguration
                 .IsRequired();
 
             builder.HasIndex(_ => _.DoctorSlotId)
+                .HasFilter("[BookingStatus] = 1")
                 .IsUnique();
 
             builder.HasOne(_ => _.DoctorSlot)
-                .WithOne(_ => _.Booking)
-                .HasForeignKey<Booking>(_ => _.DoctorSlotId)
+                .WithMany(_ => _.Bookings)
+                .HasForeignKey(_ => _.DoctorSlotId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(_ => _.Patient)
