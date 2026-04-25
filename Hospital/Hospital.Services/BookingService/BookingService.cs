@@ -1,55 +1,35 @@
 ﻿using Hospital.Core.Exceptions;
 using Hospital.Core.Models.Responce;
-using Hospital.Db;
 using Hospital.Db.Entities;
 using Hospital.Db.Utilities;
-using Microsoft.EntityFrameworkCore;
+using Hospital.Repositories.BookingRepository;
+using Hospital.Repositories.DoctorSlotRepository;
+using Hospital.Repositories.PatientRepository;
 
 namespace Hospital.Services.BookingService
 {
-    public class BookingService(HospitalContext context) : IBookingService
+    public class BookingService(IBookingRepository repository,
+            IPatientRepository patientRepository,
+            IDoctorSlotRepository doctorSlotRepository) : IBookingService
     {
-        private readonly HospitalContext _context = context;
+        private readonly IBookingRepository _repository = repository;
+        private readonly IPatientRepository _patientRepository = patientRepository;
+        private readonly IDoctorSlotRepository _doctorSlotRepository = doctorSlotRepository;
 
         public async Task<IEnumerable<BookingResponce>> GetAllBookingsAsync(int userId)
         {
-            var patient = await _context.Patients
-                .FirstOrDefaultAsync(_ => _.UserId == userId)
+            var patient = await _patientRepository.GetPatientAsync(userId)
                 ?? throw new PatientNotFoundException("Patient not found");
 
-            return await _context.Bookings
-                .Where(_ => _.PatientId == patient.Id)
-                .Select(_ => new BookingResponce
-                {
-                    Id = _.Id,
-                    BookingStatus = _.BookingStatus,
-                    DoctorSlotWithDoctorResponse = new DoctorSlotWithDoctorResponse
-                    {
-                        Id = _.DoctorSlot!.Id,
-                        Date = _.DoctorSlot!.Date,
-                        StartTime = _.DoctorSlot!.StartTime,
-                        EndTime = _.DoctorSlot!.EndTime,
-                        DoctorResponce = new DoctorResponce
-                        {
-                            Id = _.DoctorSlot!.Doctor!.Id,
-                            FirstName = _.DoctorSlot.Doctor.FirstName,
-                            LastName = _.DoctorSlot.Doctor.LastName,
-                            ExperienceYears = _.DoctorSlot.Doctor.ExperienceYears,
-                            GenderType = _.DoctorSlot.Doctor.GenderType.ToString(),
-                        }
-                    }
-                }).ToListAsync();
+            return await _repository.GetAllBookingsAsync(patient.Id);
         }
 
         public async Task CreateBookingAsync(int slotId, int userId)
         {
-            var patient = await _context.Patients
-                .FirstOrDefaultAsync(_ => _.UserId == userId) 
+            var patient = await _patientRepository.GetPatientAsync(userId)
                 ?? throw new PatientNotFoundException("Patient not found");
 
-            var doctorSlot = await _context.DoctorSlots
-                .Include(_ => _.Bookings)
-                .FirstOrDefaultAsync(_ => _.Id == slotId)
+            var doctorSlot = await _doctorSlotRepository.GetDoctorSlotAsync(slotId)
                 ?? throw new DoctorSlotNotFoundException("Doctor slot not found");
 
             if (doctorSlot.Bookings.Any(b => b.BookingStatus == BookingStatus.Active))
@@ -57,11 +37,7 @@ namespace Hospital.Services.BookingService
                 throw new SlotAlreadyBookedException("Slot already booked");
             }
 
-            var patientAlreadyHasActiveBookingWithDoctor = await _context.Bookings
-                .AnyAsync(_ => _.PatientId == patient.Id
-                    && _.BookingStatus == BookingStatus.Active
-                    && _.DoctorSlot != null
-                    && _.DoctorSlot.DoctorId == doctorSlot.DoctorId);
+            var patientAlreadyHasActiveBookingWithDoctor = await _repository.HasActiveBookingWithDoctorAsync(patient.Id, doctorSlot.DoctorId);
 
             if (patientAlreadyHasActiveBookingWithDoctor)
             {
@@ -76,11 +52,9 @@ namespace Hospital.Services.BookingService
                 BookingStatus = BookingStatus.Active
             };
 
-            await _context.Bookings.AddAsync(booking);
-
             try
             {
-                await _context.SaveChangesAsync();
+                await _repository.AddBookingAsync(booking);
             }
             catch
             {

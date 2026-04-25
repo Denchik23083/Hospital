@@ -1,103 +1,56 @@
 ﻿using Hospital.Core.Exceptions;
 using Hospital.Core.Models.Responce;
-using Hospital.Db;
-using Hospital.Db.Entities;
-using Hospital.Db.Utilities;
-using Microsoft.EntityFrameworkCore;
+using Hospital.Repositories.BookingRepository;
+using Hospital.Repositories.DoctorRepository;
+using Hospital.Repositories.DoctorSlotRepository;
+using Hospital.Repositories.PatientRepository;
 
 namespace Hospital.Services.DoctorSlotService
 {
-    public class DoctorSlotService(HospitalContext context) : IDoctorSlotService
+    public class DoctorSlotService(IDoctorSlotRepository repository,
+            IPatientRepository patientRepository,
+            IBookingRepository bookingRepository,
+            IDoctorRepository doctorRepository) : IDoctorSlotService
     {
-        private readonly HospitalContext _context = context;
+        private readonly IDoctorSlotRepository _repository = repository;
+        private readonly IPatientRepository _patientRepository = patientRepository;
+        private readonly IBookingRepository _bookingRepository = bookingRepository;
+        private readonly IDoctorRepository _doctorRepository = doctorRepository;
 
         public async Task<IEnumerable<DoctorSlotBookingResponce>> GetAllDoctorSlotsByDoctorAsync(int userId)
         {
-            var doctor = await _context.Doctors
-                .FirstOrDefaultAsync(_ => _.UserId == userId)
+            var doctor = await _doctorRepository.GetDoctorAsync(userId)
                 ?? throw new DoctorNotFoundException("Doctor not found");
 
-            return await _context.DoctorSlots
-                .Where(_ => _.DoctorId == doctor.Id)
-                .OrderBy(_ => _.Date)
-                .ThenBy(_ => _.StartTime)
-                .Select(_ => new DoctorSlotBookingResponce
-                {
-                    Id = _.Id,
-                    Date = _.Date,
-                    StartTime = _.StartTime,
-                    EndTime = _.EndTime,
-                    LastBooking = _.Bookings
-                        .OrderByDescending(b => b.CreatedAt)
-                        .Select(_ => new BookingPatientResponce
-                        {
-                            Id = _.Id,
-                            BookingStatus = _.BookingStatus,
-                            PatientResponce = new PatientResponce
-                            {
-                                Id = _.Patient!.Id,
-                                FirstName = _.Patient.FirstName,
-                                LastName = _.Patient.LastName,
-                                BirthDate = _.Patient.BirthDate,
-                                GenderType = _.Patient.GenderType,
-                                Phone = _.Patient.Phone
-                            }
-                        }).FirstOrDefault()
-                }).ToListAsync();
+            return await _repository.GetAllDoctorSlotsByDoctorAsync(doctor.Id);
         }
 
         public async Task<IEnumerable<DateOnly>> GetAllDoctorSlotsDatesAsync(int doctorId, int userId)
         {
-            if (await HasActiveBookingWithDoctorAsync(doctorId, userId))
+            var patient = await _patientRepository.GetPatientAsync(userId)
+                ?? throw new PatientNotFoundException("Patient not found");
+
+            if (await _bookingRepository.HasActiveBookingWithDoctorAsync(patient.Id, doctorId))
             {
                 return [];
             }
 
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
-            return await _context.DoctorSlots
-                .Where(_ => _.DoctorId == doctorId 
-                    && _.Date >= today
-                    && !_.Bookings.Any(_ => _.BookingStatus == BookingStatus.Active)) 
-                .Select(_ => _.Date)
-                .Distinct()
-                .OrderBy(d => d)
-                .ToListAsync();
+            return await _repository.GetAllDoctorSlotsDatesAsync(doctorId, today);
         }
 
         public async Task<IEnumerable<DoctorSlotResponce>> GetAllDoctorSlotsTimeByDateAsync(int doctorId, DateOnly date, int userId)
         {
-            if (await HasActiveBookingWithDoctorAsync(doctorId, userId))
+            var patient = await _patientRepository.GetPatientAsync(userId)
+                ?? throw new PatientNotFoundException("Patient not found");
+
+            if (await _bookingRepository.HasActiveBookingWithDoctorAsync(patient.Id, doctorId))
             {
                 return [];
             }
 
-            return await _context.DoctorSlots
-                .Where(_ => _.DoctorId == doctorId 
-                    && _.Date == date 
-                    && !_.Bookings.Any(_ => _.BookingStatus == BookingStatus.Active))
-                .OrderBy(s => s.StartTime)
-                .Select(_ => new DoctorSlotResponce
-                {
-                    Id = _.Id,
-                    Date = _.Date,
-                    DoctorId = _.DoctorId,
-                    StartTime = _.StartTime,
-                    EndTime = _.EndTime
-                }).ToListAsync();
-        }
-
-        private async Task<bool> HasActiveBookingWithDoctorAsync(int doctorId, int userId)
-        {
-            var patient = await _context.Patients
-                .FirstOrDefaultAsync(_ => _.UserId == userId)
-                ?? throw new PatientNotFoundException("Patient not found");
-
-            return await _context.Bookings
-                .AnyAsync(_ => _.PatientId == patient.Id
-                    && _.BookingStatus == BookingStatus.Active
-                    && _.DoctorSlot != null
-                    && _.DoctorSlot.DoctorId == doctorId);
+            return await _repository.GetAllDoctorSlotsTimeByDateAsync(doctorId, date);
         }
     }
 }

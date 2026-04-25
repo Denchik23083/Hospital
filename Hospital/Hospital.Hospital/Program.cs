@@ -2,6 +2,10 @@ using Hospital.Core.Exceptions;
 using Hospital.Core.Models.Responce;
 using Hospital.Db;
 using Hospital.Db.Entities;
+using Hospital.Repositories.BookingRepository;
+using Hospital.Repositories.DoctorRepository;
+using Hospital.Repositories.DoctorSlotRepository;
+using Hospital.Repositories.PatientRepository;
 using Hospital.Services.BookingService;
 using Hospital.Services.DoctorService;
 using Hospital.Services.DoctorSlotService;
@@ -17,6 +21,11 @@ builder.Services.AddScoped<ISpecialtyService, SpecialtyService>();
 builder.Services.AddScoped<IDoctorService, DoctorService>();
 builder.Services.AddScoped<IDoctorSlotService, DoctorSlotService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
+
+builder.Services.AddScoped<IPatientRepository, PatientRepository>();
+builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
+builder.Services.AddScoped<IDoctorSlotRepository, DoctorSlotRepository>();
+builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();

@@ -1,5 +1,4 @@
-﻿using Hospital.Db.Entities;
-using Hospital.Db.Utilities;
+﻿using Hospital.Db.Utilities;
 
 namespace Hospital.Core.Models.Responce
 {

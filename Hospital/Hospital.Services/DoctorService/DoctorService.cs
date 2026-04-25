@@ -1,25 +1,15 @@
 ﻿using Hospital.Core.Models.Responce;
-using Hospital.Db;
-using Microsoft.EntityFrameworkCore;
+using Hospital.Repositories.DoctorRepository;
 
 namespace Hospital.Services.DoctorService
 {
-    public class DoctorService(HospitalContext context) : IDoctorService
+    public class DoctorService(IDoctorRepository repository) : IDoctorService
     {
-        private readonly HospitalContext _context = context;
+        private readonly IDoctorRepository _repository = repository;
 
         public async Task<IEnumerable<DoctorResponce>> GetAllDoctorsBySpecialtyAsync(int specialtyId)
         {
-            return await _context.Doctors
-                .Where(_ => _.SpecialtyId == specialtyId)
-                .Select(_ => new DoctorResponce
-                {
-                    Id = _.Id,
-                    FirstName = _.FirstName,
-                    LastName = _.LastName,
-                    ExperienceYears = _.ExperienceYears,
-                    GenderType = _.GenderType.ToString(),
-                }).ToListAsync();
+            return await _repository.GetAllDoctorsBySpecialtyAsync(specialtyId);
         }
     }
 }
