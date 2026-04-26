@@ -10,7 +10,7 @@ namespace Hospital.Repositories.BookingRepository
     {
         private readonly HospitalContext _context = context;
 
-        public async Task<IEnumerable<BookingResponce>> GetAllBookingsAsync(int patientId)
+        public async Task<IEnumerable<BookingResponce>> GetAllPatientBookingsAsync(int patientId)
         {
             return await _context.Bookings
                 .Where(_ => _.PatientId == patientId)

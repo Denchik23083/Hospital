@@ -4,7 +4,7 @@ namespace Hospital.Services.BookingService
 {
     public interface IBookingService
     {
-        Task<IEnumerable<BookingResponce>> GetAllBookingsAsync(int userId);
+        Task<IEnumerable<BookingResponce>> GetAllPatientBookingsAsync(int userId);
 
         Task CreateBookingAsync(int slotId, int userId);
     }

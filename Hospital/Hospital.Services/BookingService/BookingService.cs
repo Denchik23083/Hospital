@@ -16,12 +16,12 @@ namespace Hospital.Services.BookingService
         private readonly IPatientRepository _patientRepository = patientRepository;
         private readonly IDoctorSlotRepository _doctorSlotRepository = doctorSlotRepository;
 
-        public async Task<IEnumerable<BookingResponce>> GetAllBookingsAsync(int userId)
+        public async Task<IEnumerable<BookingResponce>> GetAllPatientBookingsAsync(int userId)
         {
             var patient = await _patientRepository.GetPatientAsync(userId)
                 ?? throw new PatientNotFoundException("Patient not found");
 
-            return await _repository.GetAllBookingsAsync(patient.Id);
+            return await _repository.GetAllPatientBookingsAsync(patient.Id);
         }
 
         public async Task CreateBookingAsync(int slotId, int userId)

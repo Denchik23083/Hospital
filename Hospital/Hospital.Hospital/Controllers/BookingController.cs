@@ -15,11 +15,11 @@ namespace Hospital.Hospital.Controllers
 
         [Authorize(Roles = AppRoles.Patient)]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<BookingResponce>>> GetAllDoctorSlotsDatesAsync()
+        public async Task<ActionResult<IEnumerable<BookingResponce>>> GetAllPatientBookingsAsync()
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-            var bookings = await _service.GetAllBookingsAsync(userId);
+            var bookings = await _service.GetAllPatientBookingsAsync(userId);
 
             return Ok(bookings);
         }

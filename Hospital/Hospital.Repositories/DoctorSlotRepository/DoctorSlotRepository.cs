@@ -10,19 +10,22 @@ namespace Hospital.Repositories.DoctorSlotRepository
     {
         private readonly HospitalContext _context = context;
 
-        public async Task<DoctorSlot?> GetDoctorSlotAsync(int slotId)
-        {
-            return await _context.DoctorSlots
-                .Include(_ => _.Bookings)
-                .FirstOrDefaultAsync(_ => _.Id == slotId);
-        }
-
-        public async Task<IEnumerable<DoctorSlotBookingResponce>> GetAllDoctorSlotsByDoctorAsync(int doctorId)
+        public async Task<IEnumerable<DateOnly>> GetAllDoctorSlotsDatesByDoctorAsync(int doctorId)
         {
             return await _context.DoctorSlots
                 .Where(_ => _.DoctorId == doctorId)
-                .OrderBy(_ => _.Date)
-                .ThenBy(_ => _.StartTime)
+                .Select(_ => _.Date)
+                .Distinct()
+                .OrderBy(d => d)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<DoctorSlotBookingResponce>> GetAllDoctorSlotsTimesByDoctorAsync(int doctorId, DateOnly date)   
+        {
+            return await _context.DoctorSlots
+                .Where(_ => _.DoctorId == doctorId
+                    && _.Date == date)
+                .OrderBy(_ => _.StartTime)
                 .Select(_ => new DoctorSlotBookingResponce
                 {
                     Id = _.Id,
@@ -75,6 +78,13 @@ namespace Hospital.Repositories.DoctorSlotRepository
                     StartTime = _.StartTime,
                     EndTime = _.EndTime
                 }).ToListAsync();
+        }
+
+        public async Task<DoctorSlot?> GetDoctorSlotAsync(int slotId)
+        {
+            return await _context.DoctorSlots
+                .Include(_ => _.Bookings)
+                .FirstOrDefaultAsync(_ => _.Id == slotId);
         }
     }
 }

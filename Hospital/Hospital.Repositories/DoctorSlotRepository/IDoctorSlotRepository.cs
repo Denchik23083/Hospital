@@ -5,7 +5,9 @@ namespace Hospital.Repositories.DoctorSlotRepository
 {
     public interface IDoctorSlotRepository
     {
-        Task<IEnumerable<DoctorSlotBookingResponce>> GetAllDoctorSlotsByDoctorAsync(int doctorId);
+        Task<IEnumerable<DateOnly>> GetAllDoctorSlotsDatesByDoctorAsync(int doctorId);
+        
+        Task<IEnumerable<DoctorSlotBookingResponce>> GetAllDoctorSlotsTimesByDoctorAsync(int doctorId, DateOnly date);
 
         Task<IEnumerable<DateOnly>> GetAllDoctorSlotsDatesAsync(int doctorId, DateOnly today);
 

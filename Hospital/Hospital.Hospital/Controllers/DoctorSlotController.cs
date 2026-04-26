@@ -14,12 +14,23 @@ namespace Hospital.Hospital.Controllers
         private readonly IDoctorSlotService _service = service;
 
         [Authorize(Roles = AppRoles.Doctor)]
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<DoctorSlotBookingResponce>>> GetAllDoctorSlotsByDoctorAsync()
+        [HttpGet("doctor-dates")]
+        public async Task<ActionResult<IEnumerable<DateOnly>>> GetAllDoctorSlotsDatesByDoctorAsync()
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-            var doctorSlots = await _service.GetAllDoctorSlotsByDoctorAsync(userId);
+            var dates = await _service.GetAllDoctorSlotsDatesByDoctorAsync(userId);
+
+            return Ok(dates);
+        }
+
+        [Authorize(Roles = AppRoles.Doctor)]
+        [HttpGet("doctor-times")]
+        public async Task<ActionResult<IEnumerable<DoctorSlotBookingResponce>>> GetAllDoctorSlotsTimesByDoctorAsync([FromQuery] DateOnly date)
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+            var doctorSlots = await _service.GetAllDoctorSlotsTimesByDoctorAsync(date, userId);
 
             return Ok(doctorSlots);
         }
