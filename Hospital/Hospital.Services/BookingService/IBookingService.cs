@@ -7,5 +7,7 @@ namespace Hospital.Services.BookingService
         Task<IEnumerable<BookingResponse>> GetAllPatientBookingsAsync(int userId);
 
         Task CreateBookingAsync(int slotId, int userId);
+
+        Task CancelBookingAsync(int id, int userId);
     }
 }

@@ -5,16 +5,19 @@ using Hospital.Db.Utilities;
 using Hospital.Repositories.BookingRepository;
 using Hospital.Repositories.DoctorSlotRepository;
 using Hospital.Repositories.PatientRepository;
+using Hospital.Repositories.UnitOfWorkRepository;
 
 namespace Hospital.Services.BookingService
 {
     public class BookingService(IBookingRepository repository,
             IPatientRepository patientRepository,
-            IDoctorSlotRepository doctorSlotRepository) : IBookingService
+            IDoctorSlotRepository doctorSlotRepository,
+            IUnitOfWorkRepository unitOfWorkRepository) : IBookingService
     {
         private readonly IBookingRepository _repository = repository;
         private readonly IPatientRepository _patientRepository = patientRepository;
         private readonly IDoctorSlotRepository _doctorSlotRepository = doctorSlotRepository;
+        private readonly IUnitOfWorkRepository _unitOfWorkRepository = unitOfWorkRepository;
 
         public async Task<IEnumerable<BookingResponse>> GetAllPatientBookingsAsync(int userId)
         {
@@ -60,6 +63,24 @@ namespace Hospital.Services.BookingService
             {
                 throw new SlotAlreadyBookedException("Slot already booked");
             }
+        }
+
+        public async Task CancelBookingAsync(int id, int userId)
+        {
+            var patient = await _patientRepository.GetPatientAsync(userId)
+                ?? throw new PatientNotFoundException("Patient not found");
+
+            var booking = await _repository.GetBookingWithPatientAsync(id, patient.Id)
+                ?? throw new BookingNotFoundException("Booking not found");
+
+            if (booking.BookingStatus != BookingStatus.Active)
+            {
+                throw new BookingNotFoundException("Можно менять только активную запись");
+            }
+
+            booking.BookingStatus = BookingStatus.Cancelled;
+
+            await _unitOfWorkRepository.SaveChangesAsync();
         }
     }
 }

@@ -6,6 +6,7 @@ using Hospital.Repositories.BookingRepository;
 using Hospital.Repositories.DoctorRepository;
 using Hospital.Repositories.DoctorSlotRepository;
 using Hospital.Repositories.PatientRepository;
+using Hospital.Repositories.UnitOfWorkRepository;
 using Hospital.Services.BookingService;
 using Hospital.Services.DoctorService;
 using Hospital.Services.DoctorSlotService;
@@ -26,6 +27,7 @@ builder.Services.AddScoped<IPatientRepository, PatientRepository>();
 builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
 builder.Services.AddScoped<IDoctorSlotRepository, DoctorSlotRepository>();
 builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+builder.Services.AddScoped<IUnitOfWorkRepository, UnitOfWorkRepository>();
 
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();

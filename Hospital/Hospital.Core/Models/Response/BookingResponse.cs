@@ -8,6 +8,6 @@ namespace Hospital.Core.Models.Response
 
         public DoctorSlotWithDoctorResponse? DoctorSlotWithDoctorResponse { get; set; }
 
-        public BookingStatus BookingStatus { get; set; }
+        public string BookingStatus { get; set; } = string.Empty;
     }
 }

@@ -53,6 +53,13 @@ namespace Hospital.Core.Exceptions
                     problemDetails.Detail = exception.Message;
                     break;
 
+                case BookingNotFoundException:
+                    httpContext.Response.StatusCode = StatusCodes.Status404NotFound;
+                    problemDetails.Status = StatusCodes.Status404NotFound;
+                    problemDetails.Title = "Booking not found";
+                    problemDetails.Detail = exception.Message;
+                    break;
+
                 case DoctorSlotNotFoundException:
                     httpContext.Response.StatusCode = StatusCodes.Status404NotFound;
                     problemDetails.Status = StatusCodes.Status404NotFound;

@@ -17,7 +17,7 @@ namespace Hospital.Repositories.BookingRepository
                 .Select(_ => new BookingResponse
                 {
                     Id = _.Id,
-                    BookingStatus = _.BookingStatus,
+                    BookingStatus = _.BookingStatus.ToString(),
                     DoctorSlotWithDoctorResponse = new DoctorSlotWithDoctorResponse
                     {
                         Id = _.DoctorSlot!.Id,
@@ -34,6 +34,13 @@ namespace Hospital.Repositories.BookingRepository
                         }
                     }
                 }).ToListAsync();
+        }
+
+        public async Task<Booking?> GetBookingWithPatientAsync(int id, int patientId)
+        {
+            return await _context.Bookings
+                .FirstOrDefaultAsync(_ => _.Id == id
+                    && _.PatientId == patientId);
         }
 
         public async Task<bool> HasActiveBookingWithDoctorAsync(int patientId, int doctorId)
