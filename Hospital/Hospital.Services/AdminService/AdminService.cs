@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Hospital.Core.Exceptions;
-using Hospital.Core.Models.Responce;
+using Hospital.Core.Models.Response;
 using Hospital.Db;
 using Hospital.Db.Utilities;
 using Microsoft.EntityFrameworkCore;
@@ -16,19 +16,19 @@ namespace Hospital.Services.AdminService
         private readonly ILogger<AdminService> _logger = logger;
         private readonly IMapper _mapper = mapper;
 
-        public async Task<IEnumerable<UserResponce>> GetAllUsersAsync()
+        public async Task<IEnumerable<UserResponse>> GetAllUsersAsync()
         {
             return await _context.Users
                     .Where(_ => _.RoleType == RoleType.Doctor 
                             || _.RoleType == RoleType.Patient)
-                    .Select(_ => new UserResponce
+                    .Select(_ => new UserResponse
                     {
                         Id = _.Id,
                         Email = _.Email
                     }).ToListAsync();
         }
 
-        public async Task<UserResponce> GetUserAsync(int userId)
+        public async Task<UserResponse> GetUserAsync(int userId)
         {
             var user = await _context.Users
                     .Where(_ => _.RoleType == RoleType.Doctor
@@ -41,7 +41,7 @@ namespace Hospital.Services.AdminService
                 throw new UserNotFoundException($"User with id: {userId} not found");
             }
 
-            return _mapper.Map<UserResponce>(user);
+            return _mapper.Map<UserResponse>(user);
         }
 
         public async Task DeleteUserAsync(int userId)

@@ -1,4 +1,4 @@
-﻿using Hospital.Core.Models.Responce;
+﻿using Hospital.Core.Models.Response;
 using Hospital.Core.Utilities;
 using Hospital.Services.AdminService;
 using Microsoft.AspNetCore.Authorization;
@@ -14,7 +14,7 @@ namespace Hospital.AdminPanel.Controllers
 
         [Authorize(Roles = AppRoles.AdminGod)]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserResponce>>> GetAllUsersAsync()
+        public async Task<ActionResult<IEnumerable<UserResponse>>> GetAllUsersAsync()
         {
             var users = await _service.GetAllUsersAsync();
 
@@ -23,7 +23,7 @@ namespace Hospital.AdminPanel.Controllers
 
         [Authorize(Roles = AppRoles.AdminGod)]
         [HttpGet("{id}")]
-        public async Task<ActionResult<UserResponce>> GetUserAsync(int id)
+        public async Task<ActionResult<UserResponse>> GetUserAsync(int id)
         {
             var user = await _service.GetUserAsync(id);
 

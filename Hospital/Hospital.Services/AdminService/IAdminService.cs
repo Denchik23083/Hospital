@@ -1,12 +1,12 @@
-﻿using Hospital.Core.Models.Responce;
+﻿using Hospital.Core.Models.Response;
 
 namespace Hospital.Services.AdminService
 {
     public interface IAdminService
     {
-        Task<IEnumerable<UserResponce>> GetAllUsersAsync();
+        Task<IEnumerable<UserResponse>> GetAllUsersAsync();
         
-        Task<UserResponce> GetUserAsync(int userId);
+        Task<UserResponse> GetUserAsync(int userId);
 
         Task DeleteUserAsync(int userId);
     }

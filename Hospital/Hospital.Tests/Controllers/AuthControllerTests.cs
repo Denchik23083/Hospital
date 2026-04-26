@@ -1,7 +1,7 @@
 using FluentAssertions;
 using Hospital.Auth.Controllers;
 using Hospital.Core.Models.Requests;
-using Hospital.Core.Models.Responce;
+using Hospital.Core.Models.Response;
 using Hospital.Services.AuthService;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -40,7 +40,7 @@ namespace Hospital.Tests.Controllers
         {
             var login = new LoginRequest("foo@gmail.com", "0000");
 
-            var tokenResponce = new TokenResponse
+            var tokenResponse = new TokenResponse
             {
                 AccessToken = "access-token",
                 RefreshToken = "refresh-token"
@@ -48,13 +48,13 @@ namespace Hospital.Tests.Controllers
 
             _service
                 .Setup(s => s.LoginAsync(login))
-                .ReturnsAsync(tokenResponce);
+                .ReturnsAsync(tokenResponse);
 
             var result = await _controller.LoginAsync(login);
 
             var actionResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
 
-            actionResult.Value.Should().Be(tokenResponce);
+            actionResult.Value.Should().Be(tokenResponse);
 
             _service.Verify(_ => _.LoginAsync(login), Times.Once);
         }
@@ -64,7 +64,7 @@ namespace Hospital.Tests.Controllers
         {
             var refresh = new RefreshTokenRequest(1, "refresh-token");
 
-            var tokenResponce = new TokenResponse
+            var tokenResponse = new TokenResponse
             {
                 AccessToken = "access-token",
                 RefreshToken = "refresh-token"
@@ -72,13 +72,13 @@ namespace Hospital.Tests.Controllers
 
             _service
                 .Setup(s => s.RefreshTokenAsync(refresh))
-                .ReturnsAsync(tokenResponce);
+                .ReturnsAsync(tokenResponse);
 
             var result = await _controller.RefreshTokenAsync(refresh);
 
             var actionResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
 
-            actionResult.Value.Should().Be(tokenResponce);
+            actionResult.Value.Should().Be(tokenResponse);
 
             _service.Verify(_ => _.RefreshTokenAsync(refresh), Times.Once);
         }

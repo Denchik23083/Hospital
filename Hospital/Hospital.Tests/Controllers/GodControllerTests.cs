@@ -1,6 +1,6 @@
 ﻿using FluentAssertions;
 using Hospital.AdminPanel.Controllers;
-using Hospital.Core.Models.Responce;
+using Hospital.Core.Models.Response;
 using Hospital.Services.GodService;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -21,7 +21,7 @@ namespace Hospital.Tests.Controllers
         [Fact]
         public async Task GetAllAdminsAsync_ShouldReturnOkWithAdmins()
         {
-            var admins = new List<UserResponce>
+            var admins = new List<UserResponse>
             {
                 new()
                 {
@@ -53,7 +53,7 @@ namespace Hospital.Tests.Controllers
         {
             var adminId = 1;
 
-            var admin = new UserResponce
+            var admin = new UserResponse
             {
                 Id = adminId,
                 Email = "admin@gmail.com",

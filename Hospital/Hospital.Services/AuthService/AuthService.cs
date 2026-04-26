@@ -1,6 +1,6 @@
 ﻿using Hospital.Core.Exceptions;
 using Hospital.Core.Models.Requests;
-using Hospital.Core.Models.Responce;
+using Hospital.Core.Models.Response;
 using Hospital.Db;
 using Hospital.Db.Entities;
 using Hospital.Db.Utilities;

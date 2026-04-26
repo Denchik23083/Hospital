@@ -1,4 +1,4 @@
-﻿using Hospital.Core.Models.Responce;
+﻿using Hospital.Core.Models.Response;
 using Hospital.Db;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,10 +8,10 @@ namespace Hospital.Services.SpecialtyService
     {
         private readonly HospitalContext _context = context;
 
-        public async Task<IEnumerable<SpecialtyResponce>> GetAllSpecialtiesAsync()
+        public async Task<IEnumerable<SpecialtyResponse>> GetAllSpecialtiesAsync()
         {
             return await _context.Specialties
-                .Select(_ => new SpecialtyResponce
+                .Select(_ => new SpecialtyResponse
                 {
                     Id = _.Id,
                     Name = _.Name,

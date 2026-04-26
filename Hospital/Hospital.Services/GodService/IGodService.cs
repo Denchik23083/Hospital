@@ -1,12 +1,12 @@
-﻿using Hospital.Core.Models.Responce;
+﻿using Hospital.Core.Models.Response;
 
 namespace Hospital.Services.GodService
 {
     public interface IGodService
     {
-        Task<IEnumerable<UserResponce>> GetAllAdminsAsync();
+        Task<IEnumerable<UserResponse>> GetAllAdminsAsync();
         
-        Task<UserResponce> GetAdminAsync(int adminId);
+        Task<UserResponse> GetAdminAsync(int adminId);
 
         Task MakeAdminAsync(int userId);
 

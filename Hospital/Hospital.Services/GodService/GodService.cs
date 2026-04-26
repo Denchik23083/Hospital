@@ -1,10 +1,10 @@
 ﻿using Hospital.Core.Exceptions;
-using Hospital.Core.Models.Responce;
 using Hospital.Db.Utilities;
 using Hospital.Db;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using AutoMapper;
+using Hospital.Core.Models.Response;
 
 namespace Hospital.Services.GodService
 {
@@ -16,18 +16,18 @@ namespace Hospital.Services.GodService
         private readonly ILogger<GodService> _logger = logger;
         private readonly IMapper _mapper = mapper;
 
-        public async Task<IEnumerable<UserResponce>> GetAllAdminsAsync()
+        public async Task<IEnumerable<UserResponse>> GetAllAdminsAsync()
         {
             return await _context.Users
                 .Where(_ => _.RoleType == RoleType.Admin)
-                .Select(_ => new UserResponce
+                .Select(_ => new UserResponse
                 {
                     Id = _.Id,
                     Email = _.Email
                 }).ToListAsync();
         }
 
-        public async Task<UserResponce> GetAdminAsync(int adminId)
+        public async Task<UserResponse> GetAdminAsync(int adminId)
         {
             var admin = await _context.Users
                     .Where(_ => _.RoleType == RoleType.Admin)
@@ -39,7 +39,7 @@ namespace Hospital.Services.GodService
                 throw new UserNotFoundException($"Admin with id: {adminId} not found");
             }
 
-            return _mapper.Map<UserResponce>(admin);
+            return _mapper.Map<UserResponse>(admin);
         }
 
         //TODO: Удалить эти 2 метода. сделать обычный CRUD. 

@@ -1,4 +1,4 @@
-﻿using Hospital.Core.Models.Responce;
+﻿using Hospital.Core.Models.Response;
 using Hospital.Db;
 using Hospital.Db.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -9,11 +9,11 @@ namespace Hospital.Repositories.DoctorRepository
     {
         private readonly HospitalContext _context = context;
 
-        public async Task<IEnumerable<DoctorResponce>> GetAllDoctorsBySpecialtyAsync(int specialtyId)
+        public async Task<IEnumerable<DoctorResponse>> GetAllDoctorsBySpecialtyAsync(int specialtyId)
         {
             return await _context.Doctors
                 .Where(_ => _.SpecialtyId == specialtyId)
-                .Select(_ => new DoctorResponce
+                .Select(_ => new DoctorResponse
                 {
                     Id = _.Id,
                     FirstName = _.FirstName,

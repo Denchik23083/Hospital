@@ -1,15 +1,15 @@
-﻿namespace Hospital.Core.Models.Responce
+﻿namespace Hospital.Core.Models.Response
 {
-    public class DoctorSlotBookingResponce
+    public class DoctorSlotWithDoctorResponse
     {
         public int Id { get; set; }
+
+        public DoctorResponse? DoctorResponse { get; set; }
 
         public DateOnly Date { get; set; }
 
         public TimeSpan StartTime { get; set; }
 
         public TimeSpan EndTime { get; set; }
-
-        public BookingPatientResponce? LastBooking { get; set; }
     }
 }

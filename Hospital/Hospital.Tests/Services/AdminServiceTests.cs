@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using FluentAssertions;
 using Hospital.Core.Exceptions;
-using Hospital.Core.Models.Responce;
+using Hospital.Core.Models.Response;
 using Hospital.Db;
 using Hospital.Db.Entities;
 using Hospital.Db.Utilities;
@@ -114,7 +114,7 @@ namespace Hospital.Tests.Services
                 PasswordHash = "hash"
             };
 
-            var user = new UserResponce
+            var user = new UserResponse
             {
                 Id = userId,
                 Email = "foo@gmail.com",
@@ -124,7 +124,7 @@ namespace Hospital.Tests.Services
             await _context.SaveChangesAsync();
 
             _mapper
-                .Setup(_ => _.Map<UserResponce>(userDb))
+                .Setup(_ => _.Map<UserResponse>(userDb))
                 .Returns(user);
 
             var result = await _service.GetUserAsync(userId);

@@ -1,6 +1,6 @@
-﻿namespace Hospital.Core.Models.Responce
+﻿namespace Hospital.Core.Models.Response
 {
-    public class DoctorResponce
+    public class DoctorResponse
     {
         public int Id { get; set; }
 

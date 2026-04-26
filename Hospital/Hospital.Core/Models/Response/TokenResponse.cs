@@ -1,4 +1,4 @@
-﻿namespace Hospital.Core.Models.Responce
+﻿namespace Hospital.Core.Models.Response
 {
     public class TokenResponse
     {

@@ -1,10 +1,10 @@
-﻿using Hospital.Core.Models.Responce;
+﻿using Hospital.Core.Models.Response;
 
 namespace Hospital.Services.BookingService
 {
     public interface IBookingService
     {
-        Task<IEnumerable<BookingResponce>> GetAllPatientBookingsAsync(int userId);
+        Task<IEnumerable<BookingResponse>> GetAllPatientBookingsAsync(int userId);
 
         Task CreateBookingAsync(int slotId, int userId);
     }

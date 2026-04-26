@@ -1,9 +1,9 @@
-﻿using Hospital.Core.Models.Responce;
+﻿using Hospital.Core.Models.Response;
 
 namespace Hospital.Services.DoctorService
 {
     public interface IDoctorService
     {
-        Task<IEnumerable<DoctorResponce>> GetAllDoctorsBySpecialtyAsync(int specialtyId);
+        Task<IEnumerable<DoctorResponse>> GetAllDoctorsBySpecialtyAsync(int specialtyId);
     }
 }

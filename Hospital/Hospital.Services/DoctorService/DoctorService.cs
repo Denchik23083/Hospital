@@ -1,4 +1,4 @@
-﻿using Hospital.Core.Models.Responce;
+﻿using Hospital.Core.Models.Response;
 using Hospital.Repositories.DoctorRepository;
 
 namespace Hospital.Services.DoctorService
@@ -7,7 +7,7 @@ namespace Hospital.Services.DoctorService
     {
         private readonly IDoctorRepository _repository = repository;
 
-        public async Task<IEnumerable<DoctorResponce>> GetAllDoctorsBySpecialtyAsync(int specialtyId)
+        public async Task<IEnumerable<DoctorResponse>> GetAllDoctorsBySpecialtyAsync(int specialtyId)
         {
             return await _repository.GetAllDoctorsBySpecialtyAsync(specialtyId);
         }

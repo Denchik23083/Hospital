@@ -1,12 +1,12 @@
 ﻿using Hospital.Db.Utilities;
 
-namespace Hospital.Core.Models.Responce
+namespace Hospital.Core.Models.Response
 {
-    public class BookingPatientResponce
+    public class BookingPatientResponse
     {
         public int Id { get; set; }
 
-        public PatientResponce? PatientResponce { get; set; }
+        public PatientResponse? PatientResponse { get; set; }
 
         public BookingStatus BookingStatus { get; set; }
     }

@@ -1,4 +1,4 @@
-﻿using Hospital.Core.Models.Responce;
+﻿using Hospital.Core.Models.Response;
 using Hospital.Db;
 using Hospital.Db.Entities;
 using Hospital.Db.Utilities;
@@ -20,13 +20,13 @@ namespace Hospital.Repositories.DoctorSlotRepository
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<DoctorSlotBookingResponce>> GetAllDoctorSlotsTimesByDoctorAsync(int doctorId, DateOnly date)   
+        public async Task<IEnumerable<DoctorSlotBookingResponse>> GetAllDoctorSlotsTimesByDoctorAsync(int doctorId, DateOnly date)   
         {
             return await _context.DoctorSlots
                 .Where(_ => _.DoctorId == doctorId
                     && _.Date == date)
                 .OrderBy(_ => _.StartTime)
-                .Select(_ => new DoctorSlotBookingResponce
+                .Select(_ => new DoctorSlotBookingResponse
                 {
                     Id = _.Id,
                     Date = _.Date,
@@ -34,11 +34,11 @@ namespace Hospital.Repositories.DoctorSlotRepository
                     EndTime = _.EndTime,
                     LastBooking = _.Bookings
                         .OrderByDescending(b => b.CreatedAt)
-                        .Select(_ => new BookingPatientResponce
+                        .Select(_ => new BookingPatientResponse
                         {
                             Id = _.Id,
                             BookingStatus = _.BookingStatus,
-                            PatientResponce = new PatientResponce
+                            PatientResponse = new PatientResponse
                             {
                                 Id = _.Patient!.Id,
                                 FirstName = _.Patient.FirstName,
@@ -63,14 +63,14 @@ namespace Hospital.Repositories.DoctorSlotRepository
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<DoctorSlotResponce>> GetAllDoctorSlotsTimeByDateAsync(int doctorId, DateOnly date)
+        public async Task<IEnumerable<DoctorSlotResponse>> GetAllDoctorSlotsTimeByDateAsync(int doctorId, DateOnly date)
         {
             return await _context.DoctorSlots
                 .Where(_ => _.DoctorId == doctorId
                     && _.Date == date
                     && !_.Bookings.Any(_ => _.BookingStatus == BookingStatus.Active))
                 .OrderBy(s => s.StartTime)
-                .Select(_ => new DoctorSlotResponce
+                .Select(_ => new DoctorSlotResponse
                 {
                     Id = _.Id,
                     Date = _.Date,

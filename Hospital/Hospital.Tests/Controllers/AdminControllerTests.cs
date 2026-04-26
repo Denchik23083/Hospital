@@ -1,6 +1,6 @@
 ﻿using FluentAssertions;
 using Hospital.AdminPanel.Controllers;
-using Hospital.Core.Models.Responce;
+using Hospital.Core.Models.Response;
 using Hospital.Services.AdminService;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -21,7 +21,7 @@ namespace Hospital.Tests.Controllers
         [Fact]
         public async Task GetAllUsersAsync_ShouldReturnOkWithUsers()
         {
-            var users = new List<UserResponce>
+            var users = new List<UserResponse>
             {
                 new()
                 {
@@ -53,7 +53,7 @@ namespace Hospital.Tests.Controllers
         {
             var userId = 1;
 
-            var user = new UserResponce
+            var user = new UserResponse
             {
                 Id = userId,
                 Email = "foo@gmail.com",

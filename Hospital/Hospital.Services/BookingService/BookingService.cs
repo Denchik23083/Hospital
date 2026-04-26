@@ -1,5 +1,5 @@
 ﻿using Hospital.Core.Exceptions;
-using Hospital.Core.Models.Responce;
+using Hospital.Core.Models.Response;
 using Hospital.Db.Entities;
 using Hospital.Db.Utilities;
 using Hospital.Repositories.BookingRepository;
@@ -16,7 +16,7 @@ namespace Hospital.Services.BookingService
         private readonly IPatientRepository _patientRepository = patientRepository;
         private readonly IDoctorSlotRepository _doctorSlotRepository = doctorSlotRepository;
 
-        public async Task<IEnumerable<BookingResponce>> GetAllPatientBookingsAsync(int userId)
+        public async Task<IEnumerable<BookingResponse>> GetAllPatientBookingsAsync(int userId)
         {
             var patient = await _patientRepository.GetPatientAsync(userId)
                 ?? throw new PatientNotFoundException("Patient not found");

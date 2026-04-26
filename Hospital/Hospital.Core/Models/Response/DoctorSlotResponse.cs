@@ -1,10 +1,10 @@
-﻿namespace Hospital.Core.Models.Responce
+﻿namespace Hospital.Core.Models.Response
 {
-    public class DoctorSlotWithDoctorResponse
+    public class DoctorSlotResponse
     {
         public int Id { get; set; }
 
-        public DoctorResponce? DoctorResponce { get; set; }
+        public int DoctorId { get; set; }
 
         public DateOnly Date { get; set; }
 

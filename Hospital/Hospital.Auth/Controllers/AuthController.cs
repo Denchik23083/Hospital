@@ -1,5 +1,5 @@
 ﻿using Hospital.Core.Models.Requests;
-using Hospital.Core.Models.Responce;
+using Hospital.Core.Models.Response;
 using Hospital.Services.AuthService;
 using Microsoft.AspNetCore.Mvc;
 

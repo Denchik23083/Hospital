@@ -1,5 +1,5 @@
 ﻿using Hospital.Core.Exceptions;
-using Hospital.Core.Models.Responce;
+using Hospital.Core.Models.Response;
 using Hospital.Repositories.BookingRepository;
 using Hospital.Repositories.DoctorRepository;
 using Hospital.Repositories.DoctorSlotRepository;
@@ -25,7 +25,7 @@ namespace Hospital.Services.DoctorSlotService
             return await _repository.GetAllDoctorSlotsDatesByDoctorAsync(doctor.Id);
         }
         
-        public async Task<IEnumerable<DoctorSlotBookingResponce>> GetAllDoctorSlotsTimesByDoctorAsync(DateOnly date, int userId)
+        public async Task<IEnumerable<DoctorSlotBookingResponse>> GetAllDoctorSlotsTimesByDoctorAsync(DateOnly date, int userId)
         {
             var doctor = await _doctorRepository.GetDoctorAsync(userId)
                 ?? throw new DoctorNotFoundException("Doctor not found");
@@ -51,7 +51,7 @@ namespace Hospital.Services.DoctorSlotService
             return await _repository.GetAllDoctorSlotsDatesAsync(doctor.Id, today);
         }
 
-        public async Task<IEnumerable<DoctorSlotResponce>> GetAllDoctorSlotsTimeByDateAsync(int doctorId, DateOnly date, int userId)
+        public async Task<IEnumerable<DoctorSlotResponse>> GetAllDoctorSlotsTimeByDateAsync(int doctorId, DateOnly date, int userId)
         {
             var patient = await _patientRepository.GetPatientAsync(userId)
                 ?? throw new PatientNotFoundException("Patient not found");

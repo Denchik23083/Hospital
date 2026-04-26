@@ -1,5 +1,5 @@
 using Hospital.Core.Exceptions;
-using Hospital.Core.Models.Responce;
+using Hospital.Core.Models.Response;
 using Hospital.Db;
 using Hospital.Db.Entities;
 using Hospital.Services.AdminService;
@@ -64,7 +64,7 @@ builder.Services.AddDbContext<HospitalContext>(option =>
 
 builder.Services.AddAutoMapper(au =>
 {
-    au.CreateMap<User, UserResponce>();
+    au.CreateMap<User, UserResponse>();
 });
 
 var app = builder.Build();

@@ -1,4 +1,4 @@
-﻿using Hospital.Core.Models.Responce;
+﻿using Hospital.Core.Models.Response;
 using Hospital.Core.Utilities;
 using Hospital.Services.BookingService;
 using Microsoft.AspNetCore.Authorization;
@@ -15,7 +15,7 @@ namespace Hospital.Hospital.Controllers
 
         [Authorize(Roles = AppRoles.Patient)]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<BookingResponce>>> GetAllPatientBookingsAsync()
+        public async Task<ActionResult<IEnumerable<BookingResponse>>> GetAllPatientBookingsAsync()
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 

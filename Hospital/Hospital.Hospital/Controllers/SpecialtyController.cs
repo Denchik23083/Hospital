@@ -1,4 +1,4 @@
-﻿using Hospital.Core.Models.Responce;
+﻿using Hospital.Core.Models.Response;
 using Hospital.Core.Utilities;
 using Hospital.Services.DoctorService;
 using Hospital.Services.SpecialtyService;
@@ -17,7 +17,7 @@ namespace Hospital.Hospital.Controllers
 
         [Authorize(Roles = AppRoles.PatientAdminGod)]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<SpecialtyResponce>>> GetAllSpecialtiesAsync()
+        public async Task<ActionResult<IEnumerable<SpecialtyResponse>>> GetAllSpecialtiesAsync()
         {
             var specialties = await _service.GetAllSpecialtiesAsync();
 
@@ -26,7 +26,7 @@ namespace Hospital.Hospital.Controllers
 
         [Authorize(Roles = AppRoles.PatientAdminGod)]
         [HttpGet("{specialtyId}/doctors")]
-        public async Task<ActionResult<IEnumerable<DoctorResponce>>> GetAllDoctorsBySpecialtyAsync(int specialtyId)
+        public async Task<ActionResult<IEnumerable<DoctorResponse>>> GetAllDoctorsBySpecialtyAsync(int specialtyId)
         {
             var doctorsBySpecialty = await _doctorService.GetAllDoctorsBySpecialtyAsync(specialtyId);
 

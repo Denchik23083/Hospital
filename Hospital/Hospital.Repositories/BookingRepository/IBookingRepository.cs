@@ -1,11 +1,11 @@
-﻿using Hospital.Core.Models.Responce;
+﻿using Hospital.Core.Models.Response;
 using Hospital.Db.Entities;
 
 namespace Hospital.Repositories.BookingRepository
 {
     public interface IBookingRepository
     {
-        Task<IEnumerable<BookingResponce>> GetAllPatientBookingsAsync(int patientId);
+        Task<IEnumerable<BookingResponse>> GetAllPatientBookingsAsync(int patientId);
 
         Task<bool> HasActiveBookingWithDoctorAsync(int patientId, int doctorId);
 

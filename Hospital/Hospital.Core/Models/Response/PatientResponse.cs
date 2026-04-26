@@ -1,8 +1,8 @@
 ﻿using Hospital.Db.Utilities;
 
-namespace Hospital.Core.Models.Responce
+namespace Hospital.Core.Models.Response
 {
-    public class PatientResponce
+    public class PatientResponse
     {
         public int Id { get; set; }
 

@@ -1,9 +1,9 @@
-﻿using Hospital.Core.Models.Responce;
+﻿using Hospital.Core.Models.Response;
 
 namespace Hospital.Services.SpecialtyService
 {
     public interface ISpecialtyService
     {
-        Task<IEnumerable<SpecialtyResponce>> GetAllSpecialtiesAsync();
+        Task<IEnumerable<SpecialtyResponse>> GetAllSpecialtiesAsync();
     }
 }

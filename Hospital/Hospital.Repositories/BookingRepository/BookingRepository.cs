@@ -1,4 +1,4 @@
-﻿using Hospital.Core.Models.Responce;
+﻿using Hospital.Core.Models.Response;
 using Hospital.Db;
 using Hospital.Db.Entities;
 using Hospital.Db.Utilities;
@@ -10,11 +10,11 @@ namespace Hospital.Repositories.BookingRepository
     {
         private readonly HospitalContext _context = context;
 
-        public async Task<IEnumerable<BookingResponce>> GetAllPatientBookingsAsync(int patientId)
+        public async Task<IEnumerable<BookingResponse>> GetAllPatientBookingsAsync(int patientId)
         {
             return await _context.Bookings
                 .Where(_ => _.PatientId == patientId)
-                .Select(_ => new BookingResponce
+                .Select(_ => new BookingResponse
                 {
                     Id = _.Id,
                     BookingStatus = _.BookingStatus,
@@ -24,7 +24,7 @@ namespace Hospital.Repositories.BookingRepository
                         Date = _.DoctorSlot!.Date,
                         StartTime = _.DoctorSlot!.StartTime,
                         EndTime = _.DoctorSlot!.EndTime,
-                        DoctorResponce = new DoctorResponce
+                        DoctorResponse = new DoctorResponse
                         {
                             Id = _.DoctorSlot!.Doctor!.Id,
                             FirstName = _.DoctorSlot.Doctor.FirstName,

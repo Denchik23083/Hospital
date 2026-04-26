@@ -1,5 +1,5 @@
 using Hospital.Core.Exceptions;
-using Hospital.Core.Models.Responce;
+using Hospital.Core.Models.Response;
 using Hospital.Db;
 using Hospital.Db.Entities;
 using Hospital.Repositories.BookingRepository;
@@ -77,7 +77,7 @@ builder.Services.AddDbContext<HospitalContext>(option =>
 
 builder.Services.AddAutoMapper(au =>
 {
-    au.CreateMap<Specialty, SpecialtyResponce>();
+    au.CreateMap<Specialty, SpecialtyResponse>();
 });
 
 var app = builder.Build();

@@ -1,4 +1,4 @@
-﻿using Hospital.Core.Models.Responce;
+﻿using Hospital.Core.Models.Response;
 using Hospital.Core.Utilities;
 using Hospital.Services.DoctorSlotService;
 using Microsoft.AspNetCore.Authorization;
@@ -26,7 +26,7 @@ namespace Hospital.Hospital.Controllers
 
         [Authorize(Roles = AppRoles.Doctor)]
         [HttpGet("doctor-times")]
-        public async Task<ActionResult<IEnumerable<DoctorSlotBookingResponce>>> GetAllDoctorSlotsTimesByDoctorAsync([FromQuery] DateOnly date)
+        public async Task<ActionResult<IEnumerable<DoctorSlotBookingResponse>>> GetAllDoctorSlotsTimesByDoctorAsync([FromQuery] DateOnly date)
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
@@ -48,7 +48,7 @@ namespace Hospital.Hospital.Controllers
 
         [Authorize(Roles = AppRoles.PatientAdminGod)]
         [HttpGet("{doctorId}/available-times")]
-        public async Task<ActionResult<IEnumerable<DoctorSlotResponce>>> GetAllDoctorSlotsTimeByDateAsync(int doctorId, [FromQuery]DateOnly date)
+        public async Task<ActionResult<IEnumerable<DoctorSlotResponse>>> GetAllDoctorSlotsTimeByDateAsync(int doctorId, [FromQuery]DateOnly date)
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
