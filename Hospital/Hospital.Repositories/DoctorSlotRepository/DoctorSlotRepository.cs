@@ -37,14 +37,14 @@ namespace Hospital.Repositories.DoctorSlotRepository
                         .Select(_ => new BookingPatientResponse
                         {
                             Id = _.Id,
-                            BookingStatus = _.BookingStatus,
+                            BookingStatus = _.BookingStatus.ToString(),
                             PatientResponse = new PatientResponse
                             {
                                 Id = _.Patient!.Id,
                                 FirstName = _.Patient.FirstName,
                                 LastName = _.Patient.LastName,
                                 BirthDate = _.Patient.BirthDate,
-                                GenderType = _.Patient.GenderType,
+                                GenderType = _.Patient.GenderType.ToString(),
                                 Phone = _.Patient.Phone
                             }
                         }).FirstOrDefault()

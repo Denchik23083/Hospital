@@ -12,7 +12,7 @@ namespace Hospital.Core.Models.Response
 
         public DateOnly BirthDate { get; set; }
 
-        public GenderType GenderType { get; set; }
+        public string GenderType { get; set; } = string.Empty;
 
         public string Phone { get; set; } = string.Empty;
     }
