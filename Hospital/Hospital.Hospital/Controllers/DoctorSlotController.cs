@@ -35,7 +35,7 @@ namespace Hospital.Hospital.Controllers
             return Ok(doctorSlots);
         }
 
-        [Authorize(Roles = AppRoles.PatientAdminGod)]
+        [Authorize(Roles = AppRoles.Patient)]
         [HttpGet("{doctorId}/available-dates")]
         public async Task<ActionResult<IEnumerable<DateOnly>>> GetAllDoctorSlotsDatesAsync(int doctorId)
         {
@@ -46,7 +46,7 @@ namespace Hospital.Hospital.Controllers
             return Ok(dates);
         }
 
-        [Authorize(Roles = AppRoles.PatientAdminGod)]
+        [Authorize(Roles = AppRoles.Patient)]
         [HttpGet("{doctorId}/available-times")]
         public async Task<ActionResult<IEnumerable<DoctorSlotResponse>>> GetAllDoctorSlotsTimeByDateAsync(int doctorId, [FromQuery]DateOnly date)
         {
@@ -55,6 +55,17 @@ namespace Hospital.Hospital.Controllers
             var doctorSlots = await _service.GetAllDoctorSlotsTimeByDateAsync(doctorId, date, userId);
 
             return Ok(doctorSlots);
+        }
+
+        [Authorize(Roles = AppRoles.Doctor)]
+        [HttpPost]
+        public async Task<ActionResult> AddDoctorSlotsAsync([FromQuery] DateOnly date)
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+            await _service.AddDoctorSlotsAsync(date, userId);
+
+            return Created();
         }
     }
 }

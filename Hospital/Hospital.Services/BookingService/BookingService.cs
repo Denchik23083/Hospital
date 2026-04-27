@@ -3,6 +3,7 @@ using Hospital.Core.Models.Response;
 using Hospital.Db.Entities;
 using Hospital.Db.Utilities;
 using Hospital.Repositories.BookingRepository;
+using Hospital.Repositories.DoctorRepository;
 using Hospital.Repositories.DoctorSlotRepository;
 using Hospital.Repositories.PatientRepository;
 using Hospital.Repositories.UnitOfWorkRepository;
@@ -12,11 +13,13 @@ namespace Hospital.Services.BookingService
     public class BookingService(IBookingRepository repository,
             IPatientRepository patientRepository,
             IDoctorSlotRepository doctorSlotRepository,
+            IDoctorRepository doctorRepository,
             IUnitOfWorkRepository unitOfWorkRepository) : IBookingService
     {
         private readonly IBookingRepository _repository = repository;
         private readonly IPatientRepository _patientRepository = patientRepository;
         private readonly IDoctorSlotRepository _doctorSlotRepository = doctorSlotRepository;
+        private readonly IDoctorRepository _doctorRepository = doctorRepository;
         private readonly IUnitOfWorkRepository _unitOfWorkRepository = unitOfWorkRepository;
 
         public async Task<IEnumerable<BookingResponse>> GetAllPatientBookingsAsync(int userId)
@@ -63,6 +66,24 @@ namespace Hospital.Services.BookingService
             {
                 throw new SlotAlreadyBookedException("Slot already booked");
             }
+        }
+
+        public async Task CompleteBookingAsync(int id, int userId)
+        {
+            var doctor = await _doctorRepository.GetDoctorAsync(userId)
+                ?? throw new DoctorNotFoundException("Doctor not found");
+
+            var booking = await _repository.GetBookingWithDoctorAsync(id, doctor.Id)
+                ?? throw new BookingNotFoundException("Booking not found");
+
+            if (booking.BookingStatus != BookingStatus.Active)
+            {
+                throw new BookingNotFoundException("Можно менять только активную запись");
+            }
+
+            booking.BookingStatus = BookingStatus.Completed;
+
+            await _unitOfWorkRepository.SaveChangesAsync();
         }
 
         public async Task CancelBookingAsync(int id, int userId)

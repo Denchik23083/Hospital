@@ -8,6 +8,8 @@ namespace Hospital.Services.BookingService
 
         Task CreateBookingAsync(int slotId, int userId);
 
+        Task CompleteBookingAsync(int id, int userId);
+
         Task CancelBookingAsync(int id, int userId);
     }
 }

@@ -36,6 +36,14 @@ namespace Hospital.Repositories.BookingRepository
                 }).ToListAsync();
         }
 
+        public async Task<Booking?> GetBookingWithDoctorAsync(int id, int doctorId)
+        {
+            return await _context.Bookings
+                .Include(_ => _.DoctorSlot)
+                .FirstOrDefaultAsync(_ => _.Id == id
+                    && _.DoctorSlot!.DoctorId == doctorId);
+        }
+
         public async Task<Booking?> GetBookingWithPatientAsync(int id, int patientId)
         {
             return await _context.Bookings

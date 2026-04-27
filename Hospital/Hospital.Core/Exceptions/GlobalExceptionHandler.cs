@@ -67,6 +67,13 @@ namespace Hospital.Core.Exceptions
                     problemDetails.Detail = exception.Message;
                     break;
 
+                case DoctorSlotAlreadyExistsException:
+                    httpContext.Response.StatusCode = StatusCodes.Status409Conflict;
+                    problemDetails.Status = StatusCodes.Status409Conflict;
+                    problemDetails.Title = "Doctor slot with this date already exists";
+                    problemDetails.Detail = exception.Message;
+                    break;
+
                 case SlotAlreadyBookedException:
                     httpContext.Response.StatusCode = StatusCodes.Status409Conflict;
                     problemDetails.Status = StatusCodes.Status409Conflict;

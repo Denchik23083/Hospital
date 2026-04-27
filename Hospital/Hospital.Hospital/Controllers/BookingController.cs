@@ -35,6 +35,17 @@ namespace Hospital.Hospital.Controllers
             return Created();
         }
 
+        [HttpPut("{id}/complete")]
+        [Authorize(Roles = AppRoles.Doctor)]
+        public async Task<ActionResult> CompleteBookingAsync(int id)
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+            await _service.CompleteBookingAsync(id, userId);
+
+            return NoContent();
+        }
+
         [HttpPut("{id}/cancel")]
         [Authorize(Roles = AppRoles.Patient)]
         public async Task<ActionResult> CancelBookingAsync(int id)

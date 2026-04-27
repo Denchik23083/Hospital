@@ -86,5 +86,18 @@ namespace Hospital.Repositories.DoctorSlotRepository
                 .Include(_ => _.Bookings)
                 .FirstOrDefaultAsync(_ => _.Id == slotId);
         }
+
+        public async Task<bool> DoctorSlotsAlreadyExists(int doctorId, DateOnly date)
+        {
+            return await _context.DoctorSlots
+                .AnyAsync(_ => _.DoctorId == doctorId && _.Date == date);
+        }
+
+        public async Task AddDoctorSlotsAsync(List<DoctorSlot> doctorSlots)
+        {
+            await _context.DoctorSlots.AddRangeAsync(doctorSlots);
+
+            await _context.SaveChangesAsync();
+        }
     }
 }

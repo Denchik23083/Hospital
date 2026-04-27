@@ -14,5 +14,9 @@ namespace Hospital.Repositories.DoctorSlotRepository
         Task<IEnumerable<DoctorSlotResponse>> GetAllDoctorSlotsTimeByDateAsync(int doctorId, DateOnly date);
 
         Task<DoctorSlot?> GetDoctorSlotAsync(int slotId);
+
+        Task<bool> DoctorSlotsAlreadyExists(int doctorId, DateOnly date);
+
+        Task AddDoctorSlotsAsync(List<DoctorSlot> doctorSlots);
     }
 }
