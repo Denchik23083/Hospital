@@ -15,7 +15,7 @@ namespace Hospital.Hospital.Controllers
         private readonly ISpecialtyService _service = service;
         private readonly IDoctorService _doctorService = doctorService;
 
-        [Authorize(Roles = AppRoles.PatientAdminGod)]
+        [Authorize(Roles = AppRoles.PatientAdmin)]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SpecialtyResponse>>> GetAllSpecialtiesAsync()
         {
@@ -24,7 +24,7 @@ namespace Hospital.Hospital.Controllers
             return Ok(specialties);
         }
 
-        [Authorize(Roles = AppRoles.PatientAdminGod)]
+        [Authorize(Roles = AppRoles.PatientAdmin)]
         [HttpGet("{specialtyId}/doctors")]
         public async Task<ActionResult<IEnumerable<DoctorResponse>>> GetAllDoctorsBySpecialtyAsync(int specialtyId)
         {

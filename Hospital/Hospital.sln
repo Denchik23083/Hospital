@@ -11,8 +11,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hospital.Db", "Hospital.Db\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hospital.Core", "Hospital.Core\Hospital.Core.csproj", "{4322490B-5F79-45A6-838B-3AAE76D6D09F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hospital.AdminPanel", "Hospital.AdminPanel\Hospital.AdminPanel.csproj", "{7ED70B38-8ABC-49BB-80C3-2ABE98171DA9}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hospital.Tests", "Hospital.Tests\Hospital.Tests.csproj", "{CCF153A3-8583-42DC-ABEB-1CD989306AA1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hospital.Hospital", "Hospital.Hospital\Hospital.Hospital.csproj", "{D9B69FCE-C361-44BF-BC18-58EAC9F7B8AA}"
@@ -41,10 +39,6 @@ Global
 		{4322490B-5F79-45A6-838B-3AAE76D6D09F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4322490B-5F79-45A6-838B-3AAE76D6D09F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4322490B-5F79-45A6-838B-3AAE76D6D09F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7ED70B38-8ABC-49BB-80C3-2ABE98171DA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7ED70B38-8ABC-49BB-80C3-2ABE98171DA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7ED70B38-8ABC-49BB-80C3-2ABE98171DA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7ED70B38-8ABC-49BB-80C3-2ABE98171DA9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{CCF153A3-8583-42DC-ABEB-1CD989306AA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CCF153A3-8583-42DC-ABEB-1CD989306AA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CCF153A3-8583-42DC-ABEB-1CD989306AA1}.Release|Any CPU.ActiveCfg = Release|Any CPU

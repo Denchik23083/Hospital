@@ -2,9 +2,8 @@
 {
     public enum RoleType
     {
-        God = 1,
-        Admin = 2,
-        Doctor = 3,
-        Patient = 4
+        Admin = 1,
+        Doctor = 2,
+        Patient = 3
     }
 }

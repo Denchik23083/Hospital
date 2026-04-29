@@ -9,9 +9,9 @@ using Microsoft.Extensions.Logging;
 namespace Hospital.Core.Utilities
 {
     public class SeedSystemUsersService(
-    HospitalContext context,
-    IConfiguration configuration,
-    ILogger<SeedSystemUsersService> logger)
+        HospitalContext context,
+        IConfiguration configuration,
+        ILogger<SeedSystemUsersService> logger)
     {
         private readonly HospitalContext _context = context;
         private readonly IConfiguration _configuration = configuration;
@@ -19,50 +19,8 @@ namespace Hospital.Core.Utilities
 
         public async Task SeedAsync()
         {
-            await SeedGodAsync();
             await SeedAdminAsync();
             await SeedDoctorsAsync();
-        }
-
-        private async Task SeedGodAsync()
-        {
-            var godEmail = _configuration["SeedGod:Email"];
-            var godPassword = _configuration["SeedGod:Password"];
-
-            if (string.IsNullOrWhiteSpace(godEmail) || string.IsNullOrWhiteSpace(godPassword))
-            {
-                _logger.LogWarning("Seed god skipped: email or password configuration is missing.");
-                return;
-            }
-
-            var godExists = await _context.Users.AnyAsync(u => u.RoleType == RoleType.God);
-            if (godExists)
-            {
-                _logger.LogInformation("Seed god skipped: god already exists.");
-                return;
-            }
-
-            var userWithSameEmailExists = await _context.Users.AnyAsync(u => u.Email == godEmail);
-            if (userWithSameEmailExists)
-            {
-                _logger.LogWarning("Seed god skipped: user with email {Email} already exists.", godEmail);
-                return;
-            }
-
-            var god = new User
-            {
-                Email = godEmail,
-                RoleType = RoleType.God
-            };
-
-            var passwordHasher = new PasswordHasher<User>();
-            god.PasswordHash = passwordHasher.HashPassword(god, godPassword);
-
-            //Do not need AddAsync
-            _context.Users.Add(god);
-            await _context.SaveChangesAsync();
-
-            _logger.LogInformation("God user {Email} created successfully.", godEmail);
         }
 
         private async Task SeedAdminAsync()
@@ -146,7 +104,7 @@ namespace Hospital.Core.Utilities
             var doctorExists = await _context.Users.AnyAsync(u => u.RoleType == RoleType.Doctor);
             if (doctorExists)
             {
-                _logger.LogInformation("Seed doctor skipped: god already exists.");
+                _logger.LogInformation("Seed doctor skipped: doctor already exists.");
                 return;
             }
 

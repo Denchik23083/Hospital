@@ -12,6 +12,8 @@ namespace Hospital.Db.Entities
 
         public RoleType RoleType { get; set; }
 
+        public decimal Price { get; set; }
+
         public string? RefreshToken { get; set; }
 
         public DateTime? RefreshTokenExpiryTime { get; set; }
