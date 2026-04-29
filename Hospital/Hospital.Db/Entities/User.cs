@@ -12,7 +12,7 @@ namespace Hospital.Db.Entities
 
         public RoleType RoleType { get; set; }
 
-        public decimal Price { get; set; }
+        public decimal Money { get; set; }
 
         public string? RefreshToken { get; set; }
 

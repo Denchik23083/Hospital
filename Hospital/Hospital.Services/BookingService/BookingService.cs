@@ -24,7 +24,7 @@ namespace Hospital.Services.BookingService
 
         public async Task<IEnumerable<BookingResponse>> GetAllPatientBookingsAsync(int userId)
         {
-            var patient = await _patientRepository.GetPatientAsync(userId)
+            var patient = await _patientRepository.GetPatientByUserAsync(userId)
                 ?? throw new PatientNotFoundException("Patient not found");
 
             return await _repository.GetAllPatientBookingsAsync(patient.Id);
@@ -32,7 +32,7 @@ namespace Hospital.Services.BookingService
 
         public async Task CreateBookingAsync(int slotId, int userId)
         {
-            var patient = await _patientRepository.GetPatientAsync(userId)
+            var patient = await _patientRepository.GetPatientByUserAsync(userId)
                 ?? throw new PatientNotFoundException("Patient not found");
 
             var doctorSlot = await _doctorSlotRepository.GetDoctorSlotAsync(slotId)
@@ -58,19 +58,47 @@ namespace Hospital.Services.BookingService
                 BookingStatus = BookingStatus.Active
             };
 
+            await using var transaction = await _unitOfWorkRepository.BeginTransactionAsync();
+
             try
             {
+                if (patient.User is null 
+                    || doctorSlot.Doctor is null 
+                    || doctorSlot.Doctor.Specialty is null
+                    || doctorSlot.Doctor.User is null)
+                {
+                    await transaction.RollbackAsync();
+
+                    throw new DoctorNotFoundException("Doctor not found");
+                }
+
+                var price = doctorSlot.Doctor.Specialty.Price;
+
+                if (patient.User.Money < price)
+                {
+                    await transaction.RollbackAsync();
+
+                    throw new InsufficientFundsException("Not enough money");
+                }
+
+                patient.User.Money -= price;
+                doctorSlot.Doctor.User.Money += price;
+
                 await _repository.AddBookingAsync(booking);
+                await _unitOfWorkRepository.SaveChangesAsync();
+
+                await transaction.CommitAsync();
             }
             catch
             {
-                throw new SlotAlreadyBookedException("Slot already booked");
+                await transaction.RollbackAsync();
+                throw;
             }
         }
 
         public async Task CompleteBookingAsync(int id, int userId)
         {
-            var doctor = await _doctorRepository.GetDoctorAsync(userId)
+            var doctor = await _doctorRepository.GetDoctorByUserAsync(userId)
                 ?? throw new DoctorNotFoundException("Doctor not found");
 
             var booking = await _repository.GetBookingWithDoctorAsync(id, doctor.Id)
@@ -88,7 +116,7 @@ namespace Hospital.Services.BookingService
 
         public async Task CancelBookingAsync(int id, int userId)
         {
-            var patient = await _patientRepository.GetPatientAsync(userId)
+            var patient = await _patientRepository.GetPatientByUserAsync(userId)
                 ?? throw new PatientNotFoundException("Patient not found");
 
             var booking = await _repository.GetBookingWithPatientAsync(id, patient.Id)
@@ -99,9 +127,43 @@ namespace Hospital.Services.BookingService
                 throw new BookingNotFoundException("Можно менять только активную запись");
             }
 
-            booking.BookingStatus = BookingStatus.Cancelled;
+            await using var transaction = await _unitOfWorkRepository.BeginTransactionAsync();
 
-            await _unitOfWorkRepository.SaveChangesAsync();
+            try
+            {
+                if (patient.User is null
+                    || booking.DoctorSlot is null
+                    || booking.DoctorSlot.Doctor is null
+                    || booking.DoctorSlot.Doctor.Specialty is null
+                    || booking.DoctorSlot.Doctor.User is null)
+                {
+                    await transaction.RollbackAsync();
+
+                    throw new DoctorNotFoundException("Doctor not found");
+                }
+
+                var price = booking.DoctorSlot.Doctor.Specialty.Price;
+
+                if (booking.DoctorSlot.Doctor.User.Money < price)
+                {
+                    await transaction.RollbackAsync();
+
+                    throw new InsufficientFundsException("Not enough money");
+                }
+
+                booking.DoctorSlot.Doctor.User.Money -= price;
+                patient.User.Money += price;
+
+                booking.BookingStatus = BookingStatus.Cancelled;
+                await _unitOfWorkRepository.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
     }
 }

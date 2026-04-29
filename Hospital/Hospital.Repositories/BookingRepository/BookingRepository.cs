@@ -47,6 +47,12 @@ namespace Hospital.Repositories.BookingRepository
         public async Task<Booking?> GetBookingWithPatientAsync(int id, int patientId)
         {
             return await _context.Bookings
+                .Include(_ => _.DoctorSlot)
+                .ThenInclude(_ => _!.Doctor)
+                .ThenInclude(_ => _!.User)
+                .Include(_ => _.DoctorSlot)
+                .ThenInclude(_ => _!.Doctor)
+                .ThenInclude(_ => _!.Specialty)
                 .FirstOrDefaultAsync(_ => _.Id == id
                     && _.PatientId == patientId);
         }
@@ -63,8 +69,6 @@ namespace Hospital.Repositories.BookingRepository
         public async Task AddBookingAsync(Booking booking)
         {
             await _context.Bookings.AddAsync(booking);
-
-            await _context.SaveChangesAsync();
         }
     }
 }

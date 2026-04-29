@@ -26,7 +26,7 @@ namespace Hospital.Services.DoctorSlotService
 
         public async Task<IEnumerable<DateOnly>> GetAllDoctorSlotsDatesByDoctorAsync(int userId)
         {
-            var doctor = await _doctorRepository.GetDoctorAsync(userId)
+            var doctor = await _doctorRepository.GetDoctorByUserAsync(userId)
                 ?? throw new DoctorNotFoundException("Doctor not found");
 
             return await _repository.GetAllDoctorSlotsDatesByDoctorAsync(doctor.Id);
@@ -34,7 +34,7 @@ namespace Hospital.Services.DoctorSlotService
         
         public async Task<IEnumerable<DoctorSlotBookingResponse>> GetAllDoctorSlotsTimesByDoctorAsync(DateOnly date, int userId)
         {
-            var doctor = await _doctorRepository.GetDoctorAsync(userId)
+            var doctor = await _doctorRepository.GetDoctorByUserAsync(userId)
                 ?? throw new DoctorNotFoundException("Doctor not found");
 
             return await _repository.GetAllDoctorSlotsTimesByDoctorAsync(doctor.Id, date);
@@ -42,10 +42,10 @@ namespace Hospital.Services.DoctorSlotService
 
         public async Task<IEnumerable<DateOnly>> GetAllDoctorSlotsDatesAsync(int doctorId, int userId)
         {
-            var patient = await _patientRepository.GetPatientAsync(userId)
+            var patient = await _patientRepository.GetPatientByUserAsync(userId)
                 ?? throw new PatientNotFoundException("Patient not found");
 
-            var doctor = await _doctorRepository.GetDoctorAsync(userId)
+            var doctor = await _doctorRepository.GetDoctorAsync(doctorId)
                 ?? throw new DoctorNotFoundException("Doctor not found");
 
             if (await _bookingRepository.HasActiveBookingWithDoctorAsync(patient.Id, doctor.Id))
@@ -60,10 +60,10 @@ namespace Hospital.Services.DoctorSlotService
 
         public async Task<IEnumerable<DoctorSlotResponse>> GetAllDoctorSlotsTimeByDateAsync(int doctorId, DateOnly date, int userId)
         {
-            var patient = await _patientRepository.GetPatientAsync(userId)
+            var patient = await _patientRepository.GetPatientByUserAsync(userId)
                 ?? throw new PatientNotFoundException("Patient not found");
 
-            var doctor = await _doctorRepository.GetDoctorAsync(userId)
+            var doctor = await _doctorRepository.GetDoctorAsync(doctorId)
                 ?? throw new DoctorNotFoundException("Doctor not found");
 
             if (await _bookingRepository.HasActiveBookingWithDoctorAsync(patient.Id, doctor.Id))
@@ -76,7 +76,7 @@ namespace Hospital.Services.DoctorSlotService
 
         public async Task AddDoctorSlotsAsync(DateOnly date, int userId)
         {
-            var doctor = await _doctorRepository.GetDoctorAsync(userId)
+            var doctor = await _doctorRepository.GetDoctorByUserAsync(userId)
                 ?? throw new DoctorNotFoundException("Doctor not found");
 
             if (await _repository.DoctorSlotsAlreadyExists(doctor.Id, date))

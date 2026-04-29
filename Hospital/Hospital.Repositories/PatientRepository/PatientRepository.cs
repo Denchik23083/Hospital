@@ -8,10 +8,11 @@ namespace Hospital.Repositories.PatientRepository
     {
         private readonly HospitalContext _context = context;
 
-        public async Task<Patient?> GetPatientAsync(int userId)
+        public async Task<Patient?> GetPatientByUserAsync(int userId)
         {
             return await _context.Patients
-                    .FirstOrDefaultAsync(_ => _.UserId == userId);
+                .Include(_ => _.User)
+                .FirstOrDefaultAsync(_ => _.UserId == userId);
         }
     }
 }

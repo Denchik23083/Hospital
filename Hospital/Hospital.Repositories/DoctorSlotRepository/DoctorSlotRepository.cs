@@ -83,6 +83,10 @@ namespace Hospital.Repositories.DoctorSlotRepository
         public async Task<DoctorSlot?> GetDoctorSlotAsync(int slotId)
         {
             return await _context.DoctorSlots
+                .Include(_ => _.Doctor)
+                .ThenInclude(_ => _!.User)
+                .Include(_ => _.Doctor)
+                .ThenInclude(_ => _!.Specialty)
                 .Include(_ => _.Bookings)
                 .FirstOrDefaultAsync(_ => _.Id == slotId);
         }

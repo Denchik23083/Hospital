@@ -13,7 +13,7 @@ namespace Hospital.Db.EntityConfiguration
             builder.Property(_ => _.PasswordHash).IsRequired();
             builder.Property(_ => _.RefreshToken);
             builder.Property(_ => _.RefreshTokenExpiryTime);
-            builder.Property(_ => _.Price)
+            builder.Property(_ => _.Money)
                 .HasPrecision(18, 2)
                 .HasDefaultValue(0m)
                 .IsRequired();

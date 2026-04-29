@@ -23,9 +23,17 @@ namespace Hospital.Repositories.DoctorRepository
                 }).ToListAsync();
         }
 
-        public async Task<Doctor?> GetDoctorAsync(int userId)
+        public async Task<Doctor?> GetDoctorAsync(int id)
         {
             return await _context.Doctors
+                .Include(_ => _.User)
+                .FirstOrDefaultAsync(_ => _.Id == id);
+        }
+
+        public async Task<Doctor?> GetDoctorByUserAsync(int userId)
+        {
+            return await _context.Doctors
+                .Include(_ => _.User)
                 .FirstOrDefaultAsync(_ => _.UserId == userId);
         }
     }
