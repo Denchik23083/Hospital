@@ -6,10 +6,12 @@ using Hospital.Repositories.BookingRepository;
 using Hospital.Repositories.DoctorRepository;
 using Hospital.Repositories.DoctorSlotRepository;
 using Hospital.Repositories.PatientRepository;
+using Hospital.Repositories.SpecialtyRepository;
 using Hospital.Repositories.UnitOfWorkRepository;
 using Hospital.Services.BookingService;
 using Hospital.Services.DoctorService;
 using Hospital.Services.DoctorSlotService;
+using Hospital.Services.PatientService;
 using Hospital.Services.SpecialtyService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -22,8 +24,10 @@ builder.Services.AddScoped<ISpecialtyService, SpecialtyService>();
 builder.Services.AddScoped<IDoctorService, DoctorService>();
 builder.Services.AddScoped<IDoctorSlotService, DoctorSlotService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
+builder.Services.AddScoped<IPatientService, PatientService>();
 
 builder.Services.AddScoped<IPatientRepository, PatientRepository>();
+builder.Services.AddScoped<ISpecialtyRepository, SpecialtyRepository>();
 builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
 builder.Services.AddScoped<IDoctorSlotRepository, DoctorSlotRepository>();
 builder.Services.AddScoped<IBookingRepository, BookingRepository>();
@@ -68,13 +72,7 @@ builder.Services.AddDbContext<HospitalContext>(option =>
 {
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-    option.UseSqlServer(connectionString, sqlOptions =>
-    {
-        sqlOptions.EnableRetryOnFailure(
-            maxRetryCount: 10,
-            maxRetryDelay: TimeSpan.FromSeconds(5),
-            errorNumbersToAdd: null);
-    });
+    option.UseSqlServer(connectionString);
 });
 
 builder.Services.AddAutoMapper(au =>

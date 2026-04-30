@@ -5,5 +5,7 @@ namespace Hospital.Repositories.PatientRepository
     public interface IPatientRepository
     {
         Task<Patient?> GetPatientByUserAsync(int userId);
+
+        Task<decimal> GetPatientBalanceAsync(int userId);
     }
 }

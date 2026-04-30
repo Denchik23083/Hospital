@@ -1,22 +1,20 @@
 ﻿using Hospital.Core.Models.Response;
-using Hospital.Db;
-using Microsoft.EntityFrameworkCore;
+using Hospital.Repositories.SpecialtyRepository;
 
 namespace Hospital.Services.SpecialtyService
 {
-    public class SpecialtyService(HospitalContext context) : ISpecialtyService
+    public class SpecialtyService(ISpecialtyRepository repository) : ISpecialtyService
     {
-        private readonly HospitalContext _context = context;
+        private readonly ISpecialtyRepository _repository = repository;
 
         public async Task<IEnumerable<SpecialtyResponse>> GetAllSpecialtiesAsync()
         {
-            return await _context.Specialties
-                .Select(_ => new SpecialtyResponse
-                {
-                    Id = _.Id,
-                    Name = _.Name,
-                    Price = _.Price
-                }).ToListAsync();
+            return await _repository.GetAllSpecialtiesAsync();
+        }
+
+        public async Task<decimal> GetSpecialtyPriceAsync(int specialtyId)
+        {
+            return await _repository.GetSpecialtyPriceAsync(specialtyId);
         }
     }
 }

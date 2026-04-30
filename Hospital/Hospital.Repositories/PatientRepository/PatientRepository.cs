@@ -14,5 +14,13 @@ namespace Hospital.Repositories.PatientRepository
                 .Include(_ => _.User)
                 .FirstOrDefaultAsync(_ => _.UserId == userId);
         }
+
+        public async Task<decimal> GetPatientBalanceAsync(int userId)
+        {
+            return await _context.Users
+                .Where(_ => _.Id == userId)
+                .Select(_ => _.Money)
+                .FirstOrDefaultAsync();
+        }
     }
 }
