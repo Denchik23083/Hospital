@@ -34,6 +34,7 @@ namespace Hospital.Repositories.DoctorRepository
         {
             return await _context.Doctors
                 .Include(_ => _.User)
+                .Include(_ => _.Specialty)
                 .FirstOrDefaultAsync(_ => _.UserId == userId);
         }
     }

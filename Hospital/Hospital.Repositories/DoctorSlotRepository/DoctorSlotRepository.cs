@@ -53,10 +53,12 @@ namespace Hospital.Repositories.DoctorSlotRepository
 
         public async Task<IEnumerable<DateOnly>> GetAllDoctorSlotsDatesAsync(int doctorId, DateOnly today)
         {
+            var currentTime = DateTime.UtcNow.TimeOfDay;
+
             return await _context.DoctorSlots
                 .Where(_ => _.DoctorId == doctorId
-                    && _.Date >= today
-                    && !_.Bookings.Any(_ => _.BookingStatus == BookingStatus.Active))
+                    && !_.Bookings.Any(_ => _.BookingStatus == BookingStatus.Active)
+                    && (_.Date > today || (_.Date == today && _.StartTime >= currentTime)))
                 .Select(_ => _.Date)
                 .Distinct()
                 .OrderBy(d => d)
@@ -65,10 +67,14 @@ namespace Hospital.Repositories.DoctorSlotRepository
 
         public async Task<IEnumerable<DoctorSlotResponse>> GetAllDoctorSlotsTimeByDateAsync(int doctorId, DateOnly date)
         {
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            var currentTime = DateTime.UtcNow.TimeOfDay;
+
             return await _context.DoctorSlots
                 .Where(_ => _.DoctorId == doctorId
                     && _.Date == date
-                    && !_.Bookings.Any(_ => _.BookingStatus == BookingStatus.Active))
+                    && !_.Bookings.Any(_ => _.BookingStatus == BookingStatus.Active)
+                    && (date > today || (date == today && _.StartTime >= currentTime)))
                 .OrderBy(s => s.StartTime)
                 .Select(_ => new DoctorSlotResponse
                 {
@@ -100,8 +106,6 @@ namespace Hospital.Repositories.DoctorSlotRepository
         public async Task AddDoctorSlotsAsync(List<DoctorSlot> doctorSlots)
         {
             await _context.DoctorSlots.AddRangeAsync(doctorSlots);
-
-            await _context.SaveChangesAsync();
         }
     }
 }

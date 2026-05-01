@@ -5,19 +5,22 @@ using Hospital.Repositories.BookingRepository;
 using Hospital.Repositories.DoctorRepository;
 using Hospital.Repositories.DoctorSlotRepository;
 using Hospital.Repositories.PatientRepository;
+using Hospital.Repositories.UnitOfWorkRepository;
 
 namespace Hospital.Services.DoctorSlotService
 {
     public class DoctorSlotService(IDoctorSlotRepository repository,
             IPatientRepository patientRepository,
             IBookingRepository bookingRepository,
-            IDoctorRepository doctorRepository) : IDoctorSlotService
+            IDoctorRepository doctorRepository,
+            IUnitOfWorkRepository unitOfWorkRepository) : IDoctorSlotService
     {
         private readonly IDoctorSlotRepository _repository = repository;
         private readonly IPatientRepository _patientRepository = patientRepository;
         private readonly IBookingRepository _bookingRepository = bookingRepository;
         private readonly IDoctorRepository _doctorRepository = doctorRepository;
-
+        private readonly IUnitOfWorkRepository _unitOfWorkRepository = unitOfWorkRepository;
+        
         private readonly TimeSpan _startTime = new (09, 00, 00);
         private readonly TimeSpan _endTime = new (16, 00, 00);
         private readonly TimeSpan _breakStart = new (13, 00, 00);
@@ -106,6 +109,7 @@ namespace Hospital.Services.DoctorSlotService
             }
 
             await _repository.AddDoctorSlotsAsync(listDoctorSlots);
+            await _unitOfWorkRepository.SaveChangesAsync();
         }
     }
 }
