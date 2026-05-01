@@ -1,4 +1,6 @@
-﻿namespace Hospital.Core.Models.Response
+﻿using Hospital.Db.Utilities;
+
+namespace Hospital.Core.Models.Response
 {
     public class DoctorWithUserResponse
     {
@@ -10,7 +12,7 @@
 
         public int ExperienceYears { get; set; }
 
-        public string GenderType { get; set; } = string.Empty;
+        public GenderType GenderType { get; set; }
 
         public SpecialtyResponse? Specialty { get; set; }
 

@@ -1,6 +1,4 @@
-﻿using Hospital.Db.Utilities;
-
-namespace Hospital.Core.Models.Response
+﻿namespace Hospital.Core.Models.Response
 {
     public class BookingPatientResponse
     {
