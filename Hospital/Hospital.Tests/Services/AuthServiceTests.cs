@@ -1,15 +1,8 @@
-﻿using Hospital.Db;
-using Hospital.Services.AuthService;
-using Hospital.Tests.Helpers;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using Moq;
-
-namespace Hospital.Tests.Services
+﻿namespace Hospital.Tests.Services
 {
     public class AuthServiceTests
     {
-        private readonly HospitalContext _context;
+        /*private readonly HospitalContext _context;
         private readonly IConfiguration _configuration;
         private readonly ILogger<AuthService> _logger;
         private readonly AuthService _service;
@@ -23,7 +16,7 @@ namespace Hospital.Tests.Services
             _service = new AuthService(_context, _configuration, _logger);
         }
 
-        /*[Fact]
+        [Fact]
         public async Task RegisterAsync_ShouldThrowConflictException_WhenEmailAlreadyExists()
         {
             var user = new User

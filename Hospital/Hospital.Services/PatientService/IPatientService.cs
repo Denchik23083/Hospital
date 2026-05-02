@@ -10,5 +10,7 @@ namespace Hospital.Services.PatientService
         Task<decimal> GetPatientBalanceAsync(int userId);
 
         Task UpdatePatientAsync(PatientRequest model, int userId);
+        
+        Task ReplenishBalanceAsync(PatientReplenishBalanceRequest model, int userId);
     }
 }

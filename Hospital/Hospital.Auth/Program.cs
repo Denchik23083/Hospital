@@ -2,6 +2,7 @@ using Hospital.Core.Exceptions;
 using Hospital.Core.Utilities;
 using Hospital.Db;
 using Hospital.Services.AuthService;
+using Hospital.Repositories.AuthRepository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -10,6 +11,8 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<IAuthService, AuthService>();
+
+builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 
 builder.Services.AddScoped<SeedSystemUsersService>();
 

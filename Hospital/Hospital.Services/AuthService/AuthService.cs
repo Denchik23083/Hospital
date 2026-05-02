@@ -1,11 +1,11 @@
 ﻿using Hospital.Core.Exceptions;
 using Hospital.Core.Models.Requests;
 using Hospital.Core.Models.Response;
-using Hospital.Db;
 using Hospital.Db.Entities;
 using Hospital.Db.Utilities;
+using Hospital.Repositories.AuthRepository;
+using Hospital.Repositories.UnitOfWorkRepository;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -16,17 +16,19 @@ using System.Text;
 
 namespace Hospital.Services.AuthService
 {
-    public class AuthService(HospitalContext context, 
+    public class AuthService(IAuthRepository repository, 
+            IUnitOfWorkRepository unitOfWorkRepository,
             IConfiguration configuration,
             ILogger<AuthService> logger) : IAuthService
     {
-        private readonly HospitalContext _context = context;
+        private readonly IAuthRepository _repository = repository;
+        private readonly IUnitOfWorkRepository _unitOfWorkRepository = unitOfWorkRepository;
         private readonly IConfiguration _configuration = configuration;
         private readonly ILogger<AuthService> _logger = logger;
 
         public async Task RegisterAsync(RegisterRequest model)
         {
-            if (await _context.Users.AnyAsync(u => u.Email == model.Email))
+            if (await _repository.IsEmailNotUniqueAsync(model.Email))
             {
                 _logger.LogWarning("User with this {Email} email is already exist", model.Email);
                 throw new ConflictException(model.Email);
@@ -49,14 +51,13 @@ namespace Hospital.Services.AuthService
             user.PasswordHash = new PasswordHasher<User>()
                 .HashPassword(user, model.Password);
 
-            await _context.Users.AddAsync(user);
-            await _context.SaveChangesAsync();
+            await _repository.RegisterAsync(user);
+            await _unitOfWorkRepository.SaveChangesAsync();
         }
 
         public async Task<TokenResponse> LoginAsync(LoginRequest model)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(
-                u => u.Email == model.Email);
+            var user = await _repository.GetUserByEmailAsync(model.Email);
 
             if (user is null || 
                 new PasswordHasher <User>().VerifyHashedPassword(user,
@@ -127,14 +128,14 @@ namespace Hospital.Services.AuthService
             user.RefreshToken = refreshToken;
             user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
 
-            await _context.SaveChangesAsync();
+            await _unitOfWorkRepository.SaveChangesAsync();
 
             return refreshToken;
         }
 
         private async Task<User> ValidateRefreshTokenAsync(int userId, string refreshToken)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            var user = await _repository.GetUserAsync(userId);
 
             if (user is null 
                 || user.RefreshToken != refreshToken

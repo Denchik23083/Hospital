@@ -46,5 +46,17 @@ namespace Hospital.Hospital.Controllers
 
             return NoContent();
         }
+
+        [Authorize(Roles = AppRoles.Patient)]
+        [HttpPut("replenish")]
+        public async Task<ActionResult<decimal>> ReplenishBalanceAsync(PatientReplenishBalanceRequest model)
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+            await _service.ReplenishBalanceAsync(model, userId);
+
+            return NoContent();
+        }
+        
     }
 }
