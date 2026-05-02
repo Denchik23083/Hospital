@@ -13,6 +13,8 @@ namespace Hospital.Db.EntityConfiguration
             builder.Property(_ => _.FirstName).IsRequired();
             builder.Property(_ => _.LastName).IsRequired();
             builder.Property(_ => _.ExperienceYears).IsRequired();
+            builder.Property(_ => _.WorkDayStart).IsRequired();
+            builder.Property(_ => _.WorkDayEnd).IsRequired();
             builder.Property(_ => _.GenderType)
                 .HasConversion<int>()
                 .IsRequired();

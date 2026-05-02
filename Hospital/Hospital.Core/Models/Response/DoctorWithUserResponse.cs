@@ -14,6 +14,10 @@ namespace Hospital.Core.Models.Response
 
         public GenderType GenderType { get; set; }
 
+        public TimeSpan WorkDayStart { get; set; }
+
+        public TimeSpan WorkDayEnd { get; set; }
+
         public SpecialtyResponse? Specialty { get; set; }
 
         public UserResponse? User { get; set; }

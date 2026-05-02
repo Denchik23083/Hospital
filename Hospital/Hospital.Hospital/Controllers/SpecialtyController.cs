@@ -24,7 +24,7 @@ namespace Hospital.Hospital.Controllers
             return Ok(specialties);
         }
 
-        [Authorize(Roles = AppRoles.Patient)]
+        [Authorize(Roles = AppRoles.PatientAdmin)]
         [HttpGet("{specialtyId}/price")]
         public async Task<ActionResult<decimal>> GetSpecialtyPriceAsync(int specialtyId)
         {

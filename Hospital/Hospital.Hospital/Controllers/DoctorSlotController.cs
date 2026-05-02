@@ -57,6 +57,24 @@ namespace Hospital.Hospital.Controllers
             return Ok(doctorSlots);
         }
 
+        [Authorize(Roles = AppRoles.Admin)]
+        [HttpGet("{doctorId}/admin/available-dates")]
+        public async Task<ActionResult<IEnumerable<DateOnly>>> GetAllAdminDoctorSlotsDatesAsync(int doctorId)
+        {
+            var dates = await _service.GetAllAdminDoctorSlotsDatesAsync(doctorId);
+
+            return Ok(dates);
+        }
+
+        [Authorize(Roles = AppRoles.Admin)]
+        [HttpGet("{doctorId}/admin/available-times")]
+        public async Task<ActionResult<IEnumerable<DoctorSlotResponse>>> GetAllAdminDoctorSlotsTimeByDateAsync(int doctorId, [FromQuery] DateOnly date)
+        {
+            var doctorSlots = await _service.GetAllAdminDoctorSlotsTimeByDateAsync(doctorId, date);
+
+            return Ok(doctorSlots);
+        }
+
         [Authorize(Roles = AppRoles.Doctor)]
         [HttpPost]
         public async Task<ActionResult> AddDoctorSlotsAsync([FromQuery] DateOnly date)

@@ -21,8 +21,6 @@ namespace Hospital.Services.DoctorSlotService
         private readonly IDoctorRepository _doctorRepository = doctorRepository;
         private readonly IUnitOfWorkRepository _unitOfWorkRepository = unitOfWorkRepository;
         
-        private readonly TimeSpan _startTime = new (09, 00, 00);
-        private readonly TimeSpan _endTime = new (16, 00, 00);
         private readonly TimeSpan _breakStart = new (13, 00, 00);
         private readonly TimeSpan _breakEnd = new (14, 00, 00);
         private readonly TimeSpan _slot = new (00, 30, 00);
@@ -77,6 +75,24 @@ namespace Hospital.Services.DoctorSlotService
             return await _repository.GetAllDoctorSlotsTimeByDateAsync(doctor.Id, date);
         }
 
+        public async Task<IEnumerable<DateOnly>> GetAllAdminDoctorSlotsDatesAsync(int doctorId)
+        {
+            var doctor = await _doctorRepository.GetDoctorAsync(doctorId)
+                ?? throw new DoctorNotFoundException("Doctor not found");
+
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
+            return await _repository.GetAllDoctorSlotsDatesAsync(doctor.Id, today);
+        }
+
+        public async Task<IEnumerable<DoctorSlotResponse>> GetAllAdminDoctorSlotsTimeByDateAsync(int doctorId, DateOnly date)
+        {
+            var doctor = await _doctorRepository.GetDoctorAsync(doctorId)
+                ?? throw new DoctorNotFoundException("Doctor not found");
+
+            return await _repository.GetAllDoctorSlotsTimeByDateAsync(doctor.Id, date);
+        }
+
         public async Task AddDoctorSlotsAsync(DateOnly date, int userId)
         {
             var doctor = await _doctorRepository.GetDoctorByUserAsync(userId)
@@ -87,25 +103,27 @@ namespace Hospital.Services.DoctorSlotService
                 throw new DoctorSlotAlreadyExistsException($"Doctor slot with {date} already exists");
             }
 
-            var now = _startTime;
+            var workDayStart = doctor.WorkDayStart;
+            var workDayEnd = doctor.WorkDayEnd;
+
             var listDoctorSlots = new List<DoctorSlot>();
 
-            while (now < _endTime)
+            while (workDayStart + _slot <= workDayEnd)
             {
-                if (now >= _breakStart && now < _breakEnd)
+                if (workDayStart >= _breakStart && workDayStart < _breakEnd)
                 {
-                    now = _breakEnd;
+                    workDayStart = _breakEnd;
                 }
 
                 listDoctorSlots.Add(new DoctorSlot
                 {
                     DoctorId = doctor.Id,
-                    StartTime = now,
-                    EndTime = now + _slot,
+                    StartTime = workDayStart,
+                    EndTime = workDayStart + _slot,
                     Date = date
                 });
 
-                now += _slot;
+                workDayStart += _slot;
             }
 
             await _repository.AddDoctorSlotsAsync(listDoctorSlots);
