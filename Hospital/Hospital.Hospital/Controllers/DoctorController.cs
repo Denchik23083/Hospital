@@ -14,13 +14,22 @@ namespace Hospital.Hospital.Controllers
     {
         private readonly IDoctorService _service = service;
 
+        [Authorize(Roles = AppRoles.Admin)]
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<DoctorWithUserResponse>>> GetAllDoctorsAsync()
+        {
+            var doctors = await _service.GetAllDoctorsAsync();
+
+            return Ok(doctors);
+        }
+
         [Authorize(Roles = AppRoles.Doctor)]
         [HttpGet("profile")]
-        public async Task<ActionResult<DoctorWithUserResponse>> GetDoctorAsync()
+        public async Task<ActionResult<DoctorWithUserResponse>> GetDoctorByUserAsync()
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-            var doctorWithUser = await _service.GetDoctorAsync(userId);
+            var doctorWithUser = await _service.GetDoctorByUserAsync(userId);
 
             return Ok(doctorWithUser);
         }

@@ -5,7 +5,7 @@ namespace Hospital.Services.PatientService
 {
     public interface IPatientService
     {
-        Task<PatientWithUserResponse> GetPatientAsync(int userId);
+        Task<PatientWithUserResponse> GetPatientByUserAsync(int userId);
 
         Task<decimal> GetPatientBalanceAsync(int userId);
 

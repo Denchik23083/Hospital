@@ -16,11 +16,11 @@ namespace Hospital.Hospital.Controllers
 
         [Authorize(Roles = AppRoles.Patient)]
         [HttpGet("profile")]
-        public async Task<ActionResult<PatientWithUserResponse>> GetPatientAsync()
+        public async Task<ActionResult<PatientWithUserResponse>> GetPatientByUserAsync()
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-            var patientWithUser = await _service.GetPatientAsync(userId);
+            var patientWithUser = await _service.GetPatientByUserAsync(userId);
 
             return Ok(patientWithUser);
         }

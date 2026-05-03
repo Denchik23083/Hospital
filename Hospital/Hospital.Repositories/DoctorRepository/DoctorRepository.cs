@@ -9,6 +9,33 @@ namespace Hospital.Repositories.DoctorRepository
     {
         private readonly HospitalContext _context = context;
 
+        public async Task<IEnumerable<DoctorWithUserResponse>> GetAllDoctorsAsync()
+        {
+            return await _context.Doctors
+                .Include(_ => _.User)
+                .Include(_ => _.Specialty)
+                .Select(_ => new DoctorWithUserResponse
+                {
+                    Id = _.Id,
+                    FirstName = _.FirstName,
+                    LastName = _.LastName,
+                    ExperienceYears = _.ExperienceYears,
+                    GenderType = _.GenderType,
+                    WorkDayStart = _.WorkDayStart,
+                    WorkDayEnd = _.WorkDayEnd,
+                    User = new UserResponse
+                    {
+                        Email = _.User!.Email,
+                        Money = _.User!.Money
+                    },
+                    Specialty = new SpecialtyResponse
+                    {
+                        Name = _.Specialty!.Name,
+                        Price = _.Specialty!.Price
+                    }
+                }).ToListAsync();
+        }
+
         public async Task<IEnumerable<DoctorResponse>> GetAllDoctorsBySpecialtyAsync(int specialtyId)
         {
             return await _context.Doctors

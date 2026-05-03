@@ -18,7 +18,7 @@ namespace Hospital.Services.PatientService
         private readonly ILogger<PatientService> _logger = logger;
         private readonly IUnitOfWorkRepository _unitOfWorkRepository = unitOfWorkRepository;
 
-        public async Task<PatientWithUserResponse> GetPatientAsync(int userId)
+        public async Task<PatientWithUserResponse> GetPatientByUserAsync(int userId)
         {
             var patient = await _repository.GetPatientByUserAsync(userId);
 

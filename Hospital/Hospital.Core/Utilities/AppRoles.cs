@@ -5,10 +5,9 @@ namespace Hospital.Core.Utilities
     public static class AppRoles
     {
         public const string Admin = nameof(RoleType.Admin);
-        public const string DoctorAdmin = nameof(RoleType.Doctor) + "," + nameof(RoleType.Admin);
         public const string Doctor = nameof(RoleType.Doctor);
-        public const string PatientAdmin = nameof(RoleType.Patient) + "," + nameof(RoleType.Admin);
         public const string Patient = nameof(RoleType.Patient);
-        public const string All = nameof(RoleType.Admin) + "," + nameof(RoleType.Doctor) + "," + nameof(RoleType.Patient);
+        public const string DoctorAdmin = nameof(RoleType.Doctor) + "," + nameof(RoleType.Admin);
+        public const string PatientAdmin = nameof(RoleType.Patient) + "," + nameof(RoleType.Admin);
     }
 }

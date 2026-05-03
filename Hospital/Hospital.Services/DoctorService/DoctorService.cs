@@ -18,12 +18,17 @@ namespace Hospital.Services.DoctorService
         private readonly ILogger<DoctorService> _logger = logger;
         private readonly IUnitOfWorkRepository _unitOfWorkRepository = unitOfWorkRepository;
 
+        public async Task<IEnumerable<DoctorWithUserResponse>> GetAllDoctorsAsync()
+        {
+            return await _repository.GetAllDoctorsAsync();
+        }
+
         public async Task<IEnumerable<DoctorResponse>> GetAllDoctorsBySpecialtyAsync(int specialtyId)
         {
             return await _repository.GetAllDoctorsBySpecialtyAsync(specialtyId);
         }
 
-        public async Task<DoctorWithUserResponse> GetDoctorAsync(int userId)
+        public async Task<DoctorWithUserResponse> GetDoctorByUserAsync(int userId)
         {
             var doctor = await _repository.GetDoctorByUserAsync(userId);
 
