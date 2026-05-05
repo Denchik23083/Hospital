@@ -102,6 +102,23 @@ namespace Hospital.Services.DoctorService
                 throw new DoctorNotFoundException("Doctor not found");
             }
 
+            if (doctor.User is null)
+            {
+                _logger.LogWarning("User not found");
+                throw new UserNotFoundException("User not found");
+            }
+
+            if (doctor.User.Email != model.Email)
+            {
+                if (await _authRepository.IsEmailNotUniqueAsync(model.Email))
+                {
+                    _logger.LogWarning("User with this {Email} email is already exist", model.Email);
+                    throw new ConflictException(model.Email);
+                }
+
+                doctor.User.Email = model.Email;
+            }
+
             doctor.FirstName = model.FirstName;
             doctor.LastName = model.LastName;
             doctor.GenderType = model.GenderType;
@@ -110,31 +127,26 @@ namespace Hospital.Services.DoctorService
             doctor.WorkDayEnd = model.WorkDayEnd;
             doctor.SpecialtyId = model.SpecialtyId;
 
-            if (doctor.User is null)
+            if (!string.IsNullOrWhiteSpace(model.Password))
             {
-                _logger.LogWarning("User not found");
-                throw new UserNotFoundException("User not found");
+                var passwordHasher = new PasswordHasher<User>();
+                doctor.User.PasswordHash = passwordHasher.HashPassword(doctor.User, model.Password);
             }
-
-            doctor.User.Email = model.Email;
-
-            var passwordHasher = new PasswordHasher<User>();
-            doctor.User.PasswordHash = passwordHasher.HashPassword(doctor.User, model.Password);
 
             await _unitOfWorkRepository.SaveChangesAsync();
         }
 
         public async Task DeleteDoctorAsync(int doctorId)
         {
-            var doctor = await _repository.GetDoctorAsync(doctorId);
+            var doctorToDelete = await _repository.GetDoctorAsync(doctorId);
 
-            if (doctor is null)
+            if (doctorToDelete is null)
             {
                 _logger.LogWarning("Doctor not found");
                 throw new DoctorNotFoundException("Doctor not found");
             }
 
-            await _repository.DeleteDoctorAsync(doctor);
+            await _repository.DeleteDoctorAsync(doctorToDelete);
             await _unitOfWorkRepository.SaveChangesAsync();
         }
 

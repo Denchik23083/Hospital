@@ -30,6 +30,7 @@ namespace Hospital.Repositories.DoctorRepository
                     },
                     Specialty = new SpecialtyResponse
                     {
+                        Id = _.Specialty!.Id,
                         Name = _.Specialty!.Name,
                         Price = _.Specialty!.Price
                     }

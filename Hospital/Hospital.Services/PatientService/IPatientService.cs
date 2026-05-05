@@ -5,6 +5,8 @@ namespace Hospital.Services.PatientService
 {
     public interface IPatientService
     {
+        Task<IEnumerable<PatientWithUserResponse>> GetAllPatientsAsync();
+
         Task<PatientWithUserResponse> GetPatientByUserAsync(int userId);
 
         Task<decimal> GetPatientBalanceAsync(int userId);
@@ -12,5 +14,7 @@ namespace Hospital.Services.PatientService
         Task UpdatePatientAsync(PatientRequest model, int userId);
         
         Task ReplenishBalanceAsync(PatientReplenishBalanceRequest model, int userId);
+        
+        Task DeletePatientAsync(int patientId);
     }
 }

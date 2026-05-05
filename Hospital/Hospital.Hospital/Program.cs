@@ -3,6 +3,7 @@ using Hospital.Core.Models.Requests;
 using Hospital.Core.Models.Response;
 using Hospital.Db;
 using Hospital.Db.Entities;
+using Hospital.Repositories.AuthRepository;
 using Hospital.Repositories.BookingRepository;
 using Hospital.Repositories.DoctorRepository;
 using Hospital.Repositories.DoctorSlotRepository;
@@ -33,6 +34,7 @@ builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
 builder.Services.AddScoped<IDoctorSlotRepository, DoctorSlotRepository>();
 builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 builder.Services.AddScoped<IUnitOfWorkRepository, UnitOfWorkRepository>();
+builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -82,7 +84,7 @@ builder.Services.AddAutoMapper(au =>
     au.CreateMap<Doctor, DoctorWithUserResponse>();
     au.CreateMap<Specialty, SpecialtyResponse>();
     au.CreateMap<User, UserResponse>();
-    au.CreateMap<Doctor, DoctorFullRequest>();
+    au.CreateMap<DoctorFullRequest, Doctor>();
 });
 
 var app = builder.Build();

@@ -2,6 +2,7 @@
 using Hospital.Core.Exceptions;
 using Hospital.Core.Models.Requests;
 using Hospital.Core.Models.Response;
+using Hospital.Db.Entities;
 using Hospital.Repositories.PatientRepository;
 using Hospital.Repositories.UnitOfWorkRepository;
 using Microsoft.Extensions.Logging;
@@ -17,6 +18,11 @@ namespace Hospital.Services.PatientService
         private readonly IMapper _mapper = mapper;
         private readonly ILogger<PatientService> _logger = logger;
         private readonly IUnitOfWorkRepository _unitOfWorkRepository = unitOfWorkRepository;
+
+        public async Task<IEnumerable<PatientWithUserResponse>> GetAllPatientsAsync()
+        {
+            return await _repository.GetAllPatientsAsync();
+        }
 
         public async Task<PatientWithUserResponse> GetPatientByUserAsync(int userId)
         {
@@ -73,6 +79,20 @@ namespace Hospital.Services.PatientService
 
             patientToUpdate.User.Money = model.Amount;
 
+            await _unitOfWorkRepository.SaveChangesAsync();
+        }
+
+        public async Task DeletePatientAsync(int patientId)
+        {
+            var patientToDelete = await _repository.GetPatientAsync(patientId);
+
+            if (patientToDelete is null)
+            {
+                _logger.LogWarning("Patient not found");
+                throw new PatientNotFoundException("Patient not found");
+            }
+
+            await _repository.DeletePatientAsync(patientToDelete);
             await _unitOfWorkRepository.SaveChangesAsync();
         }
     }

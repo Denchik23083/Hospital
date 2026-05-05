@@ -14,6 +14,15 @@ namespace Hospital.Hospital.Controllers
     {
         private readonly IPatientService _service = service;
 
+        [Authorize(Roles = AppRoles.DoctorAdmin)]
+        [HttpGet]
+        public async Task<ActionResult<PatientWithUserResponse>> GetAllPatientsAsync()
+        {
+            var patients = await _service.GetAllPatientsAsync();
+
+            return Ok(patients);
+        }
+
         [Authorize(Roles = AppRoles.Patient)]
         [HttpGet("profile")]
         public async Task<ActionResult<PatientWithUserResponse>> GetPatientByUserAsync()
@@ -37,7 +46,7 @@ namespace Hospital.Hospital.Controllers
         }
 
         [Authorize(Roles = AppRoles.Patient)]
-        [HttpPut]
+        [HttpPut("profile")]
         public async Task<ActionResult<decimal>> UpdatePatientAsync(PatientRequest model)
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
@@ -57,6 +66,14 @@ namespace Hospital.Hospital.Controllers
 
             return NoContent();
         }
-        
+
+        [Authorize(Roles = AppRoles.Admin)]
+        [HttpDelete("{patientId}")]
+        public async Task<ActionResult> DeletePatientAsync(int patientId)
+        {
+            await _service.DeletePatientAsync(patientId);
+
+            return NoContent();
+        }
     }
 }
