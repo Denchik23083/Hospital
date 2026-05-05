@@ -11,6 +11,12 @@ namespace Hospital.Services.DoctorService
     
         Task<DoctorWithUserResponse> GetDoctorByUserAsync(int userId);
 
-        Task UpdateDoctorAsync(DoctorRequest model, int userId);
+        Task CreateDoctorAsync(DoctorFullRequest model);
+
+        Task UpdateDoctorByUserAsync(DoctorRequest model, int userId);
+        
+        Task UpdateDoctorAsync(DoctorFullRequest model, int doctorId);
+
+        Task DeleteDoctorAsync(int doctorId);
     }
 }

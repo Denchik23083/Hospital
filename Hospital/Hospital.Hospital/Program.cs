@@ -1,4 +1,5 @@
 using Hospital.Core.Exceptions;
+using Hospital.Core.Models.Requests;
 using Hospital.Core.Models.Response;
 using Hospital.Db;
 using Hospital.Db.Entities;
@@ -81,6 +82,7 @@ builder.Services.AddAutoMapper(au =>
     au.CreateMap<Doctor, DoctorWithUserResponse>();
     au.CreateMap<Specialty, SpecialtyResponse>();
     au.CreateMap<User, UserResponse>();
+    au.CreateMap<Doctor, DoctorFullRequest>();
 });
 
 var app = builder.Build();

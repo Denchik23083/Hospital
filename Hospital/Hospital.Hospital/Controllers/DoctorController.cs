@@ -34,13 +34,40 @@ namespace Hospital.Hospital.Controllers
             return Ok(doctorWithUser);
         }
 
+        [Authorize(Roles = AppRoles.Admin)]
+        [HttpPost]
+        public async Task<ActionResult> CreateDoctorAsync(DoctorFullRequest model)
+        {
+            await _service.CreateDoctorAsync(model);
+
+            return Created();
+        }
+
         [Authorize(Roles = AppRoles.Doctor)]
-        [HttpPut]
-        public async Task<ActionResult<decimal>> UpdateDoctorAsync(DoctorRequest model)
+        [HttpPut("profile")]
+        public async Task<ActionResult> UpdateDoctorByUserAsync(DoctorRequest model)
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-            await _service.UpdateDoctorAsync(model, userId);
+            await _service.UpdateDoctorByUserAsync(model, userId);
+
+            return NoContent();
+        }
+
+        [Authorize(Roles = AppRoles.Admin)]
+        [HttpPut("{doctorId}")]
+        public async Task<ActionResult> UpdateDoctorAsync(DoctorFullRequest model, int doctorId)
+        {
+            await _service.UpdateDoctorAsync(model, doctorId);
+
+            return NoContent();
+        }
+
+        [Authorize(Roles = AppRoles.Admin)]
+        [HttpDelete("{doctorId}")]
+        public async Task<ActionResult> DeleteDoctorAsync(int doctorId)
+        {
+            await _service.DeleteDoctorAsync(doctorId);
 
             return NoContent();
         }

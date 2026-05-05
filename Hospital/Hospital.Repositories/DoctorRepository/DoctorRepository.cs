@@ -64,5 +64,17 @@ namespace Hospital.Repositories.DoctorRepository
                 .Include(_ => _.Specialty)
                 .FirstOrDefaultAsync(_ => _.UserId == userId);
         }
+
+        public async Task CreateDoctorAsync(Doctor doctor)
+        {
+            await _context.Doctors.AddAsync(doctor);
+        }
+
+        public Task DeleteDoctorAsync(Doctor doctor)
+        {
+            _context.Doctors.Remove(doctor);
+
+            return Task.CompletedTask;
+        }
     }
 }

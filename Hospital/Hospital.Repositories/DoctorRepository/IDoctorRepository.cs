@@ -12,5 +12,9 @@ namespace Hospital.Repositories.DoctorRepository
         Task<Doctor?> GetDoctorAsync(int id);
 
         Task<Doctor?> GetDoctorByUserAsync(int userId);
+
+        Task CreateDoctorAsync(Doctor doctor);
+
+        Task DeleteDoctorAsync(Doctor doctor);
     }
 }

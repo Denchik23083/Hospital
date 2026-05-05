@@ -88,6 +88,13 @@ namespace Hospital.Core.Exceptions
                     problemDetails.Detail = exception.Message;
                     break;
 
+                case DoctorWorkTimeException:
+                    httpContext.Response.StatusCode = StatusCodes.Status409Conflict;
+                    problemDetails.Status = StatusCodes.Status409Conflict;
+                    problemDetails.Title = "Problem with work times";
+                    problemDetails.Detail = exception.Message;
+                    break;
+
                 default:
                     _logger.LogError(exception, "Unhandled exception occurred");
 
