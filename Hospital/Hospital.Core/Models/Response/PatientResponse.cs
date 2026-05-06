@@ -1,4 +1,6 @@
-﻿namespace Hospital.Core.Models.Response
+﻿using Hospital.Db.Utilities;
+
+namespace Hospital.Core.Models.Response
 {
     public class PatientResponse
     {
@@ -10,7 +12,7 @@
 
         public DateOnly BirthDate { get; set; }
 
-        public string GenderType { get; set; } = string.Empty;
+        public GenderType GenderType { get; set; }
 
         public string Phone { get; set; } = string.Empty;
     }

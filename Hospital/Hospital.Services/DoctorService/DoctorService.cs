@@ -75,17 +75,17 @@ namespace Hospital.Services.DoctorService
 
         public async Task UpdateDoctorByUserAsync(DoctorRequest model, int userId)
         {
-            var doctor = await _repository.GetDoctorByUserAsync(userId);
+            var doctorToUpdate = await _repository.GetDoctorByUserAsync(userId);
 
-            if (doctor is null)
+            if (doctorToUpdate is null)
             {
                 _logger.LogWarning("Doctor not found");
                 throw new DoctorNotFoundException("Doctor not found");
             }
 
-            doctor.FirstName = model.FirstName;
-            doctor.LastName = model.LastName;
-            doctor.GenderType = model.GenderType;
+            doctorToUpdate.FirstName = model.FirstName;
+            doctorToUpdate.LastName = model.LastName;
+            doctorToUpdate.GenderType = model.GenderType;
 
             await _unitOfWorkRepository.SaveChangesAsync();
         }
@@ -94,21 +94,21 @@ namespace Hospital.Services.DoctorService
         {
             ValidateWorkDay(model.WorkDayStart, model.WorkDayEnd);
 
-            var doctor = await _repository.GetDoctorAsync(doctorId);
+            var doctorToUpdate = await _repository.GetDoctorAsync(doctorId);
 
-            if (doctor is null)
+            if (doctorToUpdate is null)
             {
                 _logger.LogWarning("Doctor not found");
                 throw new DoctorNotFoundException("Doctor not found");
             }
 
-            if (doctor.User is null)
+            if (doctorToUpdate.User is null)
             {
                 _logger.LogWarning("User not found");
                 throw new UserNotFoundException("User not found");
             }
 
-            if (doctor.User.Email != model.Email)
+            if (doctorToUpdate.User.Email != model.Email)
             {
                 if (await _authRepository.IsEmailNotUniqueAsync(model.Email))
                 {
@@ -116,21 +116,21 @@ namespace Hospital.Services.DoctorService
                     throw new ConflictException(model.Email);
                 }
 
-                doctor.User.Email = model.Email;
+                doctorToUpdate.User.Email = model.Email;
             }
 
-            doctor.FirstName = model.FirstName;
-            doctor.LastName = model.LastName;
-            doctor.GenderType = model.GenderType;
-            doctor.ExperienceYears = model.ExperienceYears;
-            doctor.WorkDayStart = model.WorkDayStart;
-            doctor.WorkDayEnd = model.WorkDayEnd;
-            doctor.SpecialtyId = model.SpecialtyId;
+            doctorToUpdate.FirstName = model.FirstName;
+            doctorToUpdate.LastName = model.LastName;
+            doctorToUpdate.GenderType = model.GenderType;
+            doctorToUpdate.ExperienceYears = model.ExperienceYears;
+            doctorToUpdate.WorkDayStart = model.WorkDayStart;
+            doctorToUpdate.WorkDayEnd = model.WorkDayEnd;
+            doctorToUpdate.SpecialtyId = model.SpecialtyId;
 
             if (!string.IsNullOrWhiteSpace(model.Password))
             {
                 var passwordHasher = new PasswordHasher<User>();
-                doctor.User.PasswordHash = passwordHasher.HashPassword(doctor.User, model.Password);
+                doctorToUpdate.User.PasswordHash = passwordHasher.HashPassword(doctorToUpdate.User, model.Password);
             }
 
             await _unitOfWorkRepository.SaveChangesAsync();

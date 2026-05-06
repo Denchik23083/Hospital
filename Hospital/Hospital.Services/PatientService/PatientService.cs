@@ -3,8 +3,10 @@ using Hospital.Core.Exceptions;
 using Hospital.Core.Models.Requests;
 using Hospital.Core.Models.Response;
 using Hospital.Db.Entities;
+using Hospital.Repositories.AuthRepository;
 using Hospital.Repositories.PatientRepository;
 using Hospital.Repositories.UnitOfWorkRepository;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 
 namespace Hospital.Services.PatientService
@@ -12,11 +14,13 @@ namespace Hospital.Services.PatientService
     public class PatientService(IPatientRepository repository,
             IMapper mapper,
             ILogger<PatientService> logger,
+            IAuthRepository authRepository, 
             IUnitOfWorkRepository unitOfWorkRepository) : IPatientService
     {
         private readonly IPatientRepository _repository = repository;
         private readonly IMapper _mapper = mapper;
         private readonly ILogger<PatientService> _logger = logger;
+        private readonly IAuthRepository _authRepository = authRepository;
         private readonly IUnitOfWorkRepository _unitOfWorkRepository = unitOfWorkRepository;
 
         public async Task<IEnumerable<PatientWithUserResponse>> GetAllPatientsAsync()
@@ -52,11 +56,34 @@ namespace Hospital.Services.PatientService
                 throw new PatientNotFoundException("Patient not found");
             }
 
+            if (patientToUpdate.User is null)
+            {
+                _logger.LogWarning("User not found");
+                throw new UserNotFoundException("User not found");
+            }
+
+            if (patientToUpdate.User.Email != model.Email)
+            {
+                if (await _authRepository.IsEmailNotUniqueAsync(model.Email))
+                {
+                    _logger.LogWarning("User with this {Email} email is already exist", model.Email);
+                    throw new ConflictException(model.Email);
+                }
+
+                patientToUpdate.User.Email = model.Email;
+            }
+
             patientToUpdate.FirstName = model.FirstName;
             patientToUpdate.LastName = model.LastName;
             patientToUpdate.BirthDate = model.BirthDate;
             patientToUpdate.Phone = model.Phone;
             patientToUpdate.GenderType = model.GenderType;
+
+            if (!string.IsNullOrWhiteSpace(model.Password))
+            {
+                var passwordHasher = new PasswordHasher<User>();
+                patientToUpdate.User.PasswordHash = passwordHasher.HashPassword(patientToUpdate.User, model.Password);
+            }
 
             await _unitOfWorkRepository.SaveChangesAsync();
         }

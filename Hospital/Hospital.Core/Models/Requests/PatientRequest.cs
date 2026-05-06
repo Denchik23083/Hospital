@@ -3,5 +3,6 @@
 namespace Hospital.Core.Models.Requests
 {
     public record class PatientRequest(string FirstName, string LastName,
-        DateOnly BirthDate, GenderType GenderType, string Phone);
+        DateOnly BirthDate, GenderType GenderType, string Phone,
+        string Email, string Password);
 }

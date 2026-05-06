@@ -30,7 +30,7 @@ namespace Hospital.Repositories.BookingRepository
                             FirstName = _.DoctorSlot.Doctor.FirstName,
                             LastName = _.DoctorSlot.Doctor.LastName,
                             ExperienceYears = _.DoctorSlot.Doctor.ExperienceYears,
-                            GenderType = _.DoctorSlot.Doctor.GenderType.ToString(),
+                            GenderType = _.DoctorSlot.Doctor.GenderType,
                         }
                     }
                 }).ToListAsync();

@@ -47,7 +47,7 @@ namespace Hospital.Repositories.DoctorRepository
                     FirstName = _.FirstName,
                     LastName = _.LastName,
                     ExperienceYears = _.ExperienceYears,
-                    GenderType = _.GenderType.ToString(),
+                    GenderType = _.GenderType,
                 }).ToListAsync();
         }
 

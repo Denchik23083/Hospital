@@ -44,7 +44,7 @@ namespace Hospital.Repositories.DoctorSlotRepository
                                 FirstName = _.Patient.FirstName,
                                 LastName = _.Patient.LastName,
                                 BirthDate = _.Patient.BirthDate,
-                                GenderType = _.Patient.GenderType.ToString(),
+                                GenderType = _.Patient.GenderType,
                                 Phone = _.Patient.Phone
                             }
                         }).FirstOrDefault()
