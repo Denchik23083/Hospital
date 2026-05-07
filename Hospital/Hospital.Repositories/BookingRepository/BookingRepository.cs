@@ -36,6 +36,38 @@ namespace Hospital.Repositories.BookingRepository
                 }).ToListAsync();
         }
 
+        public async Task<IEnumerable<Booking>> GetAllBookingsByDoctorAsync(int doctorId)
+        {
+            return await _context.Bookings
+                .Include(_ => _.Patient)
+                .ThenInclude(_ => _!.User)
+                .Include(_ => _.DoctorSlot)
+                .ThenInclude(_ => _!.Doctor)
+                .ThenInclude(_ => _!.User)
+                .Include(_ => _.DoctorSlot)
+                .ThenInclude(_ => _!.Doctor)
+                .ThenInclude(_ => _!.Specialty)
+                .Where(_ => _.DoctorSlot!.DoctorId == doctorId
+                    && _.BookingStatus == BookingStatus.Active)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Booking>> GetAllBookingsByPatientAsync(int patientId)
+        {
+            return await _context.Bookings
+                .Include(_ => _.Patient)
+                .ThenInclude(_ => _!.User)
+                .Include(_ => _.DoctorSlot)
+                .ThenInclude(_ => _!.Doctor)
+                .ThenInclude(_ => _!.User)
+                .Include(_ => _.DoctorSlot)
+                .ThenInclude(_ => _!.Doctor)
+                .ThenInclude(_ => _!.Specialty)
+                .Where(_ => _.PatientId == patientId
+                    && _.BookingStatus == BookingStatus.Active)
+                .ToListAsync();
+        }
+
         public async Task<Booking?> GetBookingWithDoctorAsync(int id, int doctorId)
         {
             return await _context.Bookings

@@ -5,6 +5,7 @@ using Hospital.Core.Models.Response;
 using Hospital.Db.Entities;
 using Hospital.Db.Utilities;
 using Hospital.Repositories.AuthRepository;
+using Hospital.Repositories.BookingRepository;
 using Hospital.Repositories.DoctorRepository;
 using Hospital.Repositories.UnitOfWorkRepository;
 using Microsoft.AspNetCore.Identity;
@@ -15,12 +16,14 @@ namespace Hospital.Services.DoctorService
     public class DoctorService(IDoctorRepository repository,
             IMapper mapper,
             ILogger<DoctorService> logger,
+            IBookingRepository bookingRepository,
             IAuthRepository authRepository,
             IUnitOfWorkRepository unitOfWorkRepository) : IDoctorService
     {
         private readonly IDoctorRepository _repository = repository;
         private readonly IMapper _mapper = mapper;
         private readonly ILogger<DoctorService> _logger = logger;
+        private readonly IBookingRepository _bookingRepository = bookingRepository;
         private readonly IAuthRepository _authRepository = authRepository;
         private readonly IUnitOfWorkRepository _unitOfWorkRepository = unitOfWorkRepository;
 
@@ -146,8 +149,52 @@ namespace Hospital.Services.DoctorService
                 throw new DoctorNotFoundException("Doctor not found");
             }
 
-            await _repository.DeleteDoctorAsync(doctorToDelete);
-            await _unitOfWorkRepository.SaveChangesAsync();
+            if (doctorToDelete.Specialty is null || doctorToDelete.User is null)
+            {
+                _logger.LogWarning("Doctor not found. Transaction was rollback");
+                throw new DoctorNotFoundException("Doctor not found");
+            }
+
+            await using var transaction = await _unitOfWorkRepository.BeginTransactionAsync();
+
+            try
+            {
+                var bookings = await _bookingRepository.GetAllBookingsByDoctorAsync(doctorToDelete.Id);
+
+                var totalRefund = bookings.Sum(_ => doctorToDelete.Specialty.Price);
+
+                if (doctorToDelete.User.Money < totalRefund)
+                {
+                    _logger.LogWarning("Not enough money. Transaction was rollback");
+                    throw new InsufficientFundsException("Not enough money");
+                }
+
+                foreach (var booking in bookings)
+                {
+                    if (booking.Patient is null || booking.Patient.User is null)
+                    {
+                        _logger.LogWarning("Patient not found. Transaction was rollback");
+                        throw new PatientNotFoundException("Patient not found");
+                    }
+
+                    booking.Patient.User.Money += doctorToDelete.Specialty.Price;
+                }
+
+                doctorToDelete.User.Money -= totalRefund;
+
+                await _repository.DeleteDoctorAsync(doctorToDelete);
+                await _unitOfWorkRepository.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+
+                _logger.LogError(ex, "Error during doctor transaction");
+
+                throw;
+            }
         }
 
         private static void ValidateWorkDay(TimeSpan workDayStart, TimeSpan workDayEnd)

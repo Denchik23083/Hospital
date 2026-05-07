@@ -4,6 +4,7 @@ using Hospital.Core.Models.Requests;
 using Hospital.Core.Models.Response;
 using Hospital.Db.Entities;
 using Hospital.Repositories.AuthRepository;
+using Hospital.Repositories.BookingRepository;
 using Hospital.Repositories.PatientRepository;
 using Hospital.Repositories.UnitOfWorkRepository;
 using Microsoft.AspNetCore.Identity;
@@ -15,12 +16,14 @@ namespace Hospital.Services.PatientService
             IMapper mapper,
             ILogger<PatientService> logger,
             IAuthRepository authRepository, 
+            IBookingRepository bookingRepository,
             IUnitOfWorkRepository unitOfWorkRepository) : IPatientService
     {
         private readonly IPatientRepository _repository = repository;
         private readonly IMapper _mapper = mapper;
         private readonly ILogger<PatientService> _logger = logger;
         private readonly IAuthRepository _authRepository = authRepository;
+        private readonly IBookingRepository _bookingRepository = bookingRepository;
         private readonly IUnitOfWorkRepository _unitOfWorkRepository = unitOfWorkRepository;
 
         public async Task<IEnumerable<PatientWithUserResponse>> GetAllPatientsAsync()
@@ -119,8 +122,54 @@ namespace Hospital.Services.PatientService
                 throw new PatientNotFoundException("Patient not found");
             }
 
-            await _repository.DeletePatientAsync(patientToDelete);
-            await _unitOfWorkRepository.SaveChangesAsync();
+            if (patientToDelete.User is null)
+            {
+                _logger.LogWarning("Patient not found. Transaction was rollback");
+                throw new PatientNotFoundException("Patient not found");
+            }
+
+            await using var transaction = await _unitOfWorkRepository.BeginTransactionAsync();
+
+            try
+            {
+                var bookings = await _bookingRepository.GetAllBookingsByPatientAsync(patientToDelete.Id);
+
+                foreach (var booking in bookings)
+                {
+                    if (booking.DoctorSlot is null 
+                        || booking.DoctorSlot.Doctor is null
+                        || booking.DoctorSlot.Doctor.Specialty is null
+                        || booking.DoctorSlot.Doctor.User is null)
+                    {
+                        _logger.LogWarning("Doctor not found. Transaction was rollback");
+                        throw new DoctorNotFoundException("Doctor not found");
+                    }
+                    
+                    var price = booking.DoctorSlot.Doctor.Specialty.Price;
+
+                    if (booking.DoctorSlot.Doctor.User.Money < price)
+                    {
+                        _logger.LogWarning("Not enough money. Transaction was rollback");
+                        throw new InsufficientFundsException("Not enough money");
+                    }
+
+                    patientToDelete.User.Money += price;
+                    booking.DoctorSlot.Doctor.User.Money -= price;
+                }
+
+                await _repository.DeletePatientAsync(patientToDelete);
+                await _unitOfWorkRepository.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+
+                _logger.LogError(ex, "Error during patient transaction");
+
+                throw;
+            }
         }
     }
 }
