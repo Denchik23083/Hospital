@@ -5,6 +5,7 @@ using Hospital.Core.Models.Response;
 using Hospital.Db.Entities;
 using Hospital.Repositories.AuthRepository;
 using Hospital.Repositories.BookingRepository;
+using Hospital.Repositories.NotificationRepository;
 using Hospital.Repositories.PatientRepository;
 using Hospital.Repositories.UnitOfWorkRepository;
 using Microsoft.AspNetCore.Identity;
@@ -17,6 +18,7 @@ namespace Hospital.Services.PatientService
             ILogger<PatientService> logger,
             IAuthRepository authRepository, 
             IBookingRepository bookingRepository,
+            INotificationRepository notificationRepository,
             IUnitOfWorkRepository unitOfWorkRepository) : IPatientService
     {
         private readonly IPatientRepository _repository = repository;
@@ -24,6 +26,7 @@ namespace Hospital.Services.PatientService
         private readonly ILogger<PatientService> _logger = logger;
         private readonly IAuthRepository _authRepository = authRepository;
         private readonly IBookingRepository _bookingRepository = bookingRepository;
+        private readonly INotificationRepository _notificationRepository = notificationRepository;
         private readonly IUnitOfWorkRepository _unitOfWorkRepository = unitOfWorkRepository;
 
         public async Task<IEnumerable<PatientWithUserResponse>> GetAllPatientsAsync()
@@ -155,6 +158,13 @@ namespace Hospital.Services.PatientService
 
                     patientToDelete.User.Money += price;
                     booking.DoctorSlot.Doctor.User.Money -= price;
+
+                    await _notificationRepository.AddNotificationAsync(new Notification
+                    {
+                        UserId = booking.DoctorSlot.Doctor.User.Id,
+                        CreatedAt = DateTime.UtcNow,
+                        Message = $"Запись отменена. Пациент {patientToDelete.FirstName} {patientToDelete.LastName} был удалён."
+                    });
                 }
 
                 await _repository.DeletePatientAsync(patientToDelete);

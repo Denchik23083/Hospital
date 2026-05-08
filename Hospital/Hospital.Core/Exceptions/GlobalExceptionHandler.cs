@@ -60,6 +60,13 @@ namespace Hospital.Core.Exceptions
                     problemDetails.Detail = exception.Message;
                     break;
 
+                case NotificationNotFoundException:
+                    httpContext.Response.StatusCode = StatusCodes.Status404NotFound;
+                    problemDetails.Status = StatusCodes.Status404NotFound;
+                    problemDetails.Title = "Notification not found";
+                    problemDetails.Detail = exception.Message;
+                    break;
+
                 case DoctorSlotNotFoundException:
                     httpContext.Response.StatusCode = StatusCodes.Status404NotFound;
                     problemDetails.Status = StatusCodes.Status404NotFound;

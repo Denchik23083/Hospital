@@ -16,7 +16,9 @@ namespace Hospital.Db
         public DbSet<DoctorSlot> DoctorSlots { get; set; }
 
         public DbSet<Booking> Bookings { get; set; }
-        
+
+        public DbSet<Notification> Notifications { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(GetType().Assembly);

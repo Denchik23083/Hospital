@@ -21,5 +21,7 @@ namespace Hospital.Db.Entities
         public Doctor? Doctor { get; set; }
 
         public Patient? Patient { get; set; }
+
+        public List<Notification> Notifications { get; set; } = [];
     }
 }

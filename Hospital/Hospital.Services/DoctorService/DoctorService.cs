@@ -7,6 +7,7 @@ using Hospital.Db.Utilities;
 using Hospital.Repositories.AuthRepository;
 using Hospital.Repositories.BookingRepository;
 using Hospital.Repositories.DoctorRepository;
+using Hospital.Repositories.NotificationRepository;
 using Hospital.Repositories.UnitOfWorkRepository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
@@ -18,6 +19,7 @@ namespace Hospital.Services.DoctorService
             ILogger<DoctorService> logger,
             IBookingRepository bookingRepository,
             IAuthRepository authRepository,
+            INotificationRepository notificationRepository,
             IUnitOfWorkRepository unitOfWorkRepository) : IDoctorService
     {
         private readonly IDoctorRepository _repository = repository;
@@ -25,6 +27,7 @@ namespace Hospital.Services.DoctorService
         private readonly ILogger<DoctorService> _logger = logger;
         private readonly IBookingRepository _bookingRepository = bookingRepository;
         private readonly IAuthRepository _authRepository = authRepository;
+        private readonly INotificationRepository _notificationRepository = notificationRepository;
         private readonly IUnitOfWorkRepository _unitOfWorkRepository = unitOfWorkRepository;
 
         public async Task<IEnumerable<DoctorWithUserResponse>> GetAllDoctorsAsync()
@@ -178,11 +181,19 @@ namespace Hospital.Services.DoctorService
                     }
 
                     booking.Patient.User.Money += doctorToDelete.Specialty.Price;
+
+                    await _notificationRepository.AddNotificationAsync(new Notification
+                    {
+                        UserId = booking.Patient.User.Id,
+                        CreatedAt = DateTime.UtcNow,
+                        Message = $"Ваша запись отменена. Просим прощения, врач {doctorToDelete.FirstName} {doctorToDelete.LastName} был удалён."
+                    });
                 }
 
                 doctorToDelete.User.Money -= totalRefund;
 
                 await _repository.DeleteDoctorAsync(doctorToDelete);
+
                 await _unitOfWorkRepository.SaveChangesAsync();
 
                 await transaction.CommitAsync();

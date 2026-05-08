@@ -9,5 +9,6 @@ namespace Hospital.Core.Utilities
         public const string Patient = nameof(RoleType.Patient);
         public const string DoctorAdmin = nameof(RoleType.Doctor) + "," + nameof(RoleType.Admin);
         public const string PatientAdmin = nameof(RoleType.Patient) + "," + nameof(RoleType.Admin);
+        public const string DoctorPatient = nameof(RoleType.Doctor) + "," + nameof(RoleType.Patient);
     }
 }
