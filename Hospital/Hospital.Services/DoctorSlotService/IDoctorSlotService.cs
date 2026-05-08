@@ -17,5 +17,7 @@ namespace Hospital.Services.DoctorSlotService
         Task<IEnumerable<DoctorSlotResponse>> GetAllAdminDoctorSlotsTimeByDateAsync(int doctorId, DateOnly date);
 
         Task AddDoctorSlotsAsync(DateOnly date, int userId);
+
+        Task DeleteDoctorSlotsAsync(int userId);
     }
 }

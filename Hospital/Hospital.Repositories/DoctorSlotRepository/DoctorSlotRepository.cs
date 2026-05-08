@@ -3,6 +3,7 @@ using Hospital.Db;
 using Hospital.Db.Entities;
 using Hospital.Db.Utilities;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace Hospital.Repositories.DoctorSlotRepository
 {
@@ -86,6 +87,18 @@ namespace Hospital.Repositories.DoctorSlotRepository
                 }).ToListAsync();
         }
 
+        public async Task<IEnumerable<int>> GetAllExpiredDoctorSlotsAsync(int doctorId)
+        {
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
+            return await _context.DoctorSlots
+                .Where(_ => _.DoctorId == doctorId
+                    && _.Date < today
+                    && !_.Bookings.Any(_ => _.BookingStatus == BookingStatus.Active))
+                .Select(slot => slot.Id)
+                .ToListAsync();
+        }
+
         public async Task<DoctorSlot?> GetDoctorSlotAsync(int slotId)
         {
             return await _context.DoctorSlots
@@ -106,6 +119,17 @@ namespace Hospital.Repositories.DoctorSlotRepository
         public async Task AddDoctorSlotsAsync(List<DoctorSlot> doctorSlots)
         {
             await _context.DoctorSlots.AddRangeAsync(doctorSlots);
+        }
+
+        public async Task DeleteDoctorSlotsAsync(List<int> expiredDoctorSlots)
+        {
+            await _context.Bookings
+                .Where(booking => expiredDoctorSlots.Contains(booking.DoctorSlotId))
+                .ExecuteDeleteAsync();
+
+            await _context.DoctorSlots
+                .Where(slot => expiredDoctorSlots.Contains(slot.Id))
+                .ExecuteDeleteAsync();
         }
     }
 }

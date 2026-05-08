@@ -13,10 +13,14 @@ namespace Hospital.Repositories.DoctorSlotRepository
 
         Task<IEnumerable<DoctorSlotResponse>> GetAllDoctorSlotsTimeByDateAsync(int doctorId, DateOnly date);
 
+        Task<IEnumerable<int>> GetAllExpiredDoctorSlotsAsync(int doctorId);
+
         Task<DoctorSlot?> GetDoctorSlotAsync(int slotId);
 
         Task<bool> DoctorSlotsAlreadyExists(int doctorId, DateOnly date);
 
         Task AddDoctorSlotsAsync(List<DoctorSlot> doctorSlots);
+        
+        Task DeleteDoctorSlotsAsync(List<int> expiredDoctorSlots);
     }
 }

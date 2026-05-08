@@ -178,5 +178,23 @@ namespace Hospital.Services.DoctorSlotService
             await _repository.AddDoctorSlotsAsync(listDoctorSlots);
             await _unitOfWorkRepository.SaveChangesAsync();
         }
+
+        public async Task DeleteDoctorSlotsAsync(int userId)
+        {
+            var doctor = await _doctorRepository.GetDoctorByUserAsync(userId);
+
+            if (doctor is null)
+            {
+                _logger.LogWarning("Doctor not found");
+                throw new DoctorNotFoundException("Doctor not found");
+            }
+
+            var expiredDoctorSlots = await _repository.GetAllExpiredDoctorSlotsAsync(doctor.Id);
+
+            if (expiredDoctorSlots.Any())
+            {
+                await _repository.DeleteDoctorSlotsAsync([.. expiredDoctorSlots]);
+            }
+        }
     }
 }

@@ -85,5 +85,16 @@ namespace Hospital.Hospital.Controllers
 
             return Created();
         }
+
+        [Authorize(Roles = AppRoles.Doctor)]
+        [HttpDelete]
+        public async Task<ActionResult> DeleteDoctorSlotsAsync()
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+            await _service.DeleteDoctorSlotsAsync(userId);
+
+            return NoContent();
+        }
     }
 }
