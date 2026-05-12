@@ -1,6 +1,6 @@
 ﻿namespace Hospital.Core.Models.Response
 {
-    public class NotificationResponce
+    public class NotificationResponse
     {
         public int Id { get; set; }
 

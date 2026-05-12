@@ -2,6 +2,7 @@ using FluentAssertions;
 using Hospital.Auth.Controllers;
 using Hospital.Core.Models.Requests;
 using Hospital.Core.Models.Response;
+using Hospital.Db.Utilities;
 using Hospital.Services.AuthService;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -19,10 +20,13 @@ namespace Hospital.Tests.Controllers
             _controller = new AuthController(_service.Object);
         }
 
-        /*[Fact]
+        [Fact]
         public async Task RegisterAsync_ShouldReturnCreated_WhenRegistrationSuccessful()
         {
-            var register = new RegisterRequest("Foo", "foo@gmail.com", "0000");
+            var register = new RegisterRequest(
+                "foo@gmail.com", "0000",
+                "Denys", "Kudriavov", "497777777",
+                new DateOnly(2003, 01, 01), GenderType.Male);
 
             _service
                 .Setup(s => s.RegisterAsync(register))
@@ -33,7 +37,7 @@ namespace Hospital.Tests.Controllers
             result.Should().BeOfType<CreatedResult>();
 
             _service.Verify(_ => _.RegisterAsync(register), Times.Once);
-        }*/
+        }
 
         [Fact]
         public async Task LoginAsync_ShouldReturnOkWithToken_WhenLoginSuccessful()

@@ -14,7 +14,7 @@ namespace Hospital.Services.NotificationService
         private readonly ILogger<NotificationService> _logger = logger;
         private readonly IUnitOfWorkRepository _unitOfWorkRepository = unitOfWorkRepository;
 
-        public async Task<IEnumerable<NotificationResponce>> GetAllNotificationsAsync(int userId)
+        public async Task<IEnumerable<NotificationResponse>> GetAllNotificationsAsync(int userId)
         {
             return await _repository.GetAllNotificationsAsync(userId);
         }

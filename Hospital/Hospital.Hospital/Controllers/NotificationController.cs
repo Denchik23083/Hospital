@@ -15,7 +15,7 @@ namespace Hospital.Hospital.Controllers
 
         [Authorize(Roles = AppRoles.DoctorPatient)]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<NotificationResponce>>> GetAllNotificationsAsync()
+        public async Task<ActionResult<IEnumerable<NotificationResponse>>> GetAllNotificationsAsync()
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
