@@ -26,7 +26,7 @@ namespace Hospital.Hospital.Controllers
 
         [Authorize(Roles = AppRoles.DoctorPatient)]
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteDoctorAsync(int id)
+        public async Task<ActionResult> DeleteNotificationAsync(int id)
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 

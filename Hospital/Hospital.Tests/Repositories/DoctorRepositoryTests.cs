@@ -59,7 +59,7 @@ namespace Hospital.Tests.Repositories
             await _context.Doctors.AddRangeAsync(doctors);
             await _context.SaveChangesAsync();
 
-            var doctorsResponce = new List<DoctorResponse>
+            var doctorsResponse = new List<DoctorResponse>
             {
                 new()
                 {
@@ -81,7 +81,7 @@ namespace Hospital.Tests.Repositories
 
             var result = await _repository.GetAllDoctorsBySpecialtyAsync(specialtyId);
 
-            result.Should().BeEquivalentTo(doctorsResponce);
+            result.Should().BeEquivalentTo(doctorsResponse);
         }
     }
 }
