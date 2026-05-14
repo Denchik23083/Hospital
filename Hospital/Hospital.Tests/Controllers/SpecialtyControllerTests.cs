@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using Hospital.Core.Models.Response;
+using Hospital.Db.Utilities;
 using Hospital.Hospital.Controllers;
 using Hospital.Services.DoctorService;
 using Hospital.Services.SpecialtyService;
@@ -93,6 +94,71 @@ namespace Hospital.Tests.Controllers
             actionResult.Value.Should().BeEquivalentTo(specialties);
 
             _service.Verify(_ => _.GetAllSpecialtiesAsync(), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetSpecialtyPriceAsync_ShouldReturnOk_WithDecimalPrice()
+        {
+            var specialtyId = 1;
+            var price = 40m;
+
+            _service
+                .Setup(_ => _.GetSpecialtyPriceAsync(specialtyId))
+                .ReturnsAsync(price);
+            
+            var result = await _controller.GetSpecialtyPriceAsync(specialtyId);
+
+            var actionResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+
+            actionResult.Value.Should().Be(price);
+
+            _service.Verify(_ => _.GetSpecialtyPriceAsync(specialtyId), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetAllDoctorsBySpecialtyAsync_ShouldReturnOk_WithDoctorsBySpecialty()
+        {
+            var specialtyId = 1;
+
+            var doctors = new List<DoctorResponse>
+            {
+                new()
+                {
+                    Id = 1,
+                    FirstName = "Foo",
+                    LastName = "Too",
+                    ExperienceYears = 4,
+                    GenderType = GenderType.Male
+                },
+                new()
+                {
+                    Id = 2,
+                    FirstName = "Глеб",
+                    LastName = "Романенко",
+                    ExperienceYears = 2,
+                    GenderType = GenderType.Male
+                },
+                new()
+                {
+                    Id = 3,
+                    FirstName = "Варвара",
+                    LastName = "Черноус",
+                    ExperienceYears = 2,
+                    GenderType = GenderType.Female
+                }
+            };
+
+            _doctorService
+                .Setup(_ => _.GetAllDoctorsBySpecialtyAsync(specialtyId))
+                .ReturnsAsync(doctors);
+
+            var result = await _controller.GetAllDoctorsBySpecialtyAsync(specialtyId);
+
+            var actionResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+
+            actionResult.Value.Should().BeEquivalentTo(doctors);
+
+            _doctorService.Verify(_ => _.GetAllDoctorsBySpecialtyAsync(specialtyId), Times.Once);
         }
     }
 }

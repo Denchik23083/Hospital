@@ -137,5 +137,59 @@ namespace Hospital.Tests.Repositories
             result.Should().BeEquivalentTo(specialtiesResponse, 
                 options => options.Excluding(_ => _.Id));
         }
+
+        [Fact]
+        public async Task GetSpecialtyPriceAsync_ShouldReturnDecimalPriceFromDb()
+        {
+            var specialtyId = 1;
+            var price = 40m;
+
+            var specialties = new List<Specialty>
+            {
+                new()
+                {
+                    Id = specialtyId,
+                    Name = "Терапия",
+                    Price = price
+                },
+                new()
+                {
+                    Id = 2,
+                    Name = "Кардиология",
+                    Price = 80
+                },
+                new()
+                {
+                    Id = 3,
+                    Name = "Неврология",
+                    Price = 75
+                },
+                new()
+                {
+                    Id = 4,
+                    Name = "Офтальмология",
+                    Price = 50
+                },
+                new()
+                {
+                    Id = 5,
+                    Name = "Ортопедия",
+                    Price = 70
+                },
+                new()
+                {
+                    Id = 6,
+                    Name = "Эндокринология",
+                    Price = 65
+                }
+            };
+
+            await _context.Specialties.AddRangeAsync(specialties);
+            await _context.SaveChangesAsync();
+
+            var result = await _repository.GetSpecialtyPriceAsync(specialtyId);
+
+            result.Should().Be(price);
+        }
     }
 }

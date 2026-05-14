@@ -1,7 +1,9 @@
 ﻿using FluentAssertions;
 using Hospital.Core.Models.Response;
+using Hospital.Db.Utilities;
 using Hospital.Repositories.SpecialtyRepository;
 using Hospital.Services.SpecialtyService;
+using Microsoft.AspNetCore.Mvc;
 using Moq;
 
 namespace Hospital.Tests.Services
@@ -87,6 +89,23 @@ namespace Hospital.Tests.Services
             result.Should().BeEquivalentTo(specialties);
 
             _repository.Verify(_ => _.GetAllSpecialtiesAsync(), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetSpecialtyPriceAsync_ShouldReturnDecimalPrice()
+        {
+            var specialtyId = 1;
+            var price = 40m;
+
+            _repository
+                .Setup(_ => _.GetSpecialtyPriceAsync(specialtyId))
+                .ReturnsAsync(price);
+
+            var result = await _service.GetSpecialtyPriceAsync(specialtyId);
+
+            result.Should().Be(price);
+
+            _repository.Verify(_ => _.GetSpecialtyPriceAsync(specialtyId), Times.Once);
         }
     }
 }
