@@ -17,16 +17,16 @@ namespace Hospital.Services.DoctorService
     public class DoctorService(IDoctorRepository repository,
             IMapper mapper,
             ILogger<DoctorService> logger,
-            IBookingRepository bookingRepository,
             IAuthRepository authRepository,
+            IBookingRepository bookingRepository,
             INotificationRepository notificationRepository,
             IUnitOfWorkRepository unitOfWorkRepository) : IDoctorService
     {
         private readonly IDoctorRepository _repository = repository;
         private readonly IMapper _mapper = mapper;
         private readonly ILogger<DoctorService> _logger = logger;
-        private readonly IBookingRepository _bookingRepository = bookingRepository;
         private readonly IAuthRepository _authRepository = authRepository;
+        private readonly IBookingRepository _bookingRepository = bookingRepository;
         private readonly INotificationRepository _notificationRepository = notificationRepository;
         private readonly IUnitOfWorkRepository _unitOfWorkRepository = unitOfWorkRepository;
 

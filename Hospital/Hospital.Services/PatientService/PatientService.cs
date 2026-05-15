@@ -110,7 +110,7 @@ namespace Hospital.Services.PatientService
                 throw new UserNotFoundException("User not found");
             }
 
-            patientToUpdate.User.Money = model.Amount;
+            patientToUpdate.User.Money += model.Amount;
 
             await _unitOfWorkRepository.SaveChangesAsync();
         }
@@ -127,8 +127,8 @@ namespace Hospital.Services.PatientService
 
             if (patientToDelete.User is null)
             {
-                _logger.LogWarning("Patient not found. Transaction was rollback");
-                throw new PatientNotFoundException("Patient not found");
+                _logger.LogWarning("User not found");
+                throw new UserNotFoundException("User not found");
             }
 
             await using var transaction = await _unitOfWorkRepository.BeginTransactionAsync();

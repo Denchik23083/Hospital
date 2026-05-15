@@ -47,7 +47,7 @@ namespace Hospital.Hospital.Controllers
 
         [Authorize(Roles = AppRoles.Patient)]
         [HttpPut("profile")]
-        public async Task<ActionResult<decimal>> UpdatePatientAsync(PatientRequest model)
+        public async Task<ActionResult> UpdatePatientAsync(PatientRequest model)
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
@@ -58,7 +58,7 @@ namespace Hospital.Hospital.Controllers
 
         [Authorize(Roles = AppRoles.Patient)]
         [HttpPut("replenish")]
-        public async Task<ActionResult<decimal>> ReplenishBalanceAsync(PatientReplenishBalanceRequest model)
+        public async Task<ActionResult> ReplenishBalanceAsync(PatientReplenishBalanceRequest model)
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 

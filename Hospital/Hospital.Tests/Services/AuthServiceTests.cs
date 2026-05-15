@@ -16,6 +16,7 @@
             _service = new AuthService(_context, _configuration, _logger);
         }
 
+        //Throw Exception Condition
         [Fact]
         public async Task RegisterAsync_ShouldThrowConflictException_WhenEmailAlreadyExists()
         {
@@ -34,35 +35,6 @@
             var result = async () => await _service.RegisterAsync(register);
 
             await result.Should().ThrowAsync<ConflictException>();
-        }
-
-        [Fact]
-        public async Task RegisterAsync_ShouldAddUserWithHashedPasswordAndUserRole_WhenDataIsValid()
-        {
-            var register = new RegisterRequest("Foo", "foo@gmail.com", "0000");
-
-            var mappedUser = new User
-            {
-                Email = register.Email,
-            };
-
-            _mapper
-                .Setup(_ => _.Map<User>(register))
-                .Returns(mappedUser);
-
-            await _service.RegisterAsync(register);
-
-            var savedUser = await _context.Users.SingleAsync(_ => _.Email == register.Email);
-
-            savedUser.Email.Should().Be(register.Email);
-            savedUser.RoleType.Should().Be(RoleType.Patient);
-            savedUser.PasswordHash.Should().NotBeNullOrWhiteSpace();
-            savedUser.PasswordHash.Should().NotBe(register.Password);
-
-            var verifyResult = new PasswordHasher<User>()
-                .VerifyHashedPassword(savedUser, savedUser.PasswordHash, register.Password);
-
-            verifyResult.Should().Be(PasswordVerificationResult.Success);
         }
 
         [Fact]
@@ -95,34 +67,6 @@
             var result = async () => await _service.LoginAsync(login);
 
             await result.Should().ThrowAsync<UnauthorizedException>();
-        }
-
-        [Fact]
-        public async Task LoginAsync_ShouldReturnTokensAndUpdateRefreshToken_WhenCredentialsAreValid()
-        {
-            var user = new User
-            {
-                Email = "foo@gmail.com",
-                RoleType = RoleType.Patient
-            };
-
-            user.PasswordHash = new PasswordHasher<User>()
-                .HashPassword(user, "0000");
-
-            await _context.Users.AddAsync(user);
-            await _context.SaveChangesAsync();
-
-            var login = new LoginRequest("foo@gmail.com", "0000");
-
-            var result = await _service.LoginAsync(login);
-
-            result.AccessToken.Should().NotBeNullOrWhiteSpace();
-            result.RefreshToken.Should().NotBeNullOrWhiteSpace();
-
-            var updatedUser = await _context.Users.SingleAsync(_ => _.Email == login.Email);
-
-            updatedUser.RefreshToken.Should().Be(result.RefreshToken);
-            updatedUser.RefreshTokenExpiryTime.Should().BeAfter(DateTime.UtcNow);
         }
 
         [Fact]
@@ -181,6 +125,64 @@
             var result = async () => await _service.RefreshTokenAsync(refresh);
 
             await result.Should().ThrowAsync<UnauthorizedException>();
+        }
+
+        //Method
+        [Fact]
+        public async Task RegisterAsync_ShouldAddUserWithHashedPasswordAndUserRole_WhenDataIsValid()
+        {
+            var register = new RegisterRequest("Foo", "foo@gmail.com", "0000");
+
+            var mappedUser = new User
+            {
+                Email = register.Email,
+            };
+
+            _mapper
+                .Setup(_ => _.Map<User>(register))
+                .Returns(mappedUser);
+
+            await _service.RegisterAsync(register);
+
+            var savedUser = await _context.Users.SingleAsync(_ => _.Email == register.Email);
+
+            savedUser.Email.Should().Be(register.Email);
+            savedUser.RoleType.Should().Be(RoleType.Patient);
+            savedUser.PasswordHash.Should().NotBeNullOrWhiteSpace();
+            savedUser.PasswordHash.Should().NotBe(register.Password);
+
+            var verifyResult = new PasswordHasher<User>()
+                .VerifyHashedPassword(savedUser, savedUser.PasswordHash, register.Password);
+
+            verifyResult.Should().Be(PasswordVerificationResult.Success);
+        }
+
+        [Fact]
+        public async Task LoginAsync_ShouldReturnTokensAndUpdateRefreshToken_WhenCredentialsAreValid()
+        {
+            var user = new User
+            {
+                Email = "foo@gmail.com",
+                RoleType = RoleType.Patient
+            };
+
+            user.PasswordHash = new PasswordHasher<User>()
+                .HashPassword(user, "0000");
+
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+
+            var login = new LoginRequest("foo@gmail.com", "0000");
+
+            var result = await _service.LoginAsync(login);
+
+            result.AccessToken.Should().NotBeNullOrWhiteSpace();
+            result.RefreshToken.Should().NotBeNullOrWhiteSpace();
+
+            var updatedUser = await _context.Users.SingleAsync(_ => _.Email == login.Email);
+
+            updatedUser.RefreshToken.Should().Be(result.RefreshToken);
+            updatedUser.RefreshTokenExpiryTime.Should().BeAfter(DateTime.UtcNow);
         }
 
         [Fact]

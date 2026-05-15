@@ -18,8 +18,8 @@ namespace Hospital.Tests.Services
         private readonly Mock<IDoctorRepository> _repository;
         private readonly Mock<IMapper> _mapper;
         private readonly ILogger<DoctorService> _logger;
-        private readonly Mock<IBookingRepository> _bookingRespository;
         private readonly Mock<IAuthRepository> _authRespository;
+        private readonly Mock<IBookingRepository> _bookingRespository;
         private readonly Mock<INotificationRepository> _notificationRespository;
         private readonly Mock<IUnitOfWorkRepository> _unitOfWorkRepository;
         private readonly DoctorService _service;
@@ -29,13 +29,13 @@ namespace Hospital.Tests.Services
             _repository = new Mock<IDoctorRepository>();
             _mapper = new Mock<IMapper>();
             _logger = Mock.Of<ILogger<DoctorService>>();
-            _bookingRespository = new Mock<IBookingRepository>();
             _authRespository = new Mock<IAuthRepository>();
+            _bookingRespository = new Mock<IBookingRepository>();
             _notificationRespository = new Mock<INotificationRepository>();
             _unitOfWorkRepository = new Mock<IUnitOfWorkRepository>();
 
             _service = new DoctorService(_repository.Object, _mapper.Object, 
-                _logger, _bookingRespository.Object, _authRespository.Object, 
+                _logger, _authRespository.Object, _bookingRespository.Object,
                 _notificationRespository.Object, _unitOfWorkRepository.Object);
         }
 

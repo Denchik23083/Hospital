@@ -5,8 +5,6 @@ using Hospital.Db.Entities;
 using Hospital.Repositories.NotificationRepository;
 using Hospital.Repositories.UnitOfWorkRepository;
 using Hospital.Services.NotificationService;
-using Hospital.Tests.Helpers;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -29,6 +27,25 @@ namespace Hospital.Tests.Services
                 _logger, _unitOfWorkRepository.Object);
         }
 
+        //Throw Exception Condition
+        [Fact]
+        public async Task DeleteNotificationAsync_ShouldThrowNotificationNotFoundException_Logger()
+        {
+            var id = 1;
+            var userId = 10;
+
+            _repository
+                .Setup(_ => _.GetNotificationAsync(id, userId))
+                .ReturnsAsync((Notification?)null);
+
+            var action = async () => await _service.DeleteNotificationAsync(id, userId);
+
+            await action.Should().ThrowAsync<NotificationNotFoundException>();
+
+            _repository.Verify(_ => _.GetNotificationAsync(id, userId), Times.Once);
+        }
+
+        //Method
         [Fact]
         public async Task GetAllNotificationsAsync_ShouldReturnListNotifications()
         {
@@ -59,23 +76,6 @@ namespace Hospital.Tests.Services
             result.Should().BeEquivalentTo(notifications);
 
             _repository.Verify(_ => _.GetAllNotificationsAsync(userId), Times.Once);
-        }
-
-        [Fact]
-        public async Task GetNotificationAsync_ShouldThrowNotFoundException_Logger()
-        {
-            var id = 1;
-            var userId = 10;
-
-            _repository
-                .Setup(_ => _.GetNotificationAsync(id, userId))
-                .ReturnsAsync((Notification?)null);
-
-            var action = async () => await _service.DeleteNotificationAsync(id, userId);
-
-            await action.Should().ThrowAsync<NotificationNotFoundException>();
-
-            _repository.Verify(_ => _.GetNotificationAsync(id, userId), Times.Once);
         }
 
         [Fact]
