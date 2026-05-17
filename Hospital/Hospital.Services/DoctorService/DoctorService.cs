@@ -152,10 +152,16 @@ namespace Hospital.Services.DoctorService
                 throw new DoctorNotFoundException("Doctor not found");
             }
 
-            if (doctorToDelete.Specialty is null || doctorToDelete.User is null)
+            if (doctorToDelete.User is null)
             {
-                _logger.LogWarning("Doctor not found. Transaction was rollback");
-                throw new DoctorNotFoundException("Doctor not found");
+                _logger.LogWarning("User not found");
+                throw new UserNotFoundException("User not found");
+            }
+
+            if (doctorToDelete.Specialty is null)
+            {
+                _logger.LogWarning("Specialty not found");
+                throw new SpecialtyNotFoundException("Specialty not found");
             }
 
             await using var transaction = await _unitOfWorkRepository.BeginTransactionAsync();

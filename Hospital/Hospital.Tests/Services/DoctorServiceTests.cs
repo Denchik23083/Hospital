@@ -123,6 +123,257 @@ namespace Hospital.Tests.Services
             _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
         }
 
+        [Fact]
+        public async Task UpdateDoctorByUserAsync_ShouldThrowDoctorNotFoundException_Logger()
+        {
+            var userId = 2;
+
+            var doctorRequest = new DoctorRequest("Foo", "Too", GenderType.Female);
+
+            _repository
+                .Setup(_ => _.GetDoctorByUserAsync(userId))
+                .ReturnsAsync((Doctor?)null);
+
+            var action = async () => await _service.UpdateDoctorByUserAsync(doctorRequest, userId);
+
+            await action.Should().ThrowAsync<DoctorNotFoundException>();
+
+            _repository.Verify(_ => _.GetDoctorByUserAsync(userId), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+        }
+
+        [Theory]
+        [InlineData(9, 15, 17, 0)]
+        [InlineData(9, 0, 16, 45)]
+        [InlineData(9, 15, 16, 45)]
+        public async Task UpdateDoctorAsync_ShouldThrowDoctorWorkTimeException_Logger(
+            int startHour,
+            int startMinute,
+            int endHour,
+            int endMinute)
+        {
+            var doctorId = 1;
+
+            var doctorRequest = new DoctorFullRequest
+            {
+                FirstName = "Foo",
+                LastName = "Too",
+                ExperienceYears = 4,
+                GenderType = GenderType.Male,
+                WorkDayStart = new TimeSpan(startHour, startMinute, 0),
+                WorkDayEnd = new TimeSpan(endHour, endMinute, 0),
+                SpecialtyId = 2,
+                Email = "doctor24@gmail.com",
+                Password = "1111"
+            };
+
+            var action = async () => await _service.UpdateDoctorAsync(doctorRequest, doctorId);
+
+            await action.Should().ThrowAsync<DoctorWorkTimeException>();
+
+            _repository.Verify(_ => _.GetDoctorAsync(doctorId), Times.Never);
+            _authRespository.Verify(_ => _.IsEmailNotUniqueAsync(It.IsAny<string>()), Times.Never);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+        }
+
+        [Fact]
+        public async Task UpdateDoctorAsync_ShouldThrowDoctorNotFoundException_Logger()
+        {
+            var doctorId = 1;
+
+            var doctorRequest = new DoctorFullRequest
+            {
+                FirstName = "Foo",
+                LastName = "Too",
+                ExperienceYears = 4,
+                GenderType = GenderType.Male,
+                WorkDayStart = new TimeSpan(9, 0, 0),
+                WorkDayEnd = new TimeSpan(17, 0, 0),
+                SpecialtyId = 2,
+                Email = "doctor24@gmail.com",
+                Password = "1111"
+            };
+
+            _repository
+                .Setup(_ => _.GetDoctorAsync(doctorId))
+                .ReturnsAsync((Doctor?)null);
+
+            var action = async () => await _service.UpdateDoctorAsync(doctorRequest, doctorId);
+
+            await action.Should().ThrowAsync<DoctorNotFoundException>();
+
+            _repository.Verify(_ => _.GetDoctorAsync(doctorId), Times.Once);
+            _authRespository.Verify(_ => _.IsEmailNotUniqueAsync(doctorRequest.Email), Times.Never);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+        }
+
+        [Fact]
+        public async Task UpdateDoctorAsync_ShouldThrowUserNotFoundException_Logger()
+        {
+            var doctorId = 1;
+
+            var doctorRequest = new DoctorFullRequest
+            {
+                FirstName = "Foo",
+                LastName = "Too",
+                ExperienceYears = 4,
+                GenderType = GenderType.Male,
+                WorkDayStart = new TimeSpan(9, 0, 0),
+                WorkDayEnd = new TimeSpan(17, 0, 0),
+                SpecialtyId = 2,
+                Email = "doctor24@gmail.com",
+                Password = "1111"
+            };
+
+            var doctorToUpdate = new Doctor
+            {
+                Id = doctorId,
+                FirstName = "Глеб",
+                LastName = "Романенко",
+                ExperienceYears = 2,
+                GenderType = GenderType.Male,
+                WorkDayStart = new TimeSpan(9, 0, 0),
+                WorkDayEnd = new TimeSpan(17, 0, 0),
+                Specialty = new Specialty
+                {
+                    Id = 1,
+                    Name = "Терапия",
+                    Price = 40
+                },
+                User = null
+            };
+
+            _repository
+                .Setup(_ => _.GetDoctorAsync(doctorId))
+                .ReturnsAsync(doctorToUpdate);
+
+            var action = async () => await _service.UpdateDoctorAsync(doctorRequest, doctorId);
+
+            await action.Should().ThrowAsync<UserNotFoundException>();
+
+            _repository.Verify(_ => _.GetDoctorAsync(doctorId), Times.Once);
+            _authRespository.Verify(_ => _.IsEmailNotUniqueAsync(doctorRequest.Email), Times.Never);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+        }
+
+        [Fact]
+        public async Task UpdateDoctorAsync_ShouldThrowConflictException_WhenEmailAlreadyExists()
+        {
+            var doctorId = 1;
+
+            var doctorRequest = new DoctorFullRequest
+            {
+                FirstName = "Foo",
+                LastName = "Too",
+                ExperienceYears = 4,
+                GenderType = GenderType.Male,
+                WorkDayStart = new TimeSpan(9, 0, 0),
+                WorkDayEnd = new TimeSpan(17, 0, 0),
+                SpecialtyId = 2,
+                Email = "doctor24@gmail.com",
+                Password = "1111"
+            };
+
+            var doctorToUpdate = new Doctor
+            {
+                Id = doctorId,
+                FirstName = "Глеб",
+                LastName = "Романенко",
+                ExperienceYears = 2,
+                GenderType = GenderType.Male,
+                WorkDayStart = new TimeSpan(9, 0, 0),
+                WorkDayEnd = new TimeSpan(17, 0, 0),
+                Specialty = new Specialty
+                {
+                    Id = 1,
+                    Name = "Терапия",
+                    Price = 40
+                },
+                User = new User
+                {
+                    Id = 2,
+                    Email = "doctor1@gmail.com",
+                    Money = 500m
+                }
+            };
+
+            _repository
+                .Setup(_ => _.GetDoctorAsync(doctorId))
+                .ReturnsAsync(doctorToUpdate);
+
+            _authRespository
+                .Setup(_ => _.IsEmailNotUniqueAsync(doctorRequest.Email))
+                .ReturnsAsync(true);
+
+            var action = async () => await _service.UpdateDoctorAsync(doctorRequest, doctorId);
+
+            await action.Should().ThrowAsync<ConflictException>();
+
+            _repository.Verify(_ => _.GetDoctorAsync(doctorId), Times.Once);
+            _authRespository.Verify(_ => _.IsEmailNotUniqueAsync(doctorRequest.Email), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+        }
+
+        [Fact]
+        public async Task UpdateDoctorAsync_ShouldNotUpdatePassword_WhenPasswordIsEmpty()
+        {
+            var doctorId = 1;
+
+            var doctorRequest = new DoctorFullRequest
+            {
+                FirstName = "Foo",
+                LastName = "Too",
+                ExperienceYears = 4,
+                GenderType = GenderType.Male,
+                WorkDayStart = new TimeSpan(9, 0, 0),
+                WorkDayEnd = new TimeSpan(17, 0, 0),
+                SpecialtyId = 2,
+                Email = "doctor1@gmail.com",
+                Password = ""
+            };
+
+            var doctorToUpdate = new Doctor
+            {
+                Id = doctorId,
+                FirstName = "Глеб",
+                LastName = "Романенко",
+                ExperienceYears = 2,
+                GenderType = GenderType.Male,
+                WorkDayStart = new TimeSpan(9, 0, 0),
+                WorkDayEnd = new TimeSpan(17, 0, 0),
+                Specialty = new Specialty
+                {
+                    Id = 1,
+                    Name = "Терапия",
+                    Price = 40
+                },
+                User = new User
+                {
+                    Id = 2,
+                    Email = "doctor1@gmail.com",
+                    Money = 500m,
+                    PasswordHash = "old-password-hash"
+                }
+            };
+
+            _repository
+                .Setup(_ => _.GetDoctorAsync(doctorId))
+                .ReturnsAsync(doctorToUpdate);
+
+            _unitOfWorkRepository
+                .Setup(_ => _.SaveChangesAsync())
+                .Returns(Task.CompletedTask);
+
+            await _service.UpdateDoctorAsync(doctorRequest, doctorId);
+
+            doctorToUpdate.User.PasswordHash.Should().Be("old-password-hash");
+
+            doctorToUpdate.User.Email.Should().Be("doctor1@gmail.com");
+
+            _repository.Verify(_ => _.GetDoctorAsync(doctorId), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Once);
+        }
+
         //Tests
         [Fact]
         public async Task GetAllDoctorsAsync_ShouldReturnListDoctors()
@@ -373,6 +624,129 @@ namespace Hospital.Tests.Services
             _authRespository.Verify(_ => _.IsEmailNotUniqueAsync(doctorToAdd.Email), Times.Once);
             _mapper.Verify(_ => _.Map<Doctor>(doctorToAdd), Times.Once);
             _repository.Verify(_ => _.CreateDoctorAsync(doctor), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Once);
+        }
+
+        [Fact]
+        public async Task UpdateDoctorByUserAsync_ShouldUpdateDoctorByUser_WhenDoctorExists()
+        {
+            var userId = 2;
+
+            var doctorRequest = new DoctorRequest("Foo", "Too", GenderType.Female);
+
+            var doctorToUpdate = new Doctor
+            {
+                Id = 1,
+                FirstName = "Глеб",
+                LastName = "Романенко",
+                ExperienceYears = 2,
+                GenderType = GenderType.Male,
+                WorkDayStart = new TimeSpan(9, 0, 0),
+                WorkDayEnd = new TimeSpan(17, 0, 0),
+                Specialty = new Specialty
+                {
+                    Id = 1,
+                    Name = "Терапия",
+                    Price = 40
+                },
+                User = new User
+                {
+                    Id = userId,
+                    Email = "doctor1@gmail.com",
+                    Money = 500m
+                }
+            };
+
+            _repository
+                .Setup(_ => _.GetDoctorByUserAsync(userId))
+                .ReturnsAsync(doctorToUpdate);
+
+            _unitOfWorkRepository
+                .Setup(_ => _.SaveChangesAsync())
+                .Returns(Task.CompletedTask);
+
+            await _service.UpdateDoctorByUserAsync(doctorRequest, userId);
+
+            doctorToUpdate.FirstName.Should().Be(doctorRequest.FirstName);
+            doctorToUpdate.LastName.Should().Be(doctorRequest.LastName);
+            doctorToUpdate.GenderType.Should().Be(doctorRequest.GenderType);
+
+            _repository.Verify(_ => _.GetDoctorByUserAsync(userId), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Once);
+        }
+
+        [Fact]
+        public async Task UpdateDoctorAsync_ShouldUpdateDoctor_WhenDoctorExists()
+        {
+            var doctorId = 1;
+
+            var doctorRequest = new DoctorFullRequest
+            {
+                FirstName = "Foo",
+                LastName = "Too",
+                ExperienceYears = 4,
+                GenderType = GenderType.Female,
+                WorkDayStart = new TimeSpan(10, 0, 0),
+                WorkDayEnd = new TimeSpan(17, 0, 0),
+                SpecialtyId = 2,
+                Email = "doctor24@gmail.com",
+                Password = "1111"
+            };
+
+            var doctorToUpdate = new Doctor
+            {
+                Id = doctorId,
+                FirstName = "Глеб",
+                LastName = "Романенко",
+                ExperienceYears = 2,
+                GenderType = GenderType.Male,
+                WorkDayStart = new TimeSpan(9, 0, 0),
+                WorkDayEnd = new TimeSpan(17, 0, 0),
+                Specialty = new Specialty
+                {
+                    Id = 1,
+                    Name = "Терапия",
+                    Price = 40
+                },
+                User = new User
+                {
+                    Id = 2,
+                    Email = "doctor1@gmail.com",
+                    Money = 500m
+                }
+            };
+
+            _repository
+                .Setup(_ => _.GetDoctorAsync(doctorId))
+                .ReturnsAsync(doctorToUpdate);
+
+            _authRespository
+                .Setup(_ => _.IsEmailNotUniqueAsync(doctorRequest.Email))
+                .ReturnsAsync(false);
+
+            _unitOfWorkRepository
+                .Setup(_ => _.SaveChangesAsync())
+                .Returns(Task.CompletedTask);
+
+            await _service.UpdateDoctorAsync(doctorRequest, doctorId);
+
+            doctorToUpdate.FirstName.Should().Be(doctorRequest.FirstName);
+            doctorToUpdate.LastName.Should().Be(doctorRequest.LastName);
+            doctorToUpdate.GenderType.Should().Be(doctorRequest.GenderType);
+            doctorToUpdate.ExperienceYears.Should().Be(doctorRequest.ExperienceYears);
+            doctorToUpdate.WorkDayStart.Should().Be(doctorRequest.WorkDayStart);
+            doctorToUpdate.WorkDayEnd.Should().Be(doctorRequest.WorkDayEnd);
+            doctorToUpdate.SpecialtyId.Should().Be(doctorRequest.SpecialtyId);
+            doctorToUpdate.User.Email.Should().Be(doctorRequest.Email);
+
+            var verifyResult = new PasswordHasher<User>()
+                .VerifyHashedPassword(doctorToUpdate.User,
+                    doctorToUpdate.User.PasswordHash, doctorRequest.Password);
+
+            verifyResult.Should().Be(PasswordVerificationResult.Success);
+
+            _repository.Verify(_ => _.GetDoctorAsync(doctorId), Times.Once);
+            _authRespository.Verify(_ => _.IsEmailNotUniqueAsync(doctorRequest.Email), Times.Once);
             _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Once);
         }
     }

@@ -147,9 +147,9 @@ namespace Hospital.Tests.Controllers
         }
 
         [Fact]
-        public async Task CreateDoctorAsync_ShouldCreated()
+        public async Task CreateDoctorAsync_ShouldReturnCreated()
         {
-            var doctorToAdd = new DoctorFullRequest
+            var doctorRequest = new DoctorFullRequest
             {
                 FirstName = "Foo",
                 LastName = "Too",
@@ -163,14 +163,63 @@ namespace Hospital.Tests.Controllers
             };
 
             _service
-                .Setup(_ => _.CreateDoctorAsync(doctorToAdd))
+                .Setup(_ => _.CreateDoctorAsync(doctorRequest))
                 .Returns(Task.CompletedTask);
 
-            var result = await _controller.CreateDoctorAsync(doctorToAdd);
+            var result = await _controller.CreateDoctorAsync(doctorRequest);
 
             result.Should().BeOfType<CreatedResult>();
 
-            _service.Verify(_ => _.CreateDoctorAsync(doctorToAdd), Times.Once);
+            _service.Verify(_ => _.CreateDoctorAsync(doctorRequest), Times.Once);
+        }
+
+        [Fact]
+        public async Task UpdateDoctorByUserAsync_ShouldReturnNoContent()
+        {
+            var userId = 2;
+
+            var doctorRequest = new DoctorRequest("Foo", "Too", GenderType.Female);
+
+            _service
+                .Setup(_ => _.UpdateDoctorByUserAsync(doctorRequest, userId))
+                .Returns(Task.CompletedTask);
+
+            _controller.ControllerContext = TestUserFactory.CreateControllerContext(userId);
+
+            var result = await _controller.UpdateDoctorByUserAsync(doctorRequest);
+
+            result.Should().BeOfType<NoContentResult>();
+
+            _service.Verify(_ => _.UpdateDoctorByUserAsync(doctorRequest, userId), Times.Once);
+        }
+
+        [Fact]
+        public async Task UpdateDoctorAsync_ShouldReturnNoContent()
+        {
+            var doctorId = 1;
+
+            var doctorRequest = new DoctorFullRequest
+            {
+                FirstName = "Foo",
+                LastName = "Too",
+                ExperienceYears = 4,
+                GenderType = GenderType.Male,
+                WorkDayStart = new TimeSpan(9, 0, 0),
+                WorkDayEnd = new TimeSpan(17, 0, 0),
+                SpecialtyId = 2,
+                Email = "doctor24@gmail.com",
+                Password = "1111"
+            };
+
+            _service
+                .Setup(_ => _.UpdateDoctorAsync(doctorRequest, doctorId))
+                .Returns(Task.CompletedTask);
+
+            var result = await _controller.UpdateDoctorAsync(doctorRequest, doctorId);
+
+            result.Should().BeOfType<NoContentResult>();
+
+            _service.Verify(_ => _.UpdateDoctorAsync(doctorRequest, doctorId), Times.Once);
         }
     }
 }
