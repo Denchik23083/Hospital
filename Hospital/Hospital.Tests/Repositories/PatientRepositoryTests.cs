@@ -148,13 +148,13 @@ namespace Hospital.Tests.Repositories
             var result = await _repository.GetPatientAsync(id);
 
             result.Should().NotBeNull();
-            result!.Id.Should().Be(id);
+            result.Id.Should().Be(id);
             result.FirstName.Should().Be("Ivan");
             result.LastName.Should().Be("Vanko");
             result.UserId.Should().Be(2);
 
             result.User.Should().NotBeNull();
-            result.User!.Email.Should().Be("too@gmail.com");
+            result.User.Email.Should().Be("too@gmail.com");
             result.User.Money.Should().Be(7000m);
             result.User.RoleType.Should().Be(RoleType.Patient);
         }
@@ -208,13 +208,13 @@ namespace Hospital.Tests.Repositories
             var result = await _repository.GetPatientByUserAsync(userId);
 
             result.Should().NotBeNull();
-            result!.Id.Should().Be(1);
+            result.Id.Should().Be(1);
             result.FirstName.Should().Be("Denys");
             result.LastName.Should().Be("Stark");
             result.UserId.Should().Be(userId);
 
             result.User.Should().NotBeNull();
-            result.User!.Email.Should().Be("foo@gmail.com");
+            result.User.Email.Should().Be("foo@gmail.com");
             result.User.Money.Should().Be(10000m);
             result.User.RoleType.Should().Be(RoleType.Patient);
         }

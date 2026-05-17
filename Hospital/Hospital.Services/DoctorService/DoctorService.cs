@@ -55,7 +55,7 @@ namespace Hospital.Services.DoctorService
 
         public async Task CreateDoctorAsync(DoctorFullRequest model)
         {
-            ValidateWorkDay(model.WorkDayStart, model.WorkDayEnd);
+            ValidateWorkDay(model.WorkDayStart, model.WorkDayEnd, _logger);
 
             if (await _authRepository.IsEmailNotUniqueAsync(model.Email))
             {
@@ -98,7 +98,7 @@ namespace Hospital.Services.DoctorService
 
         public async Task UpdateDoctorAsync(DoctorFullRequest model, int doctorId)
         {
-            ValidateWorkDay(model.WorkDayStart, model.WorkDayEnd);
+            ValidateWorkDay(model.WorkDayStart, model.WorkDayEnd, _logger);
 
             var doctorToUpdate = await _repository.GetDoctorAsync(doctorId);
 
@@ -208,28 +208,32 @@ namespace Hospital.Services.DoctorService
             }
         }
 
-        private static void ValidateWorkDay(TimeSpan workDayStart, TimeSpan workDayEnd)
+        private static void ValidateWorkDay(TimeSpan workDayStart, TimeSpan workDayEnd, ILogger<DoctorService> _logger)
         {
             var minTime = new TimeSpan(9, 0, 0);
             var maxTime = new TimeSpan(17, 0, 0);
 
             if (workDayStart < minTime)
             {
+                _logger.LogWarning("Work day start cannot be earlier than 09:00");
                 throw new DoctorWorkTimeException("Work day start cannot be earlier than 09:00");
             }
 
             if (workDayEnd > maxTime)
             {
+                _logger.LogWarning("Work day end cannot be later than 17:00");
                 throw new DoctorWorkTimeException("Work day end cannot be later than 17:00");
             }
 
             if (workDayStart >= workDayEnd)
             {
+                _logger.LogWarning("Work day start must be earlier than work day end");
                 throw new DoctorWorkTimeException("Work day start must be earlier than work day end");
             }
 
             if (!IsValidSlotTime(workDayStart) || !IsValidSlotTime(workDayEnd))
             {
+                _logger.LogWarning("Work day time must end with :00 or :30");
                 throw new DoctorWorkTimeException("Work day time must end with :00 or :30");
             }
         }

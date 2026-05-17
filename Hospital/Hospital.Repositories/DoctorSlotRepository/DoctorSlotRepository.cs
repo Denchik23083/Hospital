@@ -3,7 +3,6 @@ using Hospital.Db;
 using Hospital.Db.Entities;
 using Hospital.Db.Utilities;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 
 namespace Hospital.Repositories.DoctorSlotRepository
 {

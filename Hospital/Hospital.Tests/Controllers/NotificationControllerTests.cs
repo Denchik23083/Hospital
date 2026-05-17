@@ -1,6 +1,5 @@
 ﻿using FluentAssertions;
 using Hospital.Core.Models.Response;
-using Hospital.Db.Entities;
 using Hospital.Hospital.Controllers;
 using Hospital.Services.NotificationService;
 using Hospital.Tests.Helpers;

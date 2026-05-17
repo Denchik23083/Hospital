@@ -1,13 +1,10 @@
-﻿using AutoMapper.Configuration.Annotations;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Hospital.Core.Models.Response;
 using Hospital.Db;
 using Hospital.Db.Entities;
 using Hospital.Repositories.NotificationRepository;
 using Hospital.Tests.Helpers;
 using Microsoft.EntityFrameworkCore;
-using Moq;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Hospital.Tests.Repositories
 {

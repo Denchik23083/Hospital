@@ -1,9 +1,7 @@
 ﻿using FluentAssertions;
 using Hospital.Core.Models.Response;
-using Hospital.Db.Utilities;
 using Hospital.Repositories.SpecialtyRepository;
 using Hospital.Services.SpecialtyService;
-using Microsoft.AspNetCore.Mvc;
 using Moq;
 
 namespace Hospital.Tests.Services

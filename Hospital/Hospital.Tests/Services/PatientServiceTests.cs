@@ -61,6 +61,7 @@ namespace Hospital.Tests.Services
             await action.Should().ThrowAsync<PatientNotFoundException>();
 
             _repository.Verify(_ => _.GetPatientByUserAsync(userId), Times.Once);
+            _mapper.Verify(_ => _.Map<PatientWithUserResponse>(It.IsAny<Patient>()), Times.Never);
         }
 
         [Fact]

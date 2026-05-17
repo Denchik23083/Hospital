@@ -4,7 +4,6 @@ using Hospital.Db;
 using Hospital.Db.Entities;
 using Hospital.Repositories.SpecialtyRepository;
 using Hospital.Tests.Helpers;
-using Moq;
 
 namespace Hospital.Tests.Repositories
 {
