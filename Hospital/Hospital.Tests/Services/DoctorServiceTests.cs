@@ -12,6 +12,7 @@ using Hospital.Repositories.NotificationRepository;
 using Hospital.Repositories.UnitOfWorkRepository;
 using Hospital.Services.DoctorService;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -26,6 +27,7 @@ namespace Hospital.Tests.Services
         private readonly Mock<IBookingRepository> _bookingRespository;
         private readonly Mock<INotificationRepository> _notificationRespository;
         private readonly Mock<IUnitOfWorkRepository> _unitOfWorkRepository;
+        private readonly Mock<IDbContextTransaction> _transaction;
         private readonly DoctorService _service;
 
         public DoctorServiceTests()
@@ -36,6 +38,7 @@ namespace Hospital.Tests.Services
             _authRespository = new Mock<IAuthRepository>();
             _bookingRespository = new Mock<IBookingRepository>();
             _notificationRespository = new Mock<INotificationRepository>();
+            _transaction = new Mock<IDbContextTransaction>();
             _unitOfWorkRepository = new Mock<IUnitOfWorkRepository>();
 
             _service = new DoctorService(_repository.Object, _mapper.Object,
@@ -372,6 +375,330 @@ namespace Hospital.Tests.Services
 
             _repository.Verify(_ => _.GetDoctorAsync(doctorId), Times.Once);
             _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Once);
+        }
+
+        [Fact]
+        public async Task DeleteDoctorAsync_ShouldThrowDoctorNotFoundException_Logger()
+        {
+            var doctorId = 1;
+
+            _repository
+                .Setup(_ => _.GetDoctorAsync(doctorId))
+                .ReturnsAsync((Doctor?)null);
+
+            var action = async () => await _service.DeleteDoctorAsync(doctorId);
+
+            await action.Should().ThrowAsync<DoctorNotFoundException>();
+
+            _repository.Verify(_ => _.GetDoctorAsync(doctorId), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+        }
+
+        [Fact]
+        public async Task DeleteDoctorAsync_ShouldThrowUserNotFoundException_Logger()
+        {
+            var doctorId = 1;
+
+            var doctorToDelete = new Doctor
+            {
+                FirstName = "Foo",
+                LastName = "Too",
+                ExperienceYears = 4,
+                GenderType = GenderType.Male,
+                WorkDayStart = new TimeSpan(9, 0, 0),
+                WorkDayEnd = new TimeSpan(17, 0, 0),
+                Specialty = new Specialty
+                {
+                    Id = 1,
+                    Name = "Терапия",
+                    Price = 40
+                },
+                User = null
+            };
+
+            _repository
+                .Setup(_ => _.GetDoctorAsync(doctorId))
+                .ReturnsAsync(doctorToDelete);
+
+            var action = async () => await _service.DeleteDoctorAsync(doctorId);
+
+            await action.Should().ThrowAsync<UserNotFoundException>();
+
+            _repository.Verify(_ => _.GetDoctorAsync(doctorId), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+        }
+
+        [Fact]
+        public async Task DeleteDoctorAsync_ShouldThrowSpecialtyNotFoundException_Logger()
+        {
+            var doctorId = 1;
+
+            var doctorToDelete = new Doctor
+            {
+                FirstName = "Foo",
+                LastName = "Too",
+                ExperienceYears = 4,
+                GenderType = GenderType.Male,
+                WorkDayStart = new TimeSpan(9, 0, 0),
+                WorkDayEnd = new TimeSpan(17, 0, 0),
+                Specialty = null,
+                User = new User
+                {
+                    Email = "doctor24@gmail.com",
+                }
+            };
+
+            _repository
+                .Setup(_ => _.GetDoctorAsync(doctorId))
+                .ReturnsAsync(doctorToDelete);
+
+            var action = async () => await _service.DeleteDoctorAsync(doctorId);
+
+            await action.Should().ThrowAsync<SpecialtyNotFoundException>();
+
+            _repository.Verify(_ => _.GetDoctorAsync(doctorId), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+        }
+
+        [Fact]
+        public async Task DeleteDoctorAsync_ShouldThrowInsufficientFundsException_Logger()
+        {
+            var doctorId = 1;
+            var price = 400m;
+
+            var doctorToDelete = new Doctor
+            {
+                Id = doctorId,
+                FirstName = "Foo",
+                LastName = "Too",
+                ExperienceYears = 4,
+                GenderType = GenderType.Male,
+                WorkDayStart = new TimeSpan(9, 0, 0),
+                WorkDayEnd = new TimeSpan(17, 0, 0),
+                Specialty = new Specialty
+                {
+                    Id = 1,
+                    Name = "Терапия",
+                    Price = price
+                },
+                User = new User
+                {
+                    Email = "doctor24@gmail.com",
+                    Money = 300m
+                },
+            };
+
+            var bookings = new List<Booking>
+            {
+                new()
+                {
+                    Id = 1,
+                    DoctorSlot = new DoctorSlot
+                    {
+                        Id = 1,
+                        DoctorId = doctorId
+                    },
+                    Patient = new Patient
+                    {
+                        User = new User
+                        {
+                            Id = 20,
+                            Money = 100m
+                        }
+                    }
+                }
+            };
+
+            _repository
+                .Setup(_ => _.GetDoctorAsync(doctorId))
+                .ReturnsAsync(doctorToDelete);
+
+            _unitOfWorkRepository
+                .Setup(_ => _.BeginTransactionAsync())
+                .ReturnsAsync(_transaction.Object);
+
+            _bookingRespository
+                .Setup(_ => _.GetAllBookingsByDoctorAsync(doctorId))
+                .ReturnsAsync(bookings);
+
+            _repository
+                .Setup(_ => _.DeleteDoctorAsync(doctorToDelete))
+                .Returns(Task.CompletedTask);
+
+            _unitOfWorkRepository
+                .Setup(_ => _.SaveChangesAsync())
+                .Returns(Task.CompletedTask);
+
+            var action = async () => await _service.DeleteDoctorAsync(doctorId);
+
+            await action.Should().ThrowAsync<InsufficientFundsException>();
+
+            _repository.Verify(_ => _.GetDoctorAsync(doctorId), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.BeginTransactionAsync(), Times.Once);
+            _bookingRespository.Verify(_ => _.GetAllBookingsByDoctorAsync(doctorId), Times.Once);
+            _transaction.Verify(_ => _.RollbackAsync(It.IsAny<CancellationToken>()), Times.Once);
+
+            _notificationRespository.Verify(_ => _.AddNotificationAsync(It.IsAny<Notification>()), Times.Never);
+            _repository.Verify(_ => _.DeleteDoctorAsync(doctorToDelete), Times.Never);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+            _transaction.Verify(_ => _.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task DeleteDoctorAsync_ShouldThrowPatientNotFoundException_Logger()
+        {
+            var doctorId = 1;
+            var price = 200m;
+
+            var doctorToDelete = new Doctor
+            {
+                Id = doctorId,
+                FirstName = "Foo",
+                LastName = "Too",
+                ExperienceYears = 4,
+                GenderType = GenderType.Male,
+                WorkDayStart = new TimeSpan(9, 0, 0),
+                WorkDayEnd = new TimeSpan(17, 0, 0),
+                Specialty = new Specialty
+                {
+                    Id = 1,
+                    Name = "Терапия",
+                    Price = price
+                },
+                User = new User
+                {
+                    Email = "doctor24@gmail.com",
+                    Money = 300m
+                },
+            };
+
+            var bookings = new List<Booking>
+            {
+                new()
+                {
+                    Id = 1,
+                    DoctorSlot = new DoctorSlot
+                    {
+                        Id = 1,
+                        DoctorId = doctorId
+                    },
+                    Patient = null
+                }
+            };
+
+            _repository
+                .Setup(_ => _.GetDoctorAsync(doctorId))
+                .ReturnsAsync(doctorToDelete);
+
+            _unitOfWorkRepository
+                .Setup(_ => _.BeginTransactionAsync())
+                .ReturnsAsync(_transaction.Object);
+
+            _bookingRespository
+                .Setup(_ => _.GetAllBookingsByDoctorAsync(doctorId))
+                .ReturnsAsync(bookings);
+
+            _repository
+                .Setup(_ => _.DeleteDoctorAsync(doctorToDelete))
+                .Returns(Task.CompletedTask);
+
+            _unitOfWorkRepository
+                .Setup(_ => _.SaveChangesAsync())
+                .Returns(Task.CompletedTask);
+
+            var action = async () => await _service.DeleteDoctorAsync(doctorId);
+
+            await action.Should().ThrowAsync<PatientNotFoundException>();
+
+            _repository.Verify(_ => _.GetDoctorAsync(doctorId), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.BeginTransactionAsync(), Times.Once);
+            _bookingRespository.Verify(_ => _.GetAllBookingsByDoctorAsync(doctorId), Times.Once);
+            _transaction.Verify(_ => _.RollbackAsync(It.IsAny<CancellationToken>()), Times.Once);
+
+            _notificationRespository.Verify(_ => _.AddNotificationAsync(It.IsAny<Notification>()), Times.Never);
+            _repository.Verify(_ => _.DeleteDoctorAsync(doctorToDelete), Times.Never);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+            _transaction.Verify(_ => _.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task DeleteDoctorAsync_ShouldThrowUserNotFoundException_WhenPatientUserIsNull_Logger()
+        {
+            var doctorId = 1;
+            var price = 200m;
+
+            var doctorToDelete = new Doctor
+            {
+                Id = doctorId,
+                FirstName = "Foo",
+                LastName = "Too",
+                ExperienceYears = 4,
+                GenderType = GenderType.Male,
+                WorkDayStart = new TimeSpan(9, 0, 0),
+                WorkDayEnd = new TimeSpan(17, 0, 0),
+                Specialty = new Specialty
+                {
+                    Id = 1,
+                    Name = "Терапия",
+                    Price = price
+                },
+                User = new User
+                {
+                    Email = "doctor24@gmail.com",
+                    Money = 300m
+                },
+            };
+
+            var bookings = new List<Booking>
+            {
+                new()
+                {
+                    Id = 1,
+                    DoctorSlot = new DoctorSlot
+                    {
+                        Id = 1,
+                        DoctorId = doctorId
+                    },
+                    Patient = new Patient
+                    {
+                        User = null
+                    }
+                }
+            };
+
+            _repository
+                .Setup(_ => _.GetDoctorAsync(doctorId))
+                .ReturnsAsync(doctorToDelete);
+
+            _unitOfWorkRepository
+                .Setup(_ => _.BeginTransactionAsync())
+                .ReturnsAsync(_transaction.Object);
+
+            _bookingRespository
+                .Setup(_ => _.GetAllBookingsByDoctorAsync(doctorId))
+                .ReturnsAsync(bookings);
+
+            _repository
+                .Setup(_ => _.DeleteDoctorAsync(doctorToDelete))
+                .Returns(Task.CompletedTask);
+
+            _unitOfWorkRepository
+                .Setup(_ => _.SaveChangesAsync())
+                .Returns(Task.CompletedTask);
+
+            var action = async () => await _service.DeleteDoctorAsync(doctorId);
+
+            await action.Should().ThrowAsync<UserNotFoundException>();
+
+            _repository.Verify(_ => _.GetDoctorAsync(doctorId), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.BeginTransactionAsync(), Times.Once);
+            _bookingRespository.Verify(_ => _.GetAllBookingsByDoctorAsync(doctorId), Times.Once);
+            _transaction.Verify(_ => _.RollbackAsync(It.IsAny<CancellationToken>()), Times.Once);
+
+            _notificationRespository.Verify(_ => _.AddNotificationAsync(It.IsAny<Notification>()), Times.Never);
+            _repository.Verify(_ => _.DeleteDoctorAsync(doctorToDelete), Times.Never);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+            _transaction.Verify(_ => _.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         //Tests
@@ -748,6 +1075,157 @@ namespace Hospital.Tests.Services
             _repository.Verify(_ => _.GetDoctorAsync(doctorId), Times.Once);
             _authRespository.Verify(_ => _.IsEmailNotUniqueAsync(doctorRequest.Email), Times.Once);
             _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Once);
+        }
+
+        [Fact]
+        public async Task DeleteDoctorAsync_ShouldDeleteDoctor_WhenDoctorExistsAndHasNoActiveBookings()
+        {
+            var doctorId = 1;
+
+            var doctorToDelete = new Doctor
+            {
+                Id = doctorId,
+                FirstName = "Foo",
+                LastName = "Too",
+                ExperienceYears = 4,
+                GenderType = GenderType.Male,
+                WorkDayStart = new TimeSpan(9, 0, 0),
+                WorkDayEnd = new TimeSpan(17, 0, 0),
+                Specialty = new Specialty
+                {
+                    Id = 1,
+                    Name = "Терапия",
+                    Price = 40
+                },
+                User = new User
+                {
+                    Email = "doctor24@gmail.com",
+                    Money = 700m
+                },
+            };
+
+            _repository
+                .Setup(_ => _.GetDoctorAsync(doctorId))
+                .ReturnsAsync(doctorToDelete);
+
+            _unitOfWorkRepository
+                .Setup(_ => _.BeginTransactionAsync())
+                .ReturnsAsync(_transaction.Object);
+
+            _bookingRespository
+                .Setup(_ => _.GetAllBookingsByDoctorAsync(doctorId))
+                .ReturnsAsync([]);
+
+            _repository
+                .Setup(_ => _.DeleteDoctorAsync(doctorToDelete))
+                .Returns(Task.CompletedTask);
+
+            _unitOfWorkRepository
+                .Setup(_ => _.SaveChangesAsync())
+                .Returns(Task.CompletedTask);
+
+            await _service.DeleteDoctorAsync(doctorId);
+
+            _repository.Verify(_ => _.GetDoctorAsync(doctorId), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.BeginTransactionAsync(), Times.Once);
+            _bookingRespository.Verify(_ => _.GetAllBookingsByDoctorAsync(doctorId), Times.Once);
+            _repository.Verify(_ => _.DeleteDoctorAsync(doctorToDelete), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Once);
+            _transaction.Verify(_ => _.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
+
+            _transaction.Verify(_ => _.RollbackAsync(It.IsAny<CancellationToken>()), Times.Never);
+            _notificationRespository.Verify(_ => _.AddNotificationAsync(It.IsAny<Notification>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task DeleteDoctorAsync_ShouldRefundPatientsAndChargeDoctorAndAddNotification_WhenDoctorHasBookings()
+        {
+            var doctorId = 1;
+            var price = 100m;
+
+            var doctorToDelete = new Doctor
+            {
+                Id = doctorId,
+                FirstName = "Foo",
+                LastName = "Too",
+                Specialty = new Specialty
+                {
+                    Id = 1,
+                    Name = "Терапия",
+                    Price = price
+                },
+                User = new User
+                {
+                    Id = 10,
+                    Email = "doctor24@gmail.com",
+                    Money = 700m
+                }
+            };
+
+            var patientUser = new User
+            {
+                Id = 20,
+                Money = 300m
+            };
+
+            var bookings = new List<Booking>
+            {
+                new()
+                {
+                    Id = 1,
+                    DoctorSlot = new DoctorSlot
+                    {
+                        Id = 1,
+                        DoctorId = doctorId
+                    },
+                    Patient = new Patient
+                    {
+                        Id = 5,
+                        User = patientUser
+                    }
+                }
+            };
+
+            _repository
+                .Setup(_ => _.GetDoctorAsync(doctorId))
+                .ReturnsAsync(doctorToDelete);
+
+            _unitOfWorkRepository
+                .Setup(_ => _.BeginTransactionAsync())
+                .ReturnsAsync(_transaction.Object);
+
+            _bookingRespository
+                .Setup(_ => _.GetAllBookingsByDoctorAsync(doctorId))
+                .ReturnsAsync(bookings);
+
+            _repository
+                .Setup(_ => _.DeleteDoctorAsync(doctorToDelete))
+                .Returns(Task.CompletedTask);
+
+            _unitOfWorkRepository
+                .Setup(_ => _.SaveChangesAsync())
+                .Returns(Task.CompletedTask);
+
+            await _service.DeleteDoctorAsync(doctorId);
+
+            doctorToDelete.User.Money.Should().Be(600m);
+            patientUser.Money.Should().Be(400m);
+
+            _repository.Verify(_ => _.GetDoctorAsync(doctorId), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.BeginTransactionAsync(), Times.Once);
+            _bookingRespository.Verify(_ => _.GetAllBookingsByDoctorAsync(doctorId), Times.Once);
+            _repository.Verify(_ => _.DeleteDoctorAsync(doctorToDelete), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Once);
+            _transaction.Verify(_ => _.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
+
+            _notificationRespository.Verify(_ => _.AddNotificationAsync(
+                It.Is<Notification>(notification =>
+                    notification.UserId == patientUser.Id &&
+                    notification.Message.Contains("Foo") &&
+                    notification.Message.Contains("Too"))),
+                Times.Once);
+            
+            _transaction.Verify(_ => _.RollbackAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
     }
 }

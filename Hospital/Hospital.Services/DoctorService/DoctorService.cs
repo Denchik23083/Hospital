@@ -180,10 +180,16 @@ namespace Hospital.Services.DoctorService
 
                 foreach (var booking in bookings)
                 {
-                    if (booking.Patient is null || booking.Patient.User is null)
+                    if (booking.Patient is null)
                     {
                         _logger.LogWarning("Patient not found. Transaction was rollback");
                         throw new PatientNotFoundException("Patient not found");
+                    }
+
+                    if (booking.Patient.User is null)
+                    {
+                        _logger.LogWarning("User not found. Transaction was rollback");
+                        throw new UserNotFoundException("User not found");
                     }
 
                     booking.Patient.User.Money += doctorToDelete.Specialty.Price;

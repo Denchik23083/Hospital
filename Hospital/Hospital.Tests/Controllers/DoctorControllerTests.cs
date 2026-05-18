@@ -221,5 +221,21 @@ namespace Hospital.Tests.Controllers
 
             _service.Verify(_ => _.UpdateDoctorAsync(doctorRequest, doctorId), Times.Once);
         }
+
+        [Fact]
+        public async Task DeleteDoctorAsync_ShouldReturnNoContent()
+        {
+            var doctorId = 1;
+
+            _service
+                .Setup(_ => _.DeleteDoctorAsync(doctorId))
+                .Returns(Task.CompletedTask);
+
+            var result = await _controller.DeleteDoctorAsync(doctorId);
+
+            result.Should().BeOfType<NoContentResult>();
+
+            _service.Verify(_ => _.DeleteDoctorAsync(doctorId), Times.Once);
+        }
     }
 }

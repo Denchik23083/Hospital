@@ -418,7 +418,7 @@ namespace Hospital.Tests.Repositories
         }
 
         [Fact]
-        public async Task CreateDoctorAsync_ShouldAddDoctorNotificationToDb()
+        public async Task CreateDoctorAsync_ShouldAddDoctorToDb()
         {
             var doctorToAdd = new Doctor
             {
@@ -455,16 +455,105 @@ namespace Hospital.Tests.Repositories
             doctor.GenderType.Should().Be(GenderType.Male);
             doctor.WorkDayStart.Should().Be(new TimeSpan(9, 0, 0));
             doctor.WorkDayEnd.Should().Be(new TimeSpan(17, 0, 0));
-            
+
             doctor.Specialty.Should().NotBeNull();
             doctor.Specialty.Id.Should().Be(2);
             doctor.Specialty.Name.Should().Be("Кардиология");
             doctor.Specialty.Price.Should().Be(80);
-            
+
             doctor.User.Should().NotBeNull();
             doctor.User.Id.Should().Be(2);
             doctor.User.Email.Should().Be("doctor24@gmail.com");
             doctor.User.Money.Should().Be(100m);
+        }
+
+        [Fact]
+        public async Task DeleteDoctorAsync_ShouldDeleteDoctorFromDb()
+        {
+            int id = 1;
+
+            var doctors = new List<Doctor>
+            {
+                new()
+                {
+                    Id = id,
+                    FirstName = "Foo",
+                    LastName = "Too",
+                    ExperienceYears = 4,
+                    GenderType = GenderType.Male,
+                    WorkDayStart = new TimeSpan(9, 0, 0),
+                    WorkDayEnd = new TimeSpan(17, 0, 0),
+                    Specialty = new Specialty
+                    {
+                        Id = 2,
+                        Name = "Кардиология",
+                        Price = 80
+                    },
+                    User = new User
+                    {
+                        Id = 1,
+                        Email = "doctor24@gmail.com",
+                        Money = 100m
+                    }
+                },
+                new()
+                {
+                    Id = 2,
+                    FirstName = "Глеб",
+                    LastName = "Романенко",
+                    ExperienceYears = 2,
+                    GenderType = GenderType.Male,
+                    WorkDayStart = new TimeSpan(9, 0, 0),
+                    WorkDayEnd = new TimeSpan(17, 0, 0),
+                    Specialty = new Specialty
+                    {
+                        Id = 1,
+                        Name = "Терапия",
+                        Price = 40
+                    },
+                    User = new User
+                    {
+                        Id = 2,
+                        Email = "doctor1@gmail.com",
+                        Money = 500m
+                    }
+                },
+                new()
+                {
+                    Id = 3,
+                    FirstName = "Варвара",
+                    LastName = "Черноус",
+                    ExperienceYears = 2,
+                    GenderType = GenderType.Female,
+                    WorkDayStart = new TimeSpan(9, 0, 0),
+                    WorkDayEnd = new TimeSpan(17, 0, 0),
+                    SpecialtyId = 1,
+                    User = new User
+                    {
+                        Id = 5,
+                        Email = "doctor4@gmail.com",
+                        Money = 400m
+                    }
+                }
+            };
+
+            await _context.Doctors.AddRangeAsync(doctors);
+            await _context.SaveChangesAsync();
+
+            var doctorToDelete = await _context.Doctors
+                .FirstOrDefaultAsync(_ => _.Id == id);
+
+            await _repository.DeleteDoctorAsync(doctorToDelete!);
+            await _context.SaveChangesAsync();
+
+            var result = await _context.Doctors
+                .FirstOrDefaultAsync(_ => _.Id == id);
+
+            result.Should().BeNull();
+
+            var doctorsCount = await _context.Doctors.CountAsync();
+
+            doctorsCount.Should().Be(2);
         }
     }
 }
