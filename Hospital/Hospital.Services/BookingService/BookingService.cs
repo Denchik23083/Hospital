@@ -82,6 +82,7 @@ namespace Hospital.Services.BookingService
 
             try
             {
+                // TODO: different
                 if (patient.User is null 
                     || doctorSlot.Doctor is null 
                     || doctorSlot.Doctor.Specialty is null
@@ -174,6 +175,7 @@ namespace Hospital.Services.BookingService
 
             try
             {
+                //TODO: Different
                 if (patient.User is null
                     || booking.DoctorSlot is null
                     || booking.DoctorSlot.Doctor is null
