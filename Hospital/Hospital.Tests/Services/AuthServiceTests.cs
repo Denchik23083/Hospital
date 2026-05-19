@@ -1,40 +1,60 @@
-﻿namespace Hospital.Tests.Services
+﻿using FluentAssertions;
+using Hospital.Core.Exceptions;
+using Hospital.Core.Models.Requests;
+using Hospital.Db.Entities;
+using Hospital.Db.Utilities;
+using Hospital.Repositories.AuthRepository;
+using Hospital.Repositories.UnitOfWorkRepository;
+using Hospital.Services.AuthService;
+using Hospital.Tests.Helpers;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Moq;
+using Newtonsoft.Json.Linq;
+
+namespace Hospital.Tests.Services
 {
     public class AuthServiceTests
     {
-        /*private readonly HospitalContext _context;
+        private readonly Mock<IAuthRepository> _repository;
+        private readonly Mock<IUnitOfWorkRepository> _unitOfWorkRepository;
         private readonly IConfiguration _configuration;
         private readonly ILogger<AuthService> _logger;
         private readonly AuthService _service;
 
         public AuthServiceTests()
         {
-            _context = TestDbContextFactory.Create();
+            _repository = new Mock<IAuthRepository>();
+            _unitOfWorkRepository = new Mock<IUnitOfWorkRepository>();
             _configuration = TestConfigurationFactory.Create();
             _logger = Mock.Of<ILogger<AuthService>>();
 
-            _service = new AuthService(_context, _configuration, _logger);
+            _service = new AuthService(_repository.Object, 
+                _unitOfWorkRepository.Object, _configuration, _logger);
         }
 
         //Throw Exception Condition
         [Fact]
         public async Task RegisterAsync_ShouldThrowConflictException_WhenEmailAlreadyExists()
         {
-            var user = new User
-            {
-                Email = "foo@gmail.com",
-                PasswordHash = "0000",
-                RoleType = RoleType.Patient
-            };
+            var register = new RegisterRequest(
+                "foo@gmail.com", "0000",
+                "Denys", "Kudriavov", "497777777",
+                new DateOnly(2003, 01, 01), GenderType.Male);
 
-            await _context.Users.AddAsync(user);
-            await _context.SaveChangesAsync();
+            _repository
+                .Setup(_ => _.IsEmailNotUniqueAsync(register.Email))
+                .ReturnsAsync(true);
 
-            var register = new RegisterRequest("Foo", "foo@gmail.com", "0000");
+            var action = async () => await _service.RegisterAsync(register);
 
-            var result = async () => await _service.RegisterAsync(register);
+            await action.Should().ThrowAsync<ConflictException>();
 
-            await result.Should().ThrowAsync<ConflictException>();
+            _repository.Verify(_ => _.IsEmailNotUniqueAsync(register.Email), Times.Once);
+
+            _repository.Verify(_ => _.RegisterAsync(It.IsAny<User>()), Times.Never);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
         }
 
         [Fact]
@@ -42,9 +62,17 @@
         {
             var login = new LoginRequest("foo@gmail.com", "0000");
 
-            var result = async () => await _service.LoginAsync(login);
+            _repository
+                .Setup(_ => _.GetUserByEmailAsync(login.Email))
+                .ReturnsAsync((User?)null);
 
-            await result.Should().ThrowAsync<UnauthorizedException>();
+            var action = async () => await _service.LoginAsync(login);
+
+            await action.Should().ThrowAsync<UnauthorizedException>();
+
+            _repository.Verify(_ => _.GetUserByEmailAsync(login.Email), Times.Once);
+
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
         }
 
         [Fact]
@@ -59,31 +87,50 @@
             user.PasswordHash = new PasswordHasher<User>()
                 .HashPassword(user, "0000");
 
-            await _context.Users.AddAsync(user);
-            await _context.SaveChangesAsync();
-
             var login = new LoginRequest("foo@gmail.com", "1111");
 
-            var result = async () => await _service.LoginAsync(login);
+            _repository
+                .Setup(_ => _.GetUserByEmailAsync(login.Email))
+                .ReturnsAsync(user);
 
-            await result.Should().ThrowAsync<UnauthorizedException>();
+            var action = async () => await _service.LoginAsync(login);
+
+            await action.Should().ThrowAsync<UnauthorizedException>();
+
+            _repository.Verify(_ => _.GetUserByEmailAsync(login.Email), Times.Once);
+
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
         }
 
         [Fact]
         public async Task RefreshTokenAsync_ShouldThrowUnauthorizedException_WhenUserNotFound()
         {
-            var refresh = new RefreshTokenRequest(999, "refresh-token");
+            var userId = 999;
 
-            var result = async () => await _service.RefreshTokenAsync(refresh);
+            var refresh = new RefreshTokenRequest(userId, "refresh-token");
 
-            await result.Should().ThrowAsync<UnauthorizedException>();
+            _repository
+                .Setup(_ => _.GetUserAsync(userId))
+                .ReturnsAsync((User?)null);
+
+            var action = async () => await _service.RefreshTokenAsync(refresh);
+
+            await action.Should().ThrowAsync<UnauthorizedException>();
+
+            _repository.Verify(_ => _.GetUserAsync(userId), Times.Once);
+
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
         }
 
         [Fact]
         public async Task RefreshTokenAsync_ShouldThrowUnauthorizedException_WhenRefreshTokenDoesNotMatch()
         {
+            var userId = 1;
+            var fakeRefreshToken = "fake-refresh-token";
+
             var user = new User
             {
+                Id = userId,
                 Email = "foo@gmail.com",
                 RoleType = RoleType.Patient,
                 RefreshToken = "refresh-token",
@@ -93,21 +140,29 @@
             user.PasswordHash = new PasswordHasher<User>()
                 .HashPassword(user, "0000");
 
-            await _context.Users.AddAsync(user);
-            await _context.SaveChangesAsync();
+            _repository
+                .Setup(_ => _.GetUserAsync(userId))
+                .ReturnsAsync(user);
 
-            var refresh = new RefreshTokenRequest(user.Id, "fake-refresh-token");
+            var refresh = new RefreshTokenRequest(user.Id, fakeRefreshToken);
 
-            var result = async () => await _service.RefreshTokenAsync(refresh);
+            var action = async () => await _service.RefreshTokenAsync(refresh);
 
-            await result.Should().ThrowAsync<UnauthorizedException>();
+            await action.Should().ThrowAsync<UnauthorizedException>();
+
+            _repository.Verify(_ => _.GetUserAsync(userId), Times.Once);
+
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
         }
 
         [Fact]
         public async Task RefreshTokenAsync_ShouldThrowUnauthorizedException_WhenRefreshTokenExpired()
         {
+            var userId = 1;
+
             var user = new User
             {
+                Id = userId,
                 Email = "foo@gmail.com",
                 RoleType = RoleType.Patient,
                 RefreshToken = "refresh-token",
@@ -117,44 +172,70 @@
             user.PasswordHash = new PasswordHasher<User>()
                 .HashPassword(user, "0000");
 
-            await _context.Users.AddAsync(user);
-            await _context.SaveChangesAsync();
+            _repository
+                .Setup(_ => _.GetUserAsync(userId))
+                .ReturnsAsync(user);
 
             var refresh = new RefreshTokenRequest(user.Id, "refresh-token");
 
-            var result = async () => await _service.RefreshTokenAsync(refresh);
+            var action = async () => await _service.RefreshTokenAsync(refresh);
 
-            await result.Should().ThrowAsync<UnauthorizedException>();
+            await action.Should().ThrowAsync<UnauthorizedException>();
+
+            _repository.Verify(_ => _.GetUserAsync(userId), Times.Once);
+
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
         }
 
         //Method
         [Fact]
         public async Task RegisterAsync_ShouldAddUserWithHashedPasswordAndUserRole_WhenDataIsValid()
         {
-            var register = new RegisterRequest("Foo", "foo@gmail.com", "0000");
+            var register = new RegisterRequest(
+                "foo@gmail.com", "0000",
+                "Denys", "Kudriavov", "497777777",
+                new DateOnly(2003, 01, 01), GenderType.Male);
 
-            var mappedUser = new User
-            {
-                Email = register.Email,
-            };
+            User? user = null;
 
-            _mapper
-                .Setup(_ => _.Map<User>(register))
-                .Returns(mappedUser);
+            _repository
+                .Setup(_ => _.IsEmailNotUniqueAsync(register.Email))
+                .ReturnsAsync(false);
+
+            _repository
+                .Setup(_ => _.RegisterAsync(It.IsAny<User>()))
+                .Callback<User>(u => user = u)
+                .Returns(Task.CompletedTask);
+
+            _unitOfWorkRepository
+                .Setup(_ => _.SaveChangesAsync())
+                .Returns(Task.CompletedTask);
 
             await _service.RegisterAsync(register);
 
-            var savedUser = await _context.Users.SingleAsync(_ => _.Email == register.Email);
+            user.Should().NotBeNull();
 
-            savedUser.Email.Should().Be(register.Email);
-            savedUser.RoleType.Should().Be(RoleType.Patient);
-            savedUser.PasswordHash.Should().NotBeNullOrWhiteSpace();
-            savedUser.PasswordHash.Should().NotBe(register.Password);
+            user.Email.Should().Be(register.Email);
+            user.RoleType.Should().Be(RoleType.Patient);
+
+            user.Patient.Should().NotBeNull();
+            user.Patient.FirstName.Should().Be(register.FirstName);
+            user.Patient.LastName.Should().Be(register.LastName);
+            user.Patient.BirthDate.Should().Be(register.BirthDate);
+            user.Patient.GenderType.Should().Be(register.GenderType);
+            user.Patient.Phone.Should().Be(register.Phone);
+
+            user.PasswordHash.Should().NotBeNullOrWhiteSpace();
+            user.PasswordHash.Should().NotBe(register.Password);
 
             var verifyResult = new PasswordHasher<User>()
-                .VerifyHashedPassword(savedUser, savedUser.PasswordHash, register.Password);
+                .VerifyHashedPassword(user, user.PasswordHash, register.Password);
 
             verifyResult.Should().Be(PasswordVerificationResult.Success);
+
+            _repository.Verify(_ => _.IsEmailNotUniqueAsync(register.Email), Times.Once);
+            _repository.Verify(_ => _.RegisterAsync(It.IsAny<User>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Once);
         }
 
         [Fact]
@@ -169,27 +250,36 @@
             user.PasswordHash = new PasswordHasher<User>()
                 .HashPassword(user, "0000");
 
-            await _context.Users.AddAsync(user);
-            await _context.SaveChangesAsync();
-
             var login = new LoginRequest("foo@gmail.com", "0000");
+
+            _repository
+                .Setup(_ => _.GetUserByEmailAsync(login.Email))
+                .ReturnsAsync(user);
+
+            _unitOfWorkRepository
+                .Setup(_ => _.SaveChangesAsync())
+                .Returns(Task.CompletedTask);
 
             var result = await _service.LoginAsync(login);
 
             result.AccessToken.Should().NotBeNullOrWhiteSpace();
             result.RefreshToken.Should().NotBeNullOrWhiteSpace();
 
-            var updatedUser = await _context.Users.SingleAsync(_ => _.Email == login.Email);
+            user.RefreshToken.Should().Be(result.RefreshToken);
+            user.RefreshTokenExpiryTime.Should().BeAfter(DateTime.UtcNow);
 
-            updatedUser.RefreshToken.Should().Be(result.RefreshToken);
-            updatedUser.RefreshTokenExpiryTime.Should().BeAfter(DateTime.UtcNow);
+            _repository.Verify(_ => _.GetUserByEmailAsync(login.Email), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Once);
         }
 
         [Fact]
         public async Task RefreshTokenAsync_ShouldReturnNewTokens_WhenRefreshTokenIsValid()
         {
+            var userId = 1;
+
             var user = new User
             {
+                Id = userId,
                 Email = "foo@gmail.com",
                 RoleType = RoleType.Patient,
                 RefreshToken = "refresh-token",
@@ -199,8 +289,9 @@
             user.PasswordHash = new PasswordHasher<User>()
                 .HashPassword(user, "0000");
 
-            await _context.Users.AddAsync(user);
-            await _context.SaveChangesAsync();
+            _repository
+                .Setup(_ => _.GetUserAsync(userId))
+                .ReturnsAsync(user);
 
             var oldRefreshToken = user.RefreshToken;
 
@@ -212,10 +303,11 @@
             result.RefreshToken.Should().NotBeNullOrWhiteSpace();
             result.RefreshToken.Should().NotBe(oldRefreshToken);
 
-            var updatedUser = await _context.Users.SingleAsync(_ => _.Email == user.Email);
+            user.RefreshToken.Should().Be(result.RefreshToken);
+            user.RefreshTokenExpiryTime.Should().BeAfter(DateTime.UtcNow);
 
-            updatedUser.RefreshToken.Should().Be(result.RefreshToken);
-            updatedUser.RefreshTokenExpiryTime.Should().BeAfter(DateTime.UtcNow);
-        }*/
+            _repository.Verify(_ => _.GetUserAsync(userId), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Once);
+        }
     }
 }
