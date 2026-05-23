@@ -701,7 +701,7 @@ namespace Hospital.Tests.Services
             _transaction.Verify(_ => _.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
-        //Tests
+        //Method
         [Fact]
         public async Task GetAllDoctorsAsync_ShouldReturnListDoctors()
         {

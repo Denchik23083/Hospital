@@ -17,6 +17,7 @@ namespace Hospital.Tests.Services
             _service = new SpecialtyService(_repository.Object);
         }
 
+        //Method
         [Fact]
         public async Task GetAllSpecialtiesAsync_ShouldReturnListSpecialties()
         {
