@@ -17,7 +17,7 @@ namespace Hospital.Repositories.DoctorSlotRepository
 
         Task<DoctorSlot?> GetDoctorSlotAsync(int slotId);
 
-        Task<bool> DoctorSlotsAlreadyExists(int doctorId, DateOnly date);
+        Task<bool> DoctorSlotsAlreadyExistsAsync(int doctorId, DateOnly date);
 
         Task AddDoctorSlotsAsync(List<DoctorSlot> doctorSlots);
         

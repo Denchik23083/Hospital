@@ -146,7 +146,7 @@ namespace Hospital.Services.DoctorSlotService
                 throw new DoctorNotFoundException("Doctor not found");
             }
 
-            if (await _repository.DoctorSlotsAlreadyExists(doctor.Id, date))
+            if (await _repository.DoctorSlotsAlreadyExistsAsync(doctor.Id, date))
             {
                 _logger.LogWarning("Doctor slot with this date already exists");
                 throw new DoctorSlotAlreadyExistsException($"Doctor slot with {date} already exists");
@@ -162,6 +162,7 @@ namespace Hospital.Services.DoctorSlotService
                 if (workDayStart >= _breakStart && workDayStart < _breakEnd)
                 {
                     workDayStart = _breakEnd;
+                    continue;
                 }
 
                 listDoctorSlots.Add(new DoctorSlot

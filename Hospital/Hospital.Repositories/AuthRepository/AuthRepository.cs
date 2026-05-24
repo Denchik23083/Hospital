@@ -8,9 +8,9 @@ namespace Hospital.Repositories.AuthRepository
     {
         private readonly HospitalContext _context = context;
 
-        public Task<bool> IsEmailNotUniqueAsync(string email)
+        public async Task<bool> IsEmailNotUniqueAsync(string email)
         {
-            return _context.Users.AnyAsync(u => u.Email == email);
+            return await _context.Users.AnyAsync(u => u.Email == email);
         }
 
         public async Task<User?> GetUserByEmailAsync(string email)

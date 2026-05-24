@@ -109,7 +109,7 @@ namespace Hospital.Repositories.DoctorSlotRepository
                 .FirstOrDefaultAsync(_ => _.Id == slotId);
         }
 
-        public async Task<bool> DoctorSlotsAlreadyExists(int doctorId, DateOnly date)
+        public async Task<bool> DoctorSlotsAlreadyExistsAsync(int doctorId, DateOnly date)
         {
             return await _context.DoctorSlots
                 .AnyAsync(_ => _.DoctorId == doctorId && _.Date == date);

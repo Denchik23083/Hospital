@@ -105,7 +105,7 @@ namespace Hospital.Tests.Controllers
         public async Task GetAllDoctorSlotsDatesAsync_ShouldReturnOk_WithListDates()
         {
             var userId = 6;
-            var doctorId = 2; 
+            var doctorId = 2;
 
             var dates = new List<DateOnly>
             {
@@ -233,6 +233,43 @@ namespace Hospital.Tests.Controllers
             actionResult.Value.Should().BeEquivalentTo(doctorSlots);
 
             _service.Verify(_ => _.GetAllAdminDoctorSlotsTimeByDateAsync(doctorId, date), Times.Once);
+        }
+
+        [Fact]
+        public async Task AddDoctorSlotsAsync_ShouldReturnCreated()
+        {
+            var userId = 4;
+            var date = new DateOnly(2026, 02, 03);
+
+            _service
+                .Setup(_ => _.AddDoctorSlotsAsync(date, userId))
+                .Returns(Task.CompletedTask);
+
+            _controller.ControllerContext = TestUserFactory.CreateControllerContext(userId);
+
+            var result = await _controller.AddDoctorSlotsAsync(date);
+
+            result.Should().BeOfType<CreatedResult>();
+
+            _service.Verify(_ => _.AddDoctorSlotsAsync(date, userId), Times.Once);
+        }
+
+        [Fact]
+        public async Task DeleteDoctorSlotsAsync_ShouldReturnNoContent()
+        {
+            var userId = 4;
+
+            _service
+                .Setup(_ => _.DeleteDoctorSlotsAsync(userId))
+                .Returns(Task.CompletedTask);
+
+            _controller.ControllerContext = TestUserFactory.CreateControllerContext(userId);
+
+            var result = await _controller.DeleteDoctorSlotsAsync();
+
+            result.Should().BeOfType<NoContentResult>();
+
+            _service.Verify(_ => _.DeleteDoctorSlotsAsync(userId), Times.Once);
         }
     }
 }

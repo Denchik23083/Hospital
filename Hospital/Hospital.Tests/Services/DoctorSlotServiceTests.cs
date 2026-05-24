@@ -292,7 +292,7 @@ namespace Hospital.Tests.Services
                 },
                 User = new User
                 {
-                    Id = userId,
+                    Id = 5,
                     Email = "doctor1@gmail.com",
                     Money = 500m
                 }
@@ -358,6 +358,138 @@ namespace Hospital.Tests.Services
             _doctorRepository.Verify(_ => _.GetDoctorAsync(doctorId), Times.Once);
 
             _repository.Verify(_ => _.GetAllDoctorSlotsDatesAsync(It.IsAny<int>(), It.IsAny<DateOnly>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task AddDoctorSlotsAsync_ShouldThrowDoctorNotFoundException_Logger()
+        {
+            var userId = 4;
+            var date = new DateOnly(2026, 02, 03);
+
+            _doctorRepository
+                .Setup(_ => _.GetDoctorByUserAsync(userId))
+                .ReturnsAsync((Doctor?)null);
+
+            var action = async () => await _service.AddDoctorSlotsAsync(date, userId);
+
+            await action.Should().ThrowAsync<DoctorNotFoundException>();
+
+            _doctorRepository.Verify(_ => _.GetDoctorByUserAsync(userId), Times.Once);
+
+            _repository.Verify(_ => _.DoctorSlotsAlreadyExistsAsync(It.IsAny<int>(), date), Times.Never);
+            _repository.Verify(_ => _.AddDoctorSlotsAsync(It.IsAny<List<DoctorSlot>>()), Times.Never);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+        }
+
+        [Fact]
+        public async Task AddDoctorSlotsAsync_ShouldThrowDoctorSlotAlreadyExistsException_Logger()
+        {
+            var userId = 4;
+            var date = new DateOnly(2026, 02, 03);
+
+            var doctor = new Doctor
+            {
+                Id = 2,
+                FirstName = "Глеб",
+                LastName = "Романенко",
+                ExperienceYears = 2,
+                GenderType = GenderType.Male,
+                WorkDayStart = new TimeSpan(9, 0, 0),
+                WorkDayEnd = new TimeSpan(17, 0, 0),
+                Specialty = new Specialty
+                {
+                    Id = 1,
+                    Name = "Терапия",
+                    Price = 40
+                },
+                User = new User
+                {
+                    Id = userId,
+                    Email = "doctor1@gmail.com",
+                    Money = 500m
+                }
+            };
+
+            _doctorRepository
+                .Setup(_ => _.GetDoctorByUserAsync(userId))
+                .ReturnsAsync(doctor);
+
+            _repository
+                .Setup(_ => _.DoctorSlotsAlreadyExistsAsync(doctor.Id, date))
+                .ReturnsAsync(true);
+
+            var action = async () => await _service.AddDoctorSlotsAsync(date, userId);
+
+            await action.Should().ThrowAsync<DoctorSlotAlreadyExistsException>();
+
+            _doctorRepository.Verify(_ => _.GetDoctorByUserAsync(userId), Times.Once);
+            _repository.Verify(_ => _.DoctorSlotsAlreadyExistsAsync(doctor.Id, date), Times.Once);
+
+            _repository.Verify(_ => _.AddDoctorSlotsAsync(It.IsAny<List<DoctorSlot>>()), Times.Never);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+        }
+
+        [Fact]
+        public async Task DeleteDoctorSlotsAsync_ShouldThrowDoctorNotFoundException_Logger()
+        {
+            var userId = 4;
+
+            _doctorRepository
+                .Setup(_ => _.GetDoctorByUserAsync(userId))
+                .ReturnsAsync((Doctor?)null);
+
+            var action = async () => await _service.DeleteDoctorSlotsAsync(userId);
+
+            await action.Should().ThrowAsync<DoctorNotFoundException>();
+
+            _doctorRepository.Verify(_ => _.GetDoctorByUserAsync(userId), Times.Once);
+
+            _repository.Verify(_ => _.GetAllExpiredDoctorSlotsAsync(It.IsAny<int>()), Times.Never);
+            _repository.Verify(_ => _.DeleteDoctorSlotsAsync(It.IsAny<List<int>>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task DeleteDoctorSlotsAsync_ShouldNotDeleteDoctorSlots_WhenExpiredDoctorSlotsNotExists()
+        {
+            var userId = 4;
+
+            var doctor = new Doctor
+            {
+                Id = 2,
+                FirstName = "Глеб",
+                LastName = "Романенко",
+                ExperienceYears = 2,
+                GenderType = GenderType.Male,
+                WorkDayStart = new TimeSpan(9, 0, 0),
+                WorkDayEnd = new TimeSpan(17, 0, 0),
+                Specialty = new Specialty
+                {
+                    Id = 1,
+                    Name = "Терапия",
+                    Price = 40
+                },
+                User = new User
+                {
+                    Id = userId,
+                    Email = "doctor1@gmail.com",
+                    Money = 500m
+                }
+            };
+
+            _doctorRepository
+                .Setup(_ => _.GetDoctorByUserAsync(userId))
+                .ReturnsAsync(doctor);
+
+            _repository
+                .Setup(_ => _.GetAllExpiredDoctorSlotsAsync(doctor.Id))
+                .ReturnsAsync([]);
+
+            await _service.DeleteDoctorSlotsAsync(userId);
+
+            _doctorRepository.Verify(_ => _.GetDoctorByUserAsync(userId), Times.Once);
+            _repository.Verify(_ => _.GetAllExpiredDoctorSlotsAsync(doctor.Id), Times.Once);
+
+            _repository.Verify(_ => _.DeleteDoctorSlotsAsync(It.IsAny<List<int>>()), Times.Never);
         }
 
         //Method
@@ -764,6 +896,132 @@ namespace Hospital.Tests.Services
 
             _doctorRepository.Verify(_ => _.GetDoctorAsync(doctorId), Times.Once);
             _repository.Verify(_ => _.GetAllDoctorSlotsTimeByDateAsync(doctor.Id, date), Times.Once);
+        }
+
+        [Fact]
+        public async Task AddDoctorSlotsAsync_ShouldAddListDoctorSlots()
+        {
+            var userId = 4;
+            var date = new DateOnly(2026, 02, 03);
+
+            TimeSpan breakStart = new(13, 00, 00);
+            TimeSpan breakEnd = new(14, 00, 00);
+            TimeSpan slot = new(00, 30, 00);
+
+            var doctor = new Doctor
+            {
+                Id = 2,
+                FirstName = "Глеб",
+                LastName = "Романенко",
+                ExperienceYears = 2,
+                GenderType = GenderType.Male,
+                WorkDayStart = new TimeSpan(9, 0, 0),
+                WorkDayEnd = new TimeSpan(17, 0, 0),
+                Specialty = new Specialty
+                {
+                    Id = 1,
+                    Name = "Терапия",
+                    Price = 40
+                },
+                User = new User
+                {
+                    Id = userId,
+                    Email = "doctor1@gmail.com",
+                    Money = 500m
+                }
+            };
+
+            List<DoctorSlot>? doctorSlots = null;
+
+            _doctorRepository
+                .Setup(_ => _.GetDoctorByUserAsync(userId))
+                .ReturnsAsync(doctor);
+
+            _repository
+                .Setup(_ => _.DoctorSlotsAlreadyExistsAsync(doctor.Id, date))
+                .ReturnsAsync(false);
+
+            _repository
+                .Setup(_ => _.AddDoctorSlotsAsync(It.IsAny<List<DoctorSlot>>()))
+                .Callback<List<DoctorSlot>>(l => doctorSlots = l)
+                .Returns(Task.CompletedTask);
+
+            _unitOfWorkRepository
+                .Setup(_ => _.SaveChangesAsync())
+                .Returns(Task.CompletedTask);
+
+            await _service.AddDoctorSlotsAsync(date, userId);
+
+            doctorSlots.Should().NotBeNull();
+            doctorSlots.Should().HaveCount(14);
+
+            doctorSlots.Should().OnlyContain(_ => _.EndTime - _.StartTime == slot);
+            doctorSlots.Should().OnlyContain(_ => _.DoctorId == doctor.Id);
+            doctorSlots.Should().OnlyContain(_ => _.Date == date);
+            doctorSlots.Should().NotContain(_ => _.StartTime >= breakStart && _.StartTime < breakEnd);
+
+            doctorSlots.First().StartTime.Should().Be(doctor.WorkDayStart);
+            doctorSlots.First().EndTime.Should().Be(doctor.WorkDayStart + slot);
+
+            doctorSlots.Last().StartTime.Should().Be(doctor.WorkDayEnd - slot);
+            doctorSlots.Last().EndTime.Should().Be(doctor.WorkDayEnd);
+
+            _doctorRepository.Verify(_ => _.GetDoctorByUserAsync(userId), Times.Once);
+            _repository.Verify(_ => _.DoctorSlotsAlreadyExistsAsync(doctor.Id, date), Times.Once);
+            _repository.Verify(_ => _.AddDoctorSlotsAsync(It.IsAny<List<DoctorSlot>>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Once);
+        }
+
+        [Fact]
+        public async Task DeleteDoctorSlotsAsync_ShouldDeleteDoctorSlots_WhenExpiredDoctorSlotsExists()
+        {
+            var userId = 4;
+
+            var doctor = new Doctor
+            {
+                Id = 2,
+                FirstName = "Глеб",
+                LastName = "Романенко",
+                ExperienceYears = 2,
+                GenderType = GenderType.Male,
+                WorkDayStart = new TimeSpan(9, 0, 0),
+                WorkDayEnd = new TimeSpan(17, 0, 0),
+                Specialty = new Specialty
+                {
+                    Id = 1,
+                    Name = "Терапия",
+                    Price = 40
+                },
+                User = new User
+                {
+                    Id = userId,
+                    Email = "doctor1@gmail.com",
+                    Money = 500m
+                }
+            };
+
+            var expiredDoctorSlots = new List<int>
+            {
+                1, 2, 3, 4, 5, 6
+            };
+
+            _doctorRepository
+                .Setup(_ => _.GetDoctorByUserAsync(userId))
+                .ReturnsAsync(doctor);
+
+            _repository
+                .Setup(_ => _.GetAllExpiredDoctorSlotsAsync(doctor.Id))
+                .ReturnsAsync(expiredDoctorSlots);
+
+            _repository
+                .Setup(_ => _.DeleteDoctorSlotsAsync(It.IsAny<List<int>>()))
+                .Returns(Task.CompletedTask);
+
+            await _service.DeleteDoctorSlotsAsync(userId);
+
+            _doctorRepository.Verify(_ => _.GetDoctorByUserAsync(userId), Times.Once);
+            _repository.Verify(_ => _.GetAllExpiredDoctorSlotsAsync(doctor.Id), Times.Once);
+            _repository.Verify(_ => _.DeleteDoctorSlotsAsync(It.IsAny<List<int>>()), Times.Once);
         }
     }
 }
