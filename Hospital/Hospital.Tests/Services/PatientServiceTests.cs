@@ -526,7 +526,7 @@ namespace Hospital.Tests.Services
         }
 
         [Fact]
-        public async Task GetPatientByUserAsync_ShouldReturnOk_WithPatientByUser()
+        public async Task GetPatientByUserAsync_ShouldReturnPatientByUser()
         {
             var userId = 1;
 

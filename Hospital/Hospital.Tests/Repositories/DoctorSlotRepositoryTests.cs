@@ -376,7 +376,7 @@ namespace Hospital.Tests.Repositories
         }
 
         [Fact]
-        public async Task GetAllExpiredDoctorSlotsAsync_ShouldReturnExpiredDoctorSlotsWithoutActiveBookings()
+        public async Task GetAllExpiredDoctorSlotsAsync_ShouldReturnExpiredDoctorSlotsWithoutActiveBookingsFromDb()
         {
             var doctorId = 2;
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
@@ -443,7 +443,7 @@ namespace Hospital.Tests.Repositories
         }
 
         [Fact]
-        public async Task GetDoctorSlotAsync_ShouldReturnDoctorSlotWithDoctorBookingsAndSpecialty()
+        public async Task GetDoctorSlotAsync_ShouldReturnDoctorSlotWithDoctorBookingsAndSpecialtyFromDb()
         {
             var slotId = 1;
 
@@ -505,7 +505,7 @@ namespace Hospital.Tests.Repositories
         }
 
         [Fact]
-        public async Task DoctorSlotsAlreadyExistsAsync_ShouldReturnTrue_WhenDoctorSlotsAlreadyExists()
+        public async Task DoctorSlotsAlreadyExistsAsync_ShouldReturnTrue_WhenDoctorSlotsAlreadyExistsFromDb()
         {
             var doctorId = 2;
             var date = new DateOnly(2026, 02, 03);
@@ -547,7 +547,7 @@ namespace Hospital.Tests.Repositories
         }
 
         [Fact]
-        public async Task DoctorSlotsAlreadyExistsAsync_ShouldReturnFalse_WhenDoctorSlotsNotExists()
+        public async Task DoctorSlotsAlreadyExistsAsync_ShouldReturnFalse_WhenDoctorSlotsNotExistsFromDb()
         {
             var doctorId = 2;
             var date = new DateOnly(2026, 02, 03);
@@ -581,7 +581,7 @@ namespace Hospital.Tests.Repositories
         }
 
         [Fact]
-        public async Task AddDoctorSlotsAsync_ShouldAddDoctorSlots()
+        public async Task AddDoctorSlotsAsync_ShouldAddDoctorSlotsToDb()
         {
             var doctorId = 2;
             var date = new DateOnly(2026, 02, 03);
@@ -623,7 +623,7 @@ namespace Hospital.Tests.Repositories
         }
 
         [Fact]
-        public async Task DeleteDoctorSlotsAsync_ShouldExecuteWithoutException()
+        public async Task DeleteDoctorSlotsAsync_ShouldExecuteWithoutExceptionFromDb()
         {
             var expiredDoctorSlots = new List<int> { 1, 2, 3 };
 

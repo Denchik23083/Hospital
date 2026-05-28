@@ -22,8 +22,8 @@ namespace Hospital.Services.BookingService
         private readonly IPatientRepository _patientRepository = patientRepository;
         private readonly IDoctorSlotRepository _doctorSlotRepository = doctorSlotRepository;
         private readonly IDoctorRepository _doctorRepository = doctorRepository;
-        private readonly IUnitOfWorkRepository _unitOfWorkRepository = unitOfWorkRepository;
         private readonly ILogger<BookingService> _logger = logger;
+        private readonly IUnitOfWorkRepository _unitOfWorkRepository = unitOfWorkRepository;
 
         public async Task<IEnumerable<BookingResponse>> GetAllPatientBookingsAsync(int userId)
         {
@@ -62,9 +62,7 @@ namespace Hospital.Services.BookingService
                 throw new SlotAlreadyBookedException("Slot already booked");
             }
 
-            var patientAlreadyHasActiveBookingWithDoctor = await _repository.HasActiveBookingWithDoctorAsync(patient.Id, doctorSlot.DoctorId);
-
-            if (patientAlreadyHasActiveBookingWithDoctor)
+            if (await _repository.HasActiveBookingWithDoctorAsync(patient.Id, doctorSlot.DoctorId))
             {
                 _logger.LogWarning("Patient already has an active booking with this doctor");
                 throw new SlotAlreadyBookedException("Patient already has an active booking with this doctor");
@@ -82,8 +80,13 @@ namespace Hospital.Services.BookingService
 
             try
             {
-                if (patient.User is null 
-                    || doctorSlot.Doctor is null 
+                if (patient.User is null)
+                {
+                    _logger.LogWarning("User not found. Transaction was rollback");
+                    throw new UserNotFoundException("User not found");
+                }
+
+                if (doctorSlot.Doctor is null 
                     || doctorSlot.Doctor.Specialty is null
                     || doctorSlot.Doctor.User is null)
                 {
@@ -174,8 +177,13 @@ namespace Hospital.Services.BookingService
 
             try
             {
-                if (patient.User is null
-                    || booking.DoctorSlot is null
+                if (patient.User is null)
+                {
+                    _logger.LogWarning("User not found. Transaction was rollback");
+                    throw new UserNotFoundException("User not found");
+                }
+
+                if (booking.DoctorSlot is null
                     || booking.DoctorSlot.Doctor is null
                     || booking.DoctorSlot.Doctor.Specialty is null
                     || booking.DoctorSlot.Doctor.User is null)
