@@ -504,6 +504,553 @@ namespace Hospital.Tests.Services
             _transaction.Verify(_ => _.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
+        [Fact]
+        public async Task CompleteBookingAsync_ShouldThrowDoctorNotFoundException_Logger()
+        {
+            var userId = 4;
+            var id = 7;
+
+            _doctorRepository
+                .Setup(_ => _.GetDoctorByUserAsync(userId))
+                .ReturnsAsync((Doctor?)null);
+
+            var action = async () => await _service.CompleteBookingAsync(id, userId);
+
+            await action.Should().ThrowAsync<DoctorNotFoundException>();
+
+            _doctorRepository.Verify(_ => _.GetDoctorByUserAsync(userId), Times.Once);
+
+            _repository.Verify(_ => _.GetBookingWithDoctorAsync(id, It.IsAny<int>()), Times.Never);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+        }
+
+        [Fact]
+        public async Task CompleteBookingAsync_ShouldThrowBookingNotFoundException_Logger()
+        {
+            var userId = 4;
+            var id = 7;
+            var doctorId = 2;
+
+            var doctor = new Doctor
+            {
+                Id = doctorId,
+                FirstName = "Глеб",
+                LastName = "Романенко",
+                ExperienceYears = 2,
+                GenderType = GenderType.Male,
+                WorkDayStart = new TimeSpan(9, 0, 0),
+                WorkDayEnd = new TimeSpan(17, 0, 0),
+                User = new User
+                {
+                    Id = userId,
+                    Email = "doctor@gmail.com",
+                    Money = 140m
+                },
+                Specialty = new Specialty
+                {
+                    Id = 1,
+                    Name = "Терапия",
+                    Price = 40m
+                }
+            };
+
+            _doctorRepository
+                .Setup(_ => _.GetDoctorByUserAsync(userId))
+                .ReturnsAsync(doctor);
+
+            _repository
+                .Setup(_ => _.GetBookingWithDoctorAsync(id, doctor.Id))
+                .ReturnsAsync((Booking?)null);
+
+            var action = async () => await _service.CompleteBookingAsync(id, userId);
+
+            await action.Should().ThrowAsync<BookingNotFoundException>();
+
+            _doctorRepository.Verify(_ => _.GetDoctorByUserAsync(userId), Times.Once);
+            _repository.Verify(_ => _.GetBookingWithDoctorAsync(id, doctor.Id), Times.Once);
+
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+        }
+
+        [Fact]
+        public async Task CompleteBookingAsync_ShouldThrowBookingNotFoundException_LoggerWhenStatusNotActive()
+        {
+            var userId = 4;
+            var id = 7;
+            var doctorId = 2;
+
+            var doctor = new Doctor
+            {
+                Id = doctorId,
+                FirstName = "Глеб",
+                LastName = "Романенко",
+                ExperienceYears = 2,
+                GenderType = GenderType.Male,
+                WorkDayStart = new TimeSpan(9, 0, 0),
+                WorkDayEnd = new TimeSpan(17, 0, 0),
+                User = new User
+                {
+                    Id = userId,
+                    Email = "doctor@gmail.com",
+                    Money = 140m
+                },
+                Specialty = new Specialty
+                {
+                    Id = 1,
+                    Name = "Терапия",
+                    Price = 40m
+                }
+            };
+
+            var booking = new Booking
+            {
+                Id = id,
+                PatientId = 1,
+                DoctorSlotId = 3,
+                CreatedAt = DateTime.UtcNow.AddDays(-1),
+                BookingStatus = BookingStatus.Cancelled,
+                DoctorSlot = new DoctorSlot
+                {
+                    Id = 3,
+                    DoctorId = doctorId,
+                    Date = new DateOnly(2026, 02, 03),
+                    StartTime = new TimeSpan(9, 0, 0),
+                    EndTime = new TimeSpan(9, 30, 0),
+                    Doctor = doctor
+                },
+                Patient = new Patient
+                {
+                    Id = 1,
+                    FirstName = "Foo",
+                    LastName = "Too",
+                    BirthDate = new DateOnly(2003, 08, 03),
+                    GenderType = GenderType.Male,
+                    Phone = "49999999",
+                    User = new User
+                    {
+                        Id = 10,
+                        Email = "patient@gmail.com",
+                        Money = 60m
+                    }
+                }
+            };
+
+            _doctorRepository
+                .Setup(_ => _.GetDoctorByUserAsync(userId))
+                .ReturnsAsync(doctor);
+
+            _repository
+                .Setup(_ => _.GetBookingWithDoctorAsync(id, doctor.Id))
+                .ReturnsAsync(booking);
+
+            var action = async () => await _service.CompleteBookingAsync(id, userId);
+
+            await action.Should().ThrowAsync<BookingNotFoundException>();
+
+            _doctorRepository.Verify(_ => _.GetDoctorByUserAsync(userId), Times.Once);
+            _repository.Verify(_ => _.GetBookingWithDoctorAsync(id, doctor.Id), Times.Once);
+
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+        }
+
+        [Fact]
+        public async Task CancelBookingAsync_ShouldThrowPatientNotFoundException_Logger()
+        {
+            var userId = 4;
+            var id = 7;
+
+            _patientRepository
+                .Setup(_ => _.GetPatientByUserAsync(userId))
+                .ReturnsAsync((Patient?)null);
+
+            var action = async () => await _service.CancelBookingAsync(id, userId);
+
+            await action.Should().ThrowAsync<PatientNotFoundException>();
+
+            _patientRepository.Verify(_ => _.GetPatientByUserAsync(userId), Times.Once);
+
+            _repository.Verify(_ => _.GetBookingWithPatientAsync(id, It.IsAny<int>()), Times.Never);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+        }
+
+        [Fact]
+        public async Task CancelBookingAsync_ShouldThrowBookingNotFoundException_Logger()
+        {
+            var userId = 4;
+            var id = 7;
+            var patientId = 1;
+
+            var patient = new Patient
+            {
+                Id = patientId,
+                FirstName = "Foo",
+                LastName = "Too",
+                BirthDate = new DateOnly(2003, 08, 03),
+                GenderType = GenderType.Male,
+                Phone = "49999999",
+                UserId = userId,
+
+                User = new User
+                {
+                    Id = userId,
+                    Email = "patient@gmail.com",
+                    Money = 60m
+                }
+            };
+
+            _patientRepository
+                .Setup(_ => _.GetPatientByUserAsync(userId))
+                .ReturnsAsync(patient);
+
+            _repository
+                .Setup(_ => _.GetBookingWithPatientAsync(id, patient.Id))
+                .ReturnsAsync((Booking?)null);
+
+            var action = async () => await _service.CancelBookingAsync(id, userId);
+
+            await action.Should().ThrowAsync<BookingNotFoundException>();
+
+            _patientRepository.Verify(_ => _.GetPatientByUserAsync(userId), Times.Once);
+            _repository.Verify(_ => _.GetBookingWithPatientAsync(id, patient.Id), Times.Once);
+
+            _unitOfWorkRepository.Verify(_ => _.BeginTransactionAsync(), Times.Never);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+        }
+
+        [Fact]
+        public async Task CancelBookingAsync_ShouldThrowBookingNotFoundException_LoggerWhenStatusNotActive()
+        {
+            var userId = 4;
+            var id = 7;
+            var patientId = 1;
+            var doctorId = 2;
+
+            var patient = new Patient
+            {
+                Id = patientId,
+                FirstName = "Foo",
+                LastName = "Too",
+                BirthDate = new DateOnly(2003, 08, 03),
+                GenderType = GenderType.Male,
+                Phone = "49999999",
+                UserId = userId,
+
+                User = new User
+                {
+                    Id = userId,
+                    Email = "patient@gmail.com",
+                    Money = 60m
+                }
+            };
+
+            var booking = new Booking
+            {
+                Id = id,
+                PatientId = patientId,
+                DoctorSlotId = 3,
+                CreatedAt = DateTime.UtcNow.AddDays(-1),
+                BookingStatus = BookingStatus.Completed,
+
+                DoctorSlot = new DoctorSlot
+                {
+                    Id = 3,
+                    DoctorId = doctorId,
+                    Date = new DateOnly(2026, 02, 03),
+                    StartTime = new TimeSpan(9, 0, 0),
+                    EndTime = new TimeSpan(9, 30, 0),
+
+                    Doctor = new Doctor
+                    {
+                        Id = doctorId,
+                        FirstName = "Глеб",
+                        LastName = "Романенко",
+                        ExperienceYears = 2,
+                        GenderType = GenderType.Male,
+
+                        Specialty = new Specialty
+                        {
+                            Id = 1,
+                            Name = "Терапия",
+                            Price = 40m
+                        },
+
+                        User = new User
+                        {
+                            Id = 10,
+                            Email = "doctor@gmail.com",
+                            Money = 140m
+                        }
+                    }
+                }
+            };
+
+            _patientRepository
+                .Setup(_ => _.GetPatientByUserAsync(userId))
+                .ReturnsAsync(patient);
+
+            _repository
+                .Setup(_ => _.GetBookingWithPatientAsync(id, patient.Id))
+                .ReturnsAsync(booking);
+
+            var action = async () => await _service.CancelBookingAsync(id, userId);
+
+            await action.Should().ThrowAsync<BookingNotFoundException>();
+
+            _patientRepository.Verify(_ => _.GetPatientByUserAsync(userId), Times.Once);
+            _repository.Verify(_ => _.GetBookingWithPatientAsync(id, patient.Id), Times.Once);
+
+            _unitOfWorkRepository.Verify(_ => _.BeginTransactionAsync(), Times.Never);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+        }
+
+        [Fact]
+        public async Task CancelBookingAsync_ShouldThrowUserNotFoundException_Logger()
+        {
+            var userId = 4;
+            var id = 7;
+            var patientId = 1;
+            var doctorId = 2;
+
+            var patient = new Patient
+            {
+                Id = patientId,
+                FirstName = "Foo",
+                LastName = "Too",
+                BirthDate = new DateOnly(2003, 08, 03),
+                GenderType = GenderType.Male,
+                Phone = "49999999",
+                UserId = userId,
+                User = null
+            };
+
+            var booking = new Booking
+            {
+                Id = id,
+                PatientId = patientId,
+                DoctorSlotId = 3,
+                CreatedAt = DateTime.UtcNow.AddDays(-1),
+                BookingStatus = BookingStatus.Active,
+
+                DoctorSlot = new DoctorSlot
+                {
+                    Id = 3,
+                    DoctorId = doctorId,
+                    Date = new DateOnly(2026, 02, 03),
+                    StartTime = new TimeSpan(9, 0, 0),
+                    EndTime = new TimeSpan(9, 30, 0),
+
+                    Doctor = new Doctor
+                    {
+                        Id = doctorId,
+                        FirstName = "Глеб",
+                        LastName = "Романенко",
+                        ExperienceYears = 2,
+                        GenderType = GenderType.Male,
+
+                        Specialty = new Specialty
+                        {
+                            Id = 1,
+                            Name = "Терапия",
+                            Price = 40m
+                        },
+
+                        User = new User
+                        {
+                            Id = 10,
+                            Email = "doctor@gmail.com",
+                            Money = 140m
+                        }
+                    }
+                }
+            };
+
+            _patientRepository
+                .Setup(_ => _.GetPatientByUserAsync(userId))
+                .ReturnsAsync(patient);
+
+            _repository
+                .Setup(_ => _.GetBookingWithPatientAsync(id, patient.Id))
+                .ReturnsAsync(booking);
+
+            _unitOfWorkRepository
+                .Setup(_ => _.BeginTransactionAsync())
+                .ReturnsAsync(_transaction.Object);
+
+            var action = async () => await _service.CancelBookingAsync(id, userId);
+
+            await action.Should().ThrowAsync<UserNotFoundException>();
+
+            _patientRepository.Verify(_ => _.GetPatientByUserAsync(userId), Times.Once);
+            _repository.Verify(_ => _.GetBookingWithPatientAsync(id, patient.Id), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.BeginTransactionAsync(), Times.Once);
+            _transaction.Verify(_ => _.RollbackAsync(It.IsAny<CancellationToken>()), Times.Once);
+
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+            _transaction.Verify(_ => _.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task CancelBookingAsync_ShouldThrowDoctorNotFoundException_Logger()
+        {
+            var userId = 4;
+            var id = 7;
+            var patientId = 1;
+            var doctorId = 2;
+
+            var patient = new Patient
+            {
+                Id = patientId,
+                FirstName = "Foo",
+                LastName = "Too",
+                BirthDate = new DateOnly(2003, 08, 03),
+                GenderType = GenderType.Male,
+                Phone = "49999999",
+                UserId = userId,
+
+                User = new User
+                {
+                    Id = userId,
+                    Email = "patient@gmail.com",
+                    Money = 60m
+                }
+            };
+
+            var booking = new Booking
+            {
+                Id = id,
+                PatientId = patientId,
+                DoctorSlotId = 3,
+                CreatedAt = DateTime.UtcNow.AddDays(-1),
+                BookingStatus = BookingStatus.Active,
+
+                DoctorSlot = new DoctorSlot
+                {
+                    Id = 3,
+                    DoctorId = doctorId,
+                    Date = new DateOnly(2026, 02, 03),
+                    StartTime = new TimeSpan(9, 0, 0),
+                    EndTime = new TimeSpan(9, 30, 0),
+                    Doctor = null
+                }
+            };
+
+            _patientRepository
+                .Setup(_ => _.GetPatientByUserAsync(userId))
+                .ReturnsAsync(patient);
+
+            _repository
+                .Setup(_ => _.GetBookingWithPatientAsync(id, patient.Id))
+                .ReturnsAsync(booking);
+
+            _unitOfWorkRepository
+                .Setup(_ => _.BeginTransactionAsync())
+                .ReturnsAsync(_transaction.Object);
+
+            var action = async () => await _service.CancelBookingAsync(id, userId);
+
+            await action.Should().ThrowAsync<DoctorNotFoundException>();
+
+            _patientRepository.Verify(_ => _.GetPatientByUserAsync(userId), Times.Once);
+            _repository.Verify(_ => _.GetBookingWithPatientAsync(id, patient.Id), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.BeginTransactionAsync(), Times.Once);
+            _transaction.Verify(_ => _.RollbackAsync(It.IsAny<CancellationToken>()), Times.Once);
+
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+            _transaction.Verify(_ => _.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task CancelBookingAsync_ShouldThrowInsufficientFundsException_Logger()
+        {
+            var userId = 4;
+            var id = 7;
+            var patientId = 1;
+            var doctorId = 2;
+
+            var patient = new Patient
+            {
+                Id = patientId,
+                FirstName = "Foo",
+                LastName = "Too",
+                BirthDate = new DateOnly(2003, 08, 03),
+                GenderType = GenderType.Male,
+                Phone = "49999999",
+                UserId = userId,
+
+                User = new User
+                {
+                    Id = userId,
+                    Email = "patient@gmail.com",
+                    Money = 60m
+                }
+            };
+
+            var booking = new Booking
+            {
+                Id = id,
+                PatientId = patientId,
+                DoctorSlotId = 3,
+                CreatedAt = DateTime.UtcNow.AddDays(-1),
+                BookingStatus = BookingStatus.Active,
+
+                DoctorSlot = new DoctorSlot
+                {
+                    Id = 3,
+                    DoctorId = doctorId,
+                    Date = new DateOnly(2026, 02, 03),
+                    StartTime = new TimeSpan(9, 0, 0),
+                    EndTime = new TimeSpan(9, 30, 0),
+
+                    Doctor = new Doctor
+                    {
+                        Id = doctorId,
+                        FirstName = "Глеб",
+                        LastName = "Романенко",
+                        ExperienceYears = 2,
+                        GenderType = GenderType.Male,
+
+                        Specialty = new Specialty
+                        {
+                            Id = 1,
+                            Name = "Терапия",
+                            Price = 240m
+                        },
+
+                        User = new User
+                        {
+                            Id = 10,
+                            Email = "doctor@gmail.com",
+                            Money = 140m
+                        }
+                    }
+                }
+            };
+
+            _patientRepository
+                .Setup(_ => _.GetPatientByUserAsync(userId))
+                .ReturnsAsync(patient);
+
+            _repository
+                .Setup(_ => _.GetBookingWithPatientAsync(id, patient.Id))
+                .ReturnsAsync(booking);
+
+            _unitOfWorkRepository
+                .Setup(_ => _.BeginTransactionAsync())
+                .ReturnsAsync(_transaction.Object);
+
+            var action = async () => await _service.CancelBookingAsync(id, userId);
+
+            await action.Should().ThrowAsync<InsufficientFundsException>();
+
+            _patientRepository.Verify(_ => _.GetPatientByUserAsync(userId), Times.Once);
+            _repository.Verify(_ => _.GetBookingWithPatientAsync(id, patient.Id), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.BeginTransactionAsync(), Times.Once);
+            _transaction.Verify(_ => _.RollbackAsync(It.IsAny<CancellationToken>()), Times.Once);
+
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+            _transaction.Verify(_ => _.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
+        }
+
         //Method
         [Fact]
         public async Task GetAllPatientBookingsAsync_ShouldReturnListBookings()
@@ -682,6 +1229,187 @@ namespace Hospital.Tests.Services
             _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Once);
             _transaction.Verify(_ => _.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
             
+            _transaction.Verify(_ => _.RollbackAsync(It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task CompleteBookingAsync_ShouldCompleteBooking()
+        {
+            var userId = 4;
+            var id = 7;
+            var doctorId = 2;
+
+            var doctor = new Doctor
+            {
+                Id = doctorId,
+                FirstName = "Глеб",
+                LastName = "Романенко",
+                ExperienceYears = 2,
+                GenderType = GenderType.Male,
+                WorkDayStart = new TimeSpan(9, 0, 0),
+                WorkDayEnd = new TimeSpan(17, 0, 0),
+                User = new User
+                {
+                    Id = userId,
+                    Email = "doctor@gmail.com",
+                    Money = 140m
+                },
+                Specialty = new Specialty
+                {
+                    Id = 1,
+                    Name = "Терапия",
+                    Price = 40m
+                }
+            };
+
+            var booking = new Booking
+            {
+                Id = id,
+                PatientId = 1,
+                DoctorSlotId = 3,
+                CreatedAt = DateTime.UtcNow.AddDays(-1),
+                BookingStatus = BookingStatus.Active,
+                DoctorSlot = new DoctorSlot
+                {
+                    Id = 3,
+                    DoctorId = doctorId,
+                    Date = new DateOnly(2026, 02, 03),
+                    StartTime = new TimeSpan(9, 0, 0),
+                    EndTime = new TimeSpan(9, 30, 0),
+                    Doctor = doctor
+                },
+                Patient = new Patient
+                {
+                    Id = 1,
+                    FirstName = "Foo",
+                    LastName = "Too",
+                    BirthDate = new DateOnly(2003, 08, 03),
+                    GenderType = GenderType.Male,
+                    Phone = "49999999",
+                    User = new User
+                    {
+                        Id = 10,
+                        Email = "patient@gmail.com",
+                        Money = 60m
+                    }
+                }
+            };
+
+            _doctorRepository
+                .Setup(_ => _.GetDoctorByUserAsync(userId))
+                .ReturnsAsync(doctor);
+
+            _repository
+                .Setup(_ => _.GetBookingWithDoctorAsync(id, doctor.Id))
+                .ReturnsAsync(booking);
+
+            _unitOfWorkRepository
+                .Setup(_ => _.SaveChangesAsync())
+                .Returns(Task.CompletedTask);
+
+            await _service.CompleteBookingAsync(id, userId);
+
+            booking.BookingStatus.Should().Be(BookingStatus.Completed);
+
+            _doctorRepository.Verify(_ => _.GetDoctorByUserAsync(userId), Times.Once);
+            _repository.Verify(_ => _.GetBookingWithDoctorAsync(id, doctor.Id), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Once);
+        }
+
+        [Fact]
+        public async Task CancelBookingAsync_ShouldCancelBooking()
+        {
+            var userId = 4;
+            var id = 7;
+            var patientId = 1;
+            var doctorId = 2;
+
+            var patient = new Patient
+            {
+                Id = patientId,
+                FirstName = "Foo",
+                LastName = "Too",
+                BirthDate = new DateOnly(2003, 08, 03),
+                GenderType = GenderType.Male,
+                Phone = "49999999",
+                UserId = userId,
+
+                User = new User
+                {
+                    Id = userId,
+                    Email = "patient@gmail.com",
+                    Money = 60m
+                }
+            };
+
+            var booking = new Booking
+            {
+                Id = id,
+                PatientId = patientId,
+                DoctorSlotId = 3,
+                CreatedAt = DateTime.UtcNow.AddDays(-1),
+                BookingStatus = BookingStatus.Active,
+
+                DoctorSlot = new DoctorSlot
+                {
+                    Id = 3,
+                    DoctorId = doctorId,
+                    Date = new DateOnly(2026, 02, 03),
+                    StartTime = new TimeSpan(9, 0, 0),
+                    EndTime = new TimeSpan(9, 30, 0),
+
+                    Doctor = new Doctor
+                    {
+                        Id = doctorId,
+                        FirstName = "Глеб",
+                        LastName = "Романенко",
+                        ExperienceYears = 2,
+                        GenderType = GenderType.Male,
+
+                        Specialty = new Specialty
+                        {
+                            Id = 1,
+                            Name = "Терапия",
+                            Price = 40m
+                        },
+
+                        User = new User
+                        {
+                            Id = 10,
+                            Email = "doctor@gmail.com",
+                            Money = 140m
+                        }
+                    }
+                }
+            };
+
+            _patientRepository
+                .Setup(_ => _.GetPatientByUserAsync(userId))
+                .ReturnsAsync(patient);
+
+            _repository
+                .Setup(_ => _.GetBookingWithPatientAsync(id, patient.Id))
+                .ReturnsAsync(booking);
+
+            _unitOfWorkRepository
+                .Setup(_ => _.BeginTransactionAsync())
+                .ReturnsAsync(_transaction.Object);
+
+            _unitOfWorkRepository
+                .Setup(_ => _.SaveChangesAsync())
+                .Returns(Task.CompletedTask);
+
+            await _service.CancelBookingAsync(id, userId);
+
+            patient.User.Money.Should().Be(100m);
+            booking.DoctorSlot.Doctor.User.Money.Should().Be(100m);
+
+            _patientRepository.Verify(_ => _.GetPatientByUserAsync(userId), Times.Once);
+            _repository.Verify(_ => _.GetBookingWithPatientAsync(id, patient.Id), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.BeginTransactionAsync(), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Once);
+            _transaction.Verify(_ => _.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
+
             _transaction.Verify(_ => _.RollbackAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
     }
