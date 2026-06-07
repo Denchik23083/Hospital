@@ -1,0 +1,71 @@
+services:
+  hospital-auth:
+    build:
+      context: .
+      dockerfile: Hospital.Auth/Dockerfile
+    ports:
+      - "5001:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: "Server=sqlserver;Database=HospitalDb;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True"
+      SecretKey: "${JWT_SECRET}"
+      Issuer: "${JWT_ISSUER}"
+      Audience: "${JWT_AUDIENCE}"
+
+      SeedAdmin__Email: "${ADMIN_EMAIL}"
+      SeedAdmin__Password: "${ADMIN_PASSWORD}"
+
+      SeedDoctor__Password: "${DOCTOR_PASSWORD}"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+
+  hospital-hospital:
+    build:
+      context: .
+      dockerfile: Hospital.Hospital/Dockerfile
+    ports:
+      - "6001:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: "Server=sqlserver;Database=HospitalDb;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True"
+      SecretKey: "${JWT_SECRET}"
+      Issuer: "${JWT_ISSUER}"
+      Audience: "${JWT_AUDIENCE}"
+
+      SeedAdmin__Email: "${ADMIN_EMAIL}"
+      SeedAdmin__Password: "${ADMIN_PASSWORD}"
+
+      SeedDoctor__Password: "${DOCTOR_PASSWORD}"
+    depends_on:
+      hospital-auth:
+        condition: service_started
+
+  frontend:
+    build:
+      context: ../../hospital-client
+      dockerfile: Dockerfile
+    ports:
+      - "4200:80"
+    depends_on:
+      - hospital-auth
+      - hospital-hospital
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "YourStrong!Passw0rd"
+    ports:
+      - "1433:1433"
+    volumes:
+      - hospital_sql_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P 'YourStrong!Passw0rd' -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 40s
+
+volumes:
+  hospital_sql_data:
