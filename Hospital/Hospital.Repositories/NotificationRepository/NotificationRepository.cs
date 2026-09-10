@@ -9,22 +9,17 @@ namespace Hospital.Repositories.NotificationRepository
     {
         private readonly HospitalContext _context = context;
 
-        public async Task<IEnumerable<NotificationResponse>> GetAllNotificationsAsync(int userId)
+        public async Task<IEnumerable<Notification>> GetAllNotificationsAsync(int userId, CancellationToken ct)
         {
             return await _context.Notifications
                 .Where(_ => _.UserId == userId)
-                .Select(_ => new NotificationResponse
-                {
-                    Id = _.Id,
-                    CreatedAt = _.CreatedAt,
-                    Message = _.Message
-                }).ToListAsync();
+                .ToListAsync(ct);
         }
 
-        public async Task<Notification?> GetNotificationAsync(int id, int userId)
+        public async Task<Notification?> GetNotificationAsync(int id, int userId, CancellationToken ct)
         {
             return await _context.Notifications
-                .FirstOrDefaultAsync(_ => _.Id == id && _.UserId == userId);
+                .FirstOrDefaultAsync(_ => _.Id == id && _.UserId == userId, ct);
         }
 
         public async Task AddNotificationAsync(Notification notification)

@@ -41,18 +41,18 @@ namespace Hospital.Tests.Controllers
             };
 
             _service
-                .Setup(_ => _.GetAllNotificationsAsync(userId))
+                .Setup(_ => _.GetAllNotificationsAsync(userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(notifications);
 
             _controller.ControllerContext = TestUserFactory.CreateControllerContext(userId);
 
-            var result = await _controller.GetAllNotificationsAsync();
+            var result = await _controller.GetAllNotificationsAsync(CancellationToken.None);
 
             var actionResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
 
             actionResult.Value.Should().BeEquivalentTo(notifications);
 
-            _service.Verify(_ => _.GetAllNotificationsAsync(userId), Times.Once);
+            _service.Verify(_ => _.GetAllNotificationsAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -62,16 +62,16 @@ namespace Hospital.Tests.Controllers
             var userId = 10;
 
             _service
-                .Setup(_ => _.DeleteNotificationAsync(id, userId))
+                .Setup(_ => _.DeleteNotificationAsync(id, userId, It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
             _controller.ControllerContext = TestUserFactory.CreateControllerContext(userId);
 
-            var result = await _controller.DeleteNotificationAsync(id);
+            var result = await _controller.DeleteNotificationAsync(id, CancellationToken.None);
 
             result.Should().BeOfType<NoContentResult>();
 
-            _service.Verify(_ => _.DeleteNotificationAsync(id, userId), Times.Once);
+            _service.Verify(_ => _.DeleteNotificationAsync(id, userId, It.IsAny<CancellationToken>()), Times.Once);
         }
     }
 }

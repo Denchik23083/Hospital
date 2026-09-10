@@ -5,9 +5,9 @@ namespace Hospital.Repositories.NotificationRepository
 {
     public interface INotificationRepository
     {
-        Task<IEnumerable<NotificationResponse>> GetAllNotificationsAsync(int userId);
+        Task<IEnumerable<Notification>> GetAllNotificationsAsync(int userId, CancellationToken ct);
         
-        Task<Notification?> GetNotificationAsync(int id, int userId);
+        Task<Notification?> GetNotificationAsync(int id, int userId, CancellationToken ct);
 
         Task AddNotificationAsync(Notification notification);
 

@@ -15,22 +15,22 @@ namespace Hospital.Hospital.Controllers
 
         [Authorize(Roles = AppRoles.DoctorPatient)]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<NotificationResponse>>> GetAllNotificationsAsync()
+        public async Task<ActionResult<IEnumerable<NotificationResponse>>> GetAllNotificationsAsync(CancellationToken ct)
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-            var notifications = await _service.GetAllNotificationsAsync(userId);
+            var notifications = await _service.GetAllNotificationsAsync(userId, ct);
 
             return Ok(notifications);
         }
 
         [Authorize(Roles = AppRoles.DoctorPatient)]
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteNotificationAsync(int id)
+        public async Task<ActionResult> DeleteNotificationAsync(int id, CancellationToken ct)
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-            await _service.DeleteNotificationAsync(id, userId);
+            await _service.DeleteNotificationAsync(id, userId, ct);
 
             return NoContent();
         }

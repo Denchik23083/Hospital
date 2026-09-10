@@ -54,25 +54,27 @@ namespace Hospital.Tests.Repositories
             await _context.Notifications.AddRangeAsync(notifications);
             await _context.SaveChangesAsync();
 
-            var notificationsResponse = new List<NotificationResponse>
+            var notificationsFromDb = new List<Notification>
             {
                 new()
                 {
                     Id = 1,
                     CreatedAt = date1,
-                    Message = "Привет"
+                    Message = "Привет",
+                    UserId = userId
                 },
                 new()
                 {
                     Id = 3,
                     CreatedAt = date2,
-                    Message = "Мир"
+                    Message = "Мир",
+                    UserId = userId
                 }
             };
 
-            var result = await _repository.GetAllNotificationsAsync(userId);
+            var result = await _repository.GetAllNotificationsAsync(userId, CancellationToken.None);
 
-            result.Should().BeEquivalentTo(notificationsResponse);
+            result.Should().BeEquivalentTo(notificationsFromDb);
         }
 
         [Fact]
@@ -110,16 +112,17 @@ namespace Hospital.Tests.Repositories
             await _context.Notifications.AddRangeAsync(notifications);
             await _context.SaveChangesAsync();
 
-            var notificationResponse = new NotificationResponse
+            var notificationFromDb = new Notification
             {
                 Id = 1,
                 CreatedAt = date1,
-                Message = "Привет"
+                Message = "Привет",
+                UserId = userId
             };
 
-            var result = await _repository.GetNotificationAsync(id, userId);
+            var result = await _repository.GetNotificationAsync(id, userId, CancellationToken.None);
 
-            result.Should().BeEquivalentTo(notificationResponse);
+            result.Should().BeEquivalentTo(notificationFromDb);
         }
 
         [Fact]
