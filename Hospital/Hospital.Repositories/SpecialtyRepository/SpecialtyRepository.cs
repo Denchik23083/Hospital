@@ -1,5 +1,5 @@
-﻿using Hospital.Core.Models.Response;
-using Hospital.Db;
+﻿using Hospital.Db;
+using Hospital.Db.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hospital.Repositories.SpecialtyRepository
@@ -8,23 +8,19 @@ namespace Hospital.Repositories.SpecialtyRepository
     {
         private readonly HospitalContext _context = context;
 
-        public async Task<IEnumerable<SpecialtyResponse>> GetAllSpecialtiesAsync()
+        public async Task<IEnumerable<Specialty>> GetAllSpecialtiesAsync(CancellationToken ct)
         {
             return await _context.Specialties
-                .Select(_ => new SpecialtyResponse
-                {
-                    Id = _.Id,
-                    Name = _.Name,
-                    Price = _.Price
-                }).ToListAsync();
+                .AsNoTracking()
+                .ToListAsync(ct);
         }
 
-        public async Task<decimal> GetSpecialtyPriceAsync(int specialtyId)
+        public async Task<decimal?> GetSpecialtyPriceAsync(int specialtyId, CancellationToken ct)
         {
             return await _context.Specialties
                 .Where(_ => _.Id == specialtyId)
-                .Select(_ => _.Price)
-                .FirstOrDefaultAsync();
+                .Select(_ => (decimal?)_.Price)
+                .FirstOrDefaultAsync(ct);
         }
     }
 }

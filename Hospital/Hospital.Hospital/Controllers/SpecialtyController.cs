@@ -17,27 +17,27 @@ namespace Hospital.Hospital.Controllers
 
         [Authorize(Roles = AppRoles.PatientAdmin)]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<SpecialtyResponse>>> GetAllSpecialtiesAsync()
+        public async Task<ActionResult<IEnumerable<SpecialtyResponse>>> GetAllSpecialtiesAsync(CancellationToken ct)
         {
-            var specialties = await _service.GetAllSpecialtiesAsync();
+            var specialties = await _service.GetAllSpecialtiesAsync(ct);
 
             return Ok(specialties);
         }
 
         [Authorize(Roles = AppRoles.PatientAdmin)]
         [HttpGet("{specialtyId}/price")]
-        public async Task<ActionResult<decimal>> GetSpecialtyPriceAsync(int specialtyId)
+        public async Task<ActionResult<decimal>> GetSpecialtyPriceAsync(int specialtyId, CancellationToken ct)
         {
-            var price = await _service.GetSpecialtyPriceAsync(specialtyId);
+            var price = await _service.GetSpecialtyPriceAsync(specialtyId, ct);
 
             return Ok(price);
         }
 
         [Authorize(Roles = AppRoles.PatientAdmin)]
         [HttpGet("{specialtyId}/doctors")]
-        public async Task<ActionResult<IEnumerable<DoctorResponse>>> GetAllDoctorsBySpecialtyAsync(int specialtyId)
+        public async Task<ActionResult<IEnumerable<DoctorResponse>>> GetAllDoctorsBySpecialtyAsync(int specialtyId, CancellationToken ct)
         {
-            var doctorsBySpecialty = await _doctorService.GetAllDoctorsBySpecialtyAsync(specialtyId);
+            var doctorsBySpecialty = await _doctorService.GetAllDoctorsBySpecialtyAsync(specialtyId, ct);
 
             return Ok(doctorsBySpecialty);
         }

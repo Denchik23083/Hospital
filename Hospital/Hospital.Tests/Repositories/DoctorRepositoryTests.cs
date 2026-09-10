@@ -202,7 +202,7 @@ namespace Hospital.Tests.Repositories
             await _context.Doctors.AddRangeAsync(doctors);
             await _context.SaveChangesAsync();
 
-            var doctorsResponse = new List<DoctorResponse>
+            var doctorsFromDb = new List<Doctor>
             {
                 new()
                 {
@@ -210,7 +210,8 @@ namespace Hospital.Tests.Repositories
                     FirstName = "Глеб",
                     LastName = "Романенко",
                     ExperienceYears = 2,
-                    GenderType = GenderType.Male
+                    GenderType = GenderType.Male,
+                    SpecialtyId = specialtyId
                 },
                 new()
                 {
@@ -218,13 +219,14 @@ namespace Hospital.Tests.Repositories
                     FirstName = "Варвара",
                     LastName = "Черноус",
                     ExperienceYears = 2,
-                    GenderType = GenderType.Female
+                    GenderType = GenderType.Female,
+                    SpecialtyId = specialtyId
                 }
             };
 
-            var result = await _repository.GetAllDoctorsBySpecialtyAsync(specialtyId);
+            var result = await _repository.GetAllDoctorsBySpecialtyAsync(specialtyId, CancellationToken.None);
 
-            result.Should().BeEquivalentTo(doctorsResponse);
+            result.Should().BeEquivalentTo(doctorsFromDb);
         }
 
         [Fact]

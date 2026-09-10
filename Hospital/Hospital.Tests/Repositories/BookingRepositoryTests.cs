@@ -80,7 +80,7 @@ namespace Hospital.Tests.Repositories
                 }
             };
 
-            var bookingsResponce = new List<BookingResponse>
+            var bookingsResponse = new List<BookingResponse>
             {
                 new()
                 {
@@ -129,7 +129,7 @@ namespace Hospital.Tests.Repositories
 
             var result = await _repository.GetAllPatientBookingsAsync(patientId);
 
-            result.Should().BeEquivalentTo(bookingsResponce);
+            result.Should().BeEquivalentTo(bookingsResponse);
         }
 
         [Fact]

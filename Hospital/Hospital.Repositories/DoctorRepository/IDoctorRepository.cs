@@ -7,7 +7,7 @@ namespace Hospital.Repositories.DoctorRepository
     {
         Task<IEnumerable<DoctorWithUserResponse>> GetAllDoctorsAsync();
 
-        Task<IEnumerable<DoctorResponse>> GetAllDoctorsBySpecialtyAsync(int specialtyId);
+        Task<IEnumerable<Doctor>> GetAllDoctorsBySpecialtyAsync(int specialtyId, CancellationToken ct);
 
         Task<Doctor?> GetDoctorAsync(int id);
 

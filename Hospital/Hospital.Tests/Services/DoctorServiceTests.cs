@@ -788,7 +788,7 @@ namespace Hospital.Tests.Services
         {
             var specialtyId = 1;
 
-            var doctors = new List<DoctorResponse>
+            var doctors = new List<Doctor>
             {
                 new()
                 {
@@ -796,7 +796,21 @@ namespace Hospital.Tests.Services
                     FirstName = "Foo",
                     LastName = "Too",
                     ExperienceYears = 4,
-                    GenderType = GenderType.Male
+                    GenderType = GenderType.Male,
+                    WorkDayStart = new TimeSpan(9, 0, 0),
+                    WorkDayEnd = new TimeSpan(17, 0, 0),
+                    SpecialtyId = 2,
+                    Specialty = new Specialty
+                    {
+                        Id = 2,
+                        Name = "Кардиология",
+                        Price = 80
+                    },
+                    User = new User
+                    {
+                        Email = "doctor24@gmail.com",
+                        Money = 100m
+                    }
                 },
                 new()
                 {
@@ -804,7 +818,21 @@ namespace Hospital.Tests.Services
                     FirstName = "Глеб",
                     LastName = "Романенко",
                     ExperienceYears = 2,
-                    GenderType = GenderType.Male
+                    GenderType = GenderType.Male,
+                    WorkDayStart = new TimeSpan(9, 0, 0),
+                    WorkDayEnd = new TimeSpan(17, 0, 0),
+                    SpecialtyId = specialtyId,
+                    Specialty = new Specialty
+                    {
+                        Id = 1,
+                        Name = "Терапия",
+                        Price = 40
+                    },
+                    User = new User
+                    {
+                        Email = "doctor1@gmail.com",
+                        Money = 500m
+                    }
                 },
                 new()
                 {
@@ -812,19 +840,58 @@ namespace Hospital.Tests.Services
                     FirstName = "Варвара",
                     LastName = "Черноус",
                     ExperienceYears = 2,
-                    GenderType = GenderType.Female
+                    GenderType = GenderType.Female,
+                    WorkDayStart = new TimeSpan(9, 0, 0),
+                    WorkDayEnd = new TimeSpan(17, 0, 0),
+                    SpecialtyId = specialtyId,
+                    Specialty = new Specialty
+                    {
+                        Id = 1,
+                        Name = "Терапия",
+                        Price = 40
+                    },
+                    User = new User
+                    {
+                        Email = "doctor4@gmail.com",
+                        Money = 400m
+                    }
+                }
+            };
+
+            var doctorsResponse = new List<DoctorResponse>
+            {
+                new()
+                {
+                    Id = 2,
+                    FirstName = "Глеб",
+                    LastName = "Романенко",
+                    ExperienceYears = 2,
+                    GenderType = GenderType.Male,
+                },
+                new()
+                {
+                    Id = 3,
+                    FirstName = "Варвара",
+                    LastName = "Черноус",
+                    ExperienceYears = 2,
+                    GenderType = GenderType.Female,
                 }
             };
 
             _repository
-                .Setup(_ => _.GetAllDoctorsBySpecialtyAsync(specialtyId))
+                .Setup(_ => _.GetAllDoctorsBySpecialtyAsync(specialtyId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(doctors);
 
-            var result = await _service.GetAllDoctorsBySpecialtyAsync(specialtyId);
+            _mapper
+                .Setup(_ => _.Map<IEnumerable<DoctorResponse>>(doctors))
+                .Returns(doctorsResponse);
 
-            result.Should().BeEquivalentTo(doctors);
+            var result = await _service.GetAllDoctorsBySpecialtyAsync(specialtyId, CancellationToken.None);
 
-            _repository.Verify(_ => _.GetAllDoctorsBySpecialtyAsync(specialtyId), Times.Once);
+            result.Should().BeEquivalentTo(doctorsResponse);
+
+            _repository.Verify(_ => _.GetAllDoctorsBySpecialtyAsync(specialtyId, It.IsAny<CancellationToken>()), Times.Once);
+            _mapper.Verify(_ => _.Map<IEnumerable<DoctorResponse>>(doctors), Times.Once);
         }
 
         [Fact]

@@ -7,7 +7,7 @@ namespace Hospital.Services.DoctorService
     {
         Task<IEnumerable<DoctorWithUserResponse>> GetAllDoctorsAsync();
 
-        Task<IEnumerable<DoctorResponse>> GetAllDoctorsBySpecialtyAsync(int specialtyId);
+        Task<IEnumerable<DoctorResponse>> GetAllDoctorsBySpecialtyAsync(int specialtyId, CancellationToken ct);
     
         Task<DoctorWithUserResponse> GetDoctorByUserAsync(int userId);
 

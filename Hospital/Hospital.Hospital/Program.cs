@@ -86,6 +86,7 @@ builder.Services.AddAutoMapper(au =>
 {
     au.CreateMap<Patient, PatientWithUserResponse>();
     au.CreateMap<Doctor, DoctorWithUserResponse>();
+    au.CreateMap<Doctor, DoctorResponse>();
     au.CreateMap<Specialty, SpecialtyResponse>();
     au.CreateMap<User, UserResponse>();
     au.CreateMap<DoctorFullRequest, Doctor>();

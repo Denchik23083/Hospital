@@ -35,9 +35,11 @@ namespace Hospital.Services.DoctorService
             return await _repository.GetAllDoctorsAsync();
         }
 
-        public async Task<IEnumerable<DoctorResponse>> GetAllDoctorsBySpecialtyAsync(int specialtyId)
+        public async Task<IEnumerable<DoctorResponse>> GetAllDoctorsBySpecialtyAsync(int specialtyId, CancellationToken ct)
         {
-            return await _repository.GetAllDoctorsBySpecialtyAsync(specialtyId);
+            var doctors = await _repository.GetAllDoctorsBySpecialtyAsync(specialtyId, ct);
+
+            return _mapper.Map<IEnumerable<DoctorResponse>>(doctors);
         }
 
         public async Task<DoctorWithUserResponse> GetDoctorByUserAsync(int userId)

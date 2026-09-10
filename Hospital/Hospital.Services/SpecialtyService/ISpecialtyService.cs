@@ -4,8 +4,8 @@ namespace Hospital.Services.SpecialtyService
 {
     public interface ISpecialtyService
     {
-        Task<IEnumerable<SpecialtyResponse>> GetAllSpecialtiesAsync();
+        Task<IEnumerable<SpecialtyResponse>> GetAllSpecialtiesAsync(CancellationToken ct);
         
-        Task<decimal> GetSpecialtyPriceAsync(int specialtyId);
+        Task<decimal> GetSpecialtyPriceAsync(int specialtyId, CancellationToken ct);
     }
 }

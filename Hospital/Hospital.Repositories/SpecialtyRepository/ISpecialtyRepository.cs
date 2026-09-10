@@ -1,11 +1,11 @@
-﻿using Hospital.Core.Models.Response;
+﻿using Hospital.Db.Entities;
 
 namespace Hospital.Repositories.SpecialtyRepository
 {
     public interface ISpecialtyRepository
     {
-        Task<IEnumerable<SpecialtyResponse>> GetAllSpecialtiesAsync();
+        Task<IEnumerable<Specialty>> GetAllSpecialtiesAsync(CancellationToken ct);
 
-        Task<decimal> GetSpecialtyPriceAsync(int specialtyId);
+        Task<decimal?> GetSpecialtyPriceAsync(int specialtyId, CancellationToken ct);
     }
 }

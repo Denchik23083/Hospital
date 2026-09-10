@@ -84,16 +84,16 @@ namespace Hospital.Tests.Controllers
             };
 
             _service
-                .Setup(_ => _.GetAllSpecialtiesAsync())
+                .Setup(_ => _.GetAllSpecialtiesAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(specialties);
 
-            var result = await _controller.GetAllSpecialtiesAsync();
+            var result = await _controller.GetAllSpecialtiesAsync(CancellationToken.None);
 
             var actionResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
 
             actionResult.Value.Should().BeEquivalentTo(specialties);
 
-            _service.Verify(_ => _.GetAllSpecialtiesAsync(), Times.Once);
+            _service.Verify(_ => _.GetAllSpecialtiesAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -103,16 +103,16 @@ namespace Hospital.Tests.Controllers
             var price = 40m;
 
             _service
-                .Setup(_ => _.GetSpecialtyPriceAsync(specialtyId))
+                .Setup(_ => _.GetSpecialtyPriceAsync(specialtyId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(price);
             
-            var result = await _controller.GetSpecialtyPriceAsync(specialtyId);
+            var result = await _controller.GetSpecialtyPriceAsync(specialtyId, CancellationToken.None);
 
             var actionResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
 
             actionResult.Value.Should().Be(price);
 
-            _service.Verify(_ => _.GetSpecialtyPriceAsync(specialtyId), Times.Once);
+            _service.Verify(_ => _.GetSpecialtyPriceAsync(specialtyId, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -149,16 +149,16 @@ namespace Hospital.Tests.Controllers
             };
 
             _doctorService
-                .Setup(_ => _.GetAllDoctorsBySpecialtyAsync(specialtyId))
+                .Setup(_ => _.GetAllDoctorsBySpecialtyAsync(specialtyId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(doctors);
 
-            var result = await _controller.GetAllDoctorsBySpecialtyAsync(specialtyId);
+            var result = await _controller.GetAllDoctorsBySpecialtyAsync(specialtyId, CancellationToken.None);
 
             var actionResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
 
             actionResult.Value.Should().BeEquivalentTo(doctors);
 
-            _doctorService.Verify(_ => _.GetAllDoctorsBySpecialtyAsync(specialtyId), Times.Once);
+            _doctorService.Verify(_ => _.GetAllDoctorsBySpecialtyAsync(specialtyId, It.IsAny<CancellationToken>()), Times.Once);
         }
     }
 }
