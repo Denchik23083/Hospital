@@ -1,5 +1,4 @@
-﻿using Hospital.Core.Models.Response;
-using Hospital.Db;
+﻿using Hospital.Db;
 using Hospital.Db.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,12 +21,12 @@ namespace Hospital.Repositories.NotificationRepository
                 .FirstOrDefaultAsync(_ => _.Id == id && _.UserId == userId, ct);
         }
 
-        public async Task AddNotificationAsync(Notification notification)
+        public async Task AddNotificationAsync(Notification notification, CancellationToken ct)
         {
-            await _context.Notifications.AddAsync(notification);
+            await _context.Notifications.AddAsync(notification, ct);
         }
 
-        public Task DeleteNotificationAsync(Notification notification)
+        public Task DeleteNotificationAsync(Notification notification, CancellationToken ct = default)
         {
             _context.Notifications.Remove(notification);
 

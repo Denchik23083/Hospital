@@ -4,8 +4,8 @@ namespace Hospital.Repositories.UnitOfWorkRepository
 {
     public interface IUnitOfWorkRepository
     {
-        Task<IDbContextTransaction> BeginTransactionAsync();
+        Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken ct);
 
-        Task SaveChangesAsync();
+        Task SaveChangesAsync(CancellationToken ct);
     }
 }

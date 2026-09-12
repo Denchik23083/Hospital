@@ -5,14 +5,14 @@ namespace Hospital.Repositories.PatientRepository
 {
     public interface IPatientRepository
     {
-        Task<IEnumerable<PatientWithUserResponse>> GetAllPatientsAsync();
+        Task<IEnumerable<Patient>> GetAllPatientsAsync(CancellationToken ct);
 
-        Task<Patient?> GetPatientAsync(int id);
+        Task<Patient?> GetPatientAsync(int id, CancellationToken ct);
 
-        Task<Patient?> GetPatientByUserAsync(int userId);
+        Task<Patient?> GetPatientByUserAsync(int userId, CancellationToken ct);
 
-        Task<decimal> GetPatientBalanceAsync(int userId);
+        Task<decimal?> GetPatientBalanceAsync(int userId, CancellationToken ct);
 
-        Task DeletePatientAsync(Patient patient);
+        Task DeletePatientAsync(Patient patient, CancellationToken ct);
     }
 }

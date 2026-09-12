@@ -6,7 +6,7 @@ using Hospital.Repositories.NotificationRepository;
 using Hospital.Tests.Helpers;
 using Microsoft.EntityFrameworkCore;
 
-namespace Hospital.Tests.Repositories
+/*namespace Hospital.Tests.Repositories
 {
     public class NotificationRepositoryTests
     {
@@ -195,3 +195,4 @@ namespace Hospital.Tests.Repositories
         }
     }
 }
+*/

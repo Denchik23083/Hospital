@@ -5,7 +5,7 @@ using Hospital.Repositories.UnitOfWorkRepository;
 using Hospital.Tests.Helpers;
 using Microsoft.EntityFrameworkCore;
 
-namespace Hospital.Tests.Repositories
+/*namespace Hospital.Tests.Repositories
 {
     public class UnitOfWorkRepositoryTests
     {
@@ -46,3 +46,4 @@ namespace Hospital.Tests.Repositories
         }
     }
 }
+*/

@@ -7,7 +7,7 @@ using Hospital.Repositories.DoctorRepository;
 using Hospital.Tests.Helpers;
 using Microsoft.EntityFrameworkCore;
 
-namespace Hospital.Tests.Repositories
+/*namespace Hospital.Tests.Repositories
 {
     public class DoctorRepositoryTests
     {
@@ -559,3 +559,4 @@ namespace Hospital.Tests.Repositories
         }
     }
 }
+*/

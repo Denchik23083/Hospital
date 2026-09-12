@@ -1,5 +1,4 @@
-﻿using Hospital.Core.Models.Response;
-using Hospital.Db;
+﻿using Hospital.Db;
 using Hospital.Db.Entities;
 using Hospital.Db.Utilities;
 using Microsoft.EntityFrameworkCore;
@@ -10,51 +9,28 @@ namespace Hospital.Repositories.DoctorSlotRepository
     {
         private readonly HospitalContext _context = context;
 
-        public async Task<IEnumerable<DateOnly>> GetAllDoctorSlotsDatesByDoctorAsync(int doctorId)
+        public async Task<IEnumerable<DateOnly>> GetAllDoctorSlotsDatesByDoctorAsync(int doctorId, CancellationToken ct)
         {
             return await _context.DoctorSlots
                 .Where(_ => _.DoctorId == doctorId)
                 .Select(_ => _.Date)
                 .Distinct()
                 .OrderBy(d => d)
-                .ToListAsync();
+                .ToListAsync(ct);
         }
 
-        public async Task<IEnumerable<DoctorSlotBookingResponse>> GetAllDoctorSlotsTimesByDoctorAsync(int doctorId, DateOnly date)   
+        public async Task<IEnumerable<DoctorSlot>> GetAllDoctorSlotsTimesByDoctorAsync(int doctorId, DateOnly date, CancellationToken ct)   
         {
             return await _context.DoctorSlots
-                .Where(_ => _.DoctorId == doctorId
-                    && _.Date == date)
+                .Include(_ => _.Bookings)
+                .ThenInclude(_ => _.Patient)
+                .Where(_ => _.DoctorId == doctorId && _.Date == date)
                 .OrderBy(_ => _.StartTime)
-                .Select(_ => new DoctorSlotBookingResponse
-                {
-                    Id = _.Id,
-                    Date = _.Date,
-                    StartTime = _.StartTime,
-                    EndTime = _.EndTime,
-                    LastBooking = _.Bookings
-                        .OrderByDescending(b => b.CreatedAt)
-                        .Select(_ => new BookingPatientResponse
-                        {
-                            Id = _.Id,
-                            BookingStatus = _.BookingStatus.ToString(),
-                            PatientResponse = new PatientResponse
-                            {
-                                Id = _.Patient!.Id,
-                                FirstName = _.Patient.FirstName,
-                                LastName = _.Patient.LastName,
-                                BirthDate = _.Patient.BirthDate,
-                                GenderType = _.Patient.GenderType,
-                                Phone = _.Patient.Phone
-                            }
-                        }).FirstOrDefault()
-                }).ToListAsync();
+                .ToListAsync(ct);
         }
 
-        public async Task<IEnumerable<DateOnly>> GetAllDoctorSlotsDatesAsync(int doctorId, DateOnly today)
+        public async Task<IEnumerable<DateOnly>> GetAllDoctorSlotsDatesAsync(int doctorId, DateOnly today, TimeSpan currentTime, CancellationToken ct)
         {
-            var currentTime = DateTime.UtcNow.TimeOfDay;
-
             return await _context.DoctorSlots
                 .Where(_ => _.DoctorId == doctorId
                     && !_.Bookings.Any(_ => _.BookingStatus == BookingStatus.Active)
@@ -62,31 +38,21 @@ namespace Hospital.Repositories.DoctorSlotRepository
                 .Select(_ => _.Date)
                 .Distinct()
                 .OrderBy(d => d)
-                .ToListAsync();
+                .ToListAsync(ct);
         }
 
-        public async Task<IEnumerable<DoctorSlotResponse>> GetAllDoctorSlotsTimeByDateAsync(int doctorId, DateOnly date)
+        public async Task<IEnumerable<DoctorSlot>> GetAllDoctorSlotsTimeByDateAsync(int doctorId, DateOnly date, DateOnly today, TimeSpan currentTime, CancellationToken ct)
         {
-            var today = DateOnly.FromDateTime(DateTime.UtcNow);
-            var currentTime = DateTime.UtcNow.TimeOfDay;
-
             return await _context.DoctorSlots
                 .Where(_ => _.DoctorId == doctorId
                     && _.Date == date
                     && !_.Bookings.Any(_ => _.BookingStatus == BookingStatus.Active)
                     && (date > today || (date == today && _.StartTime >= currentTime)))
                 .OrderBy(s => s.StartTime)
-                .Select(_ => new DoctorSlotResponse
-                {
-                    Id = _.Id,
-                    Date = _.Date,
-                    DoctorId = _.DoctorId,
-                    StartTime = _.StartTime,
-                    EndTime = _.EndTime
-                }).ToListAsync();
+                .ToListAsync(ct);
         }
 
-        public async Task<IEnumerable<int>> GetAllExpiredDoctorSlotsAsync(int doctorId)
+        public async Task<IEnumerable<int>> GetAllExpiredDoctorSlotsAsync(int doctorId, CancellationToken ct)
         {
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
@@ -95,10 +61,10 @@ namespace Hospital.Repositories.DoctorSlotRepository
                     && _.Date < today
                     && !_.Bookings.Any(_ => _.BookingStatus == BookingStatus.Active))
                 .Select(slot => slot.Id)
-                .ToListAsync();
+                .ToListAsync(ct);
         }
 
-        public async Task<DoctorSlot?> GetDoctorSlotAsync(int slotId)
+        public async Task<DoctorSlot?> GetDoctorSlotAsync(int slotId, CancellationToken ct)
         {
             return await _context.DoctorSlots
                 .Include(_ => _.Doctor)
@@ -106,29 +72,29 @@ namespace Hospital.Repositories.DoctorSlotRepository
                 .Include(_ => _.Doctor)
                 .ThenInclude(_ => _!.Specialty)
                 .Include(_ => _.Bookings)
-                .FirstOrDefaultAsync(_ => _.Id == slotId);
+                .FirstOrDefaultAsync(_ => _.Id == slotId, ct);
         }
 
-        public async Task<bool> DoctorSlotsAlreadyExistsAsync(int doctorId, DateOnly date)
+        public async Task<bool> DoctorSlotsAlreadyExistsAsync(int doctorId, DateOnly date, CancellationToken ct)
         {
             return await _context.DoctorSlots
-                .AnyAsync(_ => _.DoctorId == doctorId && _.Date == date);
+                .AnyAsync(_ => _.DoctorId == doctorId && _.Date == date, ct);
         }
 
-        public async Task AddDoctorSlotsAsync(List<DoctorSlot> doctorSlots)
+        public async Task AddDoctorSlotsAsync(List<DoctorSlot> doctorSlots, CancellationToken ct)
         {
-            await _context.DoctorSlots.AddRangeAsync(doctorSlots);
+            await _context.DoctorSlots.AddRangeAsync(doctorSlots, ct);
         }
 
-        public async Task DeleteDoctorSlotsAsync(List<int> expiredDoctorSlots)
+        public async Task DeleteDoctorSlotsAsync(List<int> expiredDoctorSlots, CancellationToken ct)
         {
             await _context.Bookings
                 .Where(booking => expiredDoctorSlots.Contains(booking.DoctorSlotId))
-                .ExecuteDeleteAsync();
+                .ExecuteDeleteAsync(ct);
 
             await _context.DoctorSlots
                 .Where(slot => expiredDoctorSlots.Contains(slot.Id))
-                .ExecuteDeleteAsync();
+                .ExecuteDeleteAsync(ct);
         }
     }
 }

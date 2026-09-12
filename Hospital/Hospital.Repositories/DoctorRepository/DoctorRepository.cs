@@ -9,32 +9,12 @@ namespace Hospital.Repositories.DoctorRepository
     {
         private readonly HospitalContext _context = context;
 
-        public async Task<IEnumerable<DoctorWithUserResponse>> GetAllDoctorsAsync()
+        public async Task<IEnumerable<Doctor>> GetAllDoctorsAsync(CancellationToken ct)
         {
             return await _context.Doctors
                 .Include(_ => _.User)
                 .Include(_ => _.Specialty)
-                .Select(_ => new DoctorWithUserResponse
-                {
-                    Id = _.Id,
-                    FirstName = _.FirstName,
-                    LastName = _.LastName,
-                    ExperienceYears = _.ExperienceYears,
-                    GenderType = _.GenderType,
-                    WorkDayStart = _.WorkDayStart,
-                    WorkDayEnd = _.WorkDayEnd,
-                    User = new UserResponse
-                    {
-                        Email = _.User!.Email,
-                        Money = _.User!.Money
-                    },
-                    Specialty = new SpecialtyResponse
-                    {
-                        Id = _.Specialty!.Id,
-                        Name = _.Specialty!.Name,
-                        Price = _.Specialty!.Price
-                    }
-                }).ToListAsync();
+                .ToListAsync(ct);
         }
 
         public async Task<IEnumerable<Doctor>> GetAllDoctorsBySpecialtyAsync(int specialtyId, CancellationToken ct)
@@ -44,28 +24,28 @@ namespace Hospital.Repositories.DoctorRepository
                 .ToListAsync(ct);
         }
 
-        public async Task<Doctor?> GetDoctorAsync(int id)
+        public async Task<Doctor?> GetDoctorAsync(int id, CancellationToken ct)
         {
             return await _context.Doctors
                 .Include(_ => _.User)
                 .Include(_ => _.Specialty)
-                .FirstOrDefaultAsync(_ => _.Id == id);
+                .FirstOrDefaultAsync(_ => _.Id == id, ct);
         }
 
-        public async Task<Doctor?> GetDoctorByUserAsync(int userId)
+        public async Task<Doctor?> GetDoctorByUserAsync(int userId, CancellationToken ct)
         {
             return await _context.Doctors
                 .Include(_ => _.User)
                 .Include(_ => _.Specialty)
-                .FirstOrDefaultAsync(_ => _.UserId == userId);
+                .FirstOrDefaultAsync(_ => _.UserId == userId, ct);
         }
 
-        public async Task CreateDoctorAsync(Doctor doctor)
+        public async Task CreateDoctorAsync(Doctor doctor, CancellationToken ct)
         {
-            await _context.Doctors.AddAsync(doctor);
+            await _context.Doctors.AddAsync(doctor, ct);
         }
 
-        public Task DeleteDoctorAsync(Doctor doctor)
+        public Task DeleteDoctorAsync(Doctor doctor, CancellationToken ct = default)
         {
             _context.Doctors.Remove(doctor);
 

@@ -5,10 +5,10 @@ namespace Hospital.Services.AuthService
 {
     public interface IAuthService
     {
-        Task RegisterAsync(RegisterRequest model);
+        Task RegisterAsync(RegisterRequest model, CancellationToken ct);
 
-        Task<TokenResponse> LoginAsync(LoginRequest model);
+        Task<TokenResponse> LoginAsync(LoginRequest model, CancellationToken ct);
 
-        Task<TokenResponse> RefreshTokenAsync(RefreshTokenRequest model);
+        Task<TokenResponse> RefreshTokenAsync(RefreshTokenRequest model, CancellationToken ct);
     }
 }

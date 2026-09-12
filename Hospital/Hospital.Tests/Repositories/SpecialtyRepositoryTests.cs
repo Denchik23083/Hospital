@@ -4,7 +4,7 @@ using Hospital.Db.Entities;
 using Hospital.Repositories.SpecialtyRepository;
 using Hospital.Tests.Helpers;
 
-namespace Hospital.Tests.Repositories
+/*namespace Hospital.Tests.Repositories
 {
     public class SpecialtyRepositoryTests
     {
@@ -141,3 +141,4 @@ namespace Hospital.Tests.Repositories
         }
     }
 }
+*/

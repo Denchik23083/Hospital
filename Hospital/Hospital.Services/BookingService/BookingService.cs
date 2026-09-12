@@ -1,4 +1,5 @@
-﻿using Hospital.Core.Exceptions;
+﻿using AutoMapper;
+using Hospital.Core.Exceptions;
 using Hospital.Core.Models.Response;
 using Hospital.Db.Entities;
 using Hospital.Db.Utilities;
@@ -16,6 +17,7 @@ namespace Hospital.Services.BookingService
             IDoctorSlotRepository doctorSlotRepository,
             IDoctorRepository doctorRepository,
             ILogger<BookingService> logger,
+            IMapper mapper,
             IUnitOfWorkRepository unitOfWorkRepository) : IBookingService
     {
         private readonly IBookingRepository _repository = repository;
@@ -23,24 +25,27 @@ namespace Hospital.Services.BookingService
         private readonly IDoctorSlotRepository _doctorSlotRepository = doctorSlotRepository;
         private readonly IDoctorRepository _doctorRepository = doctorRepository;
         private readonly ILogger<BookingService> _logger = logger;
+        private readonly IMapper _mapper = mapper;
         private readonly IUnitOfWorkRepository _unitOfWorkRepository = unitOfWorkRepository;
 
-        public async Task<IEnumerable<BookingResponse>> GetAllPatientBookingsAsync(int userId)
+        public async Task<IEnumerable<BookingResponse>> GetAllPatientBookingsAsync(int userId, CancellationToken ct)
         {
-            var patient = await _patientRepository.GetPatientByUserAsync(userId);
+            var patient = await _patientRepository.GetPatientByUserAsync(userId, ct);
 
             if (patient is null)
             {
                 _logger.LogWarning("Patient not found");
                 throw new PatientNotFoundException("Patient not found");
             }
-            
-            return await _repository.GetAllPatientBookingsAsync(patient.Id);
+
+            var bookings = await _repository.GetAllPatientBookingsAsync(patient.Id, ct);
+
+            return _mapper.Map<IEnumerable<BookingResponse>>(bookings);
         }
 
-        public async Task CreateBookingAsync(int slotId, int userId)
+        public async Task CreateBookingAsync(int slotId, int userId, CancellationToken ct)
         {
-            var patient = await _patientRepository.GetPatientByUserAsync(userId);
+            var patient = await _patientRepository.GetPatientByUserAsync(userId, ct);
             
             if (patient is null)
             {
@@ -48,7 +53,7 @@ namespace Hospital.Services.BookingService
                 throw new PatientNotFoundException("Patient not found");
             }
 
-            var doctorSlot = await _doctorSlotRepository.GetDoctorSlotAsync(slotId);
+            var doctorSlot = await _doctorSlotRepository.GetDoctorSlotAsync(slotId, ct);
 
             if (doctorSlot is null)
             {
@@ -62,7 +67,7 @@ namespace Hospital.Services.BookingService
                 throw new SlotAlreadyBookedException("Slot already booked");
             }
 
-            if (await _repository.HasActiveBookingWithDoctorAsync(patient.Id, doctorSlot.DoctorId))
+            if (await _repository.HasActiveBookingWithDoctorAsync(patient.Id, doctorSlot.DoctorId, ct))
             {
                 _logger.LogWarning("Patient already has an active booking with this doctor");
                 throw new SlotAlreadyBookedException("Patient already has an active booking with this doctor");
@@ -76,7 +81,7 @@ namespace Hospital.Services.BookingService
                 BookingStatus = BookingStatus.Active
             };
 
-            await using var transaction = await _unitOfWorkRepository.BeginTransactionAsync();
+            await using var transaction = await _unitOfWorkRepository.BeginTransactionAsync(ct);
 
             try
             {
@@ -105,14 +110,14 @@ namespace Hospital.Services.BookingService
                 patient.User.Money -= price;
                 doctorSlot.Doctor.User.Money += price;
 
-                await _repository.AddBookingAsync(booking);
-                await _unitOfWorkRepository.SaveChangesAsync();
+                await _repository.AddBookingAsync(booking, ct);
+                await _unitOfWorkRepository.SaveChangesAsync(ct);
 
-                await transaction.CommitAsync();
+                await transaction.CommitAsync(ct);
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync();
+                await transaction.RollbackAsync(ct);
 
                 _logger.LogError(ex, "Error during booking transaction");
                 
@@ -120,9 +125,9 @@ namespace Hospital.Services.BookingService
             }
         }
 
-        public async Task CompleteBookingAsync(int id, int userId)
+        public async Task CompleteBookingAsync(int id, int userId, CancellationToken ct)
         {
-            var doctor = await _doctorRepository.GetDoctorByUserAsync(userId);
+            var doctor = await _doctorRepository.GetDoctorByUserAsync(userId, ct);
 
             if (doctor is null)
             {
@@ -130,7 +135,7 @@ namespace Hospital.Services.BookingService
                 throw new DoctorNotFoundException("Doctor not found");
             }
 
-            var booking = await _repository.GetBookingWithDoctorAsync(id, doctor.Id);
+            var booking = await _repository.GetBookingWithDoctorAsync(id, doctor.Id, ct);
 
             if (booking is null)
             {
@@ -146,12 +151,12 @@ namespace Hospital.Services.BookingService
 
             booking.BookingStatus = BookingStatus.Completed;
 
-            await _unitOfWorkRepository.SaveChangesAsync();
+            await _unitOfWorkRepository.SaveChangesAsync(ct);
         }
 
-        public async Task CancelBookingAsync(int id, int userId)
+        public async Task CancelBookingAsync(int id, int userId, CancellationToken ct)
         {
-            var patient = await _patientRepository.GetPatientByUserAsync(userId);
+            var patient = await _patientRepository.GetPatientByUserAsync(userId, ct);
 
             if (patient is null)
             {
@@ -159,7 +164,7 @@ namespace Hospital.Services.BookingService
                 throw new PatientNotFoundException("Patient not found");
             }
 
-            var booking = await _repository.GetBookingWithPatientAsync(id, patient.Id);
+            var booking = await _repository.GetBookingWithPatientAsync(id, patient.Id, ct);
 
             if (booking is null)
             {
@@ -173,7 +178,7 @@ namespace Hospital.Services.BookingService
                 throw new BookingNotFoundException("Can change only active booking");
             }
 
-            await using var transaction = await _unitOfWorkRepository.BeginTransactionAsync();
+            await using var transaction = await _unitOfWorkRepository.BeginTransactionAsync(ct);
 
             try
             {
@@ -204,13 +209,13 @@ namespace Hospital.Services.BookingService
                 patient.User.Money += price;
 
                 booking.BookingStatus = BookingStatus.Cancelled;
-                await _unitOfWorkRepository.SaveChangesAsync();
+                await _unitOfWorkRepository.SaveChangesAsync(ct);
 
-                await transaction.CommitAsync();
+                await transaction.CommitAsync(ct);
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync();
+                await transaction.RollbackAsync(ct);
 
                 _logger.LogError(ex, "Error during booking transaction");
 

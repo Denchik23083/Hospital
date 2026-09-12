@@ -29,14 +29,16 @@ namespace Hospital.Services.PatientService
         private readonly INotificationRepository _notificationRepository = notificationRepository;
         private readonly IUnitOfWorkRepository _unitOfWorkRepository = unitOfWorkRepository;
 
-        public async Task<IEnumerable<PatientWithUserResponse>> GetAllPatientsAsync()
+        public async Task<IEnumerable<PatientWithUserResponse>> GetAllPatientsAsync(CancellationToken ct)
         {
-            return await _repository.GetAllPatientsAsync();
+            var patients = await _repository.GetAllPatientsAsync(ct);
+
+            return _mapper.Map<IEnumerable<PatientWithUserResponse>>(patients);
         }
 
-        public async Task<PatientWithUserResponse> GetPatientByUserAsync(int userId)
+        public async Task<PatientWithUserResponse> GetPatientByUserAsync(int userId, CancellationToken ct)
         {
-            var patient = await _repository.GetPatientByUserAsync(userId);
+            var patient = await _repository.GetPatientByUserAsync(userId, ct);
 
             if (patient is null)
             {
@@ -47,14 +49,22 @@ namespace Hospital.Services.PatientService
             return _mapper.Map<PatientWithUserResponse>(patient);
         }
 
-        public async Task<decimal> GetPatientBalanceAsync(int userId)
+        public async Task<decimal> GetPatientBalanceAsync(int userId, CancellationToken ct)
         {
-            return await _repository.GetPatientBalanceAsync(userId);
+            var patientBalance = await _repository.GetPatientBalanceAsync(userId, ct);
+
+            if (patientBalance is null)
+            {
+                _logger.LogWarning("User not found");
+                throw new UserNotFoundException($"User with Id {userId} was not found.");
+            }
+
+            return patientBalance.Value;
         }
 
-        public async Task UpdatePatientAsync(PatientRequest model, int userId)
+        public async Task UpdatePatientAsync(PatientRequest model, int userId, CancellationToken ct)
         {
-            var patientToUpdate = await _repository.GetPatientByUserAsync(userId);
+            var patientToUpdate = await _repository.GetPatientByUserAsync(userId, ct);
 
             if (patientToUpdate is null)
             {
@@ -70,7 +80,7 @@ namespace Hospital.Services.PatientService
 
             if (patientToUpdate.User.Email != model.Email)
             {
-                if (await _authRepository.IsEmailNotUniqueAsync(model.Email))
+                if (await _authRepository.IsEmailNotUniqueAsync(model.Email, ct))
                 {
                     _logger.LogWarning("User with this {Email} email is already exist", model.Email);
                     throw new ConflictException(model.Email);
@@ -91,12 +101,12 @@ namespace Hospital.Services.PatientService
                 patientToUpdate.User.PasswordHash = passwordHasher.HashPassword(patientToUpdate.User, model.Password);
             }
 
-            await _unitOfWorkRepository.SaveChangesAsync();
+            await _unitOfWorkRepository.SaveChangesAsync(ct);
         }
 
-        public async Task ReplenishBalanceAsync(PatientReplenishBalanceRequest model, int userId)
+        public async Task ReplenishBalanceAsync(PatientReplenishBalanceRequest model, int userId, CancellationToken ct)
         {
-            var patientToUpdate = await _repository.GetPatientByUserAsync(userId);
+            var patientToUpdate = await _repository.GetPatientByUserAsync(userId, ct);
 
             if (patientToUpdate is null)
             {
@@ -112,12 +122,12 @@ namespace Hospital.Services.PatientService
 
             patientToUpdate.User.Money += model.Amount;
 
-            await _unitOfWorkRepository.SaveChangesAsync();
+            await _unitOfWorkRepository.SaveChangesAsync(ct);
         }
 
-        public async Task DeletePatientAsync(int patientId)
+        public async Task DeletePatientAsync(int patientId, CancellationToken ct)
         {
-            var patientToDelete = await _repository.GetPatientAsync(patientId);
+            var patientToDelete = await _repository.GetPatientAsync(patientId, ct);
 
             if (patientToDelete is null)
             {
@@ -131,11 +141,11 @@ namespace Hospital.Services.PatientService
                 throw new UserNotFoundException("User not found");
             }
 
-            await using var transaction = await _unitOfWorkRepository.BeginTransactionAsync();
+            await using var transaction = await _unitOfWorkRepository.BeginTransactionAsync(ct);
 
             try
             {
-                var bookings = await _bookingRepository.GetAllBookingsByPatientAsync(patientToDelete.Id);
+                var bookings = await _bookingRepository.GetAllBookingsByPatientAsync(patientToDelete.Id, ct);
 
                 foreach (var booking in bookings)
                 {
@@ -164,17 +174,17 @@ namespace Hospital.Services.PatientService
                         UserId = booking.DoctorSlot.Doctor.User.Id,
                         CreatedAt = DateTime.UtcNow,
                         Message = $"Запись отменена. Пациент {patientToDelete.FirstName} {patientToDelete.LastName} был удалён."
-                    });
+                    }, ct);
                 }
 
-                await _repository.DeletePatientAsync(patientToDelete);
-                await _unitOfWorkRepository.SaveChangesAsync();
+                await _repository.DeletePatientAsync(patientToDelete, ct);
+                await _unitOfWorkRepository.SaveChangesAsync(ct);
 
-                await transaction.CommitAsync();
+                await transaction.CommitAsync(ct);
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync();
+                await transaction.RollbackAsync(ct);
 
                 _logger.LogError(ex, "Error during patient transaction");
 

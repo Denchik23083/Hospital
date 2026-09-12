@@ -85,8 +85,11 @@ builder.Services.AddDbContext<HospitalContext>(option =>
 builder.Services.AddAutoMapper(au =>
 {
     au.CreateMap<Patient, PatientWithUserResponse>();
+    au.CreateMap<Patient, PatientResponse>();
+    au.CreateMap<Booking, BookingResponse>();
     au.CreateMap<Doctor, DoctorWithUserResponse>();
     au.CreateMap<Doctor, DoctorResponse>();
+    au.CreateMap<DoctorSlot, DoctorSlotResponse>();
     au.CreateMap<Specialty, SpecialtyResponse>();
     au.CreateMap<User, UserResponse>();
     au.CreateMap<Notification, NotificationResponse>();

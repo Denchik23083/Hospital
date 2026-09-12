@@ -9,8 +9,8 @@ namespace Hospital.Repositories.NotificationRepository
         
         Task<Notification?> GetNotificationAsync(int id, int userId, CancellationToken ct);
 
-        Task AddNotificationAsync(Notification notification);
+        Task AddNotificationAsync(Notification notification, CancellationToken ct);
 
-        Task DeleteNotificationAsync(Notification notification);
+        Task DeleteNotificationAsync(Notification notification, CancellationToken ct);
     }
 }

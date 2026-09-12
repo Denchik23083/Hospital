@@ -5,16 +5,16 @@ namespace Hospital.Services.PatientService
 {
     public interface IPatientService
     {
-        Task<IEnumerable<PatientWithUserResponse>> GetAllPatientsAsync();
+        Task<IEnumerable<PatientWithUserResponse>> GetAllPatientsAsync(CancellationToken ct);
 
-        Task<PatientWithUserResponse> GetPatientByUserAsync(int userId);
+        Task<PatientWithUserResponse> GetPatientByUserAsync(int userId, CancellationToken ct);
 
-        Task<decimal> GetPatientBalanceAsync(int userId);
+        Task<decimal> GetPatientBalanceAsync(int userId, CancellationToken ct);
 
-        Task UpdatePatientAsync(PatientRequest model, int userId);
+        Task UpdatePatientAsync(PatientRequest model, int userId, CancellationToken ct);
         
-        Task ReplenishBalanceAsync(PatientReplenishBalanceRequest model, int userId);
+        Task ReplenishBalanceAsync(PatientReplenishBalanceRequest model, int userId, CancellationToken ct);
         
-        Task DeletePatientAsync(int patientId);
+        Task DeletePatientAsync(int patientId, CancellationToken ct);
     }
 }

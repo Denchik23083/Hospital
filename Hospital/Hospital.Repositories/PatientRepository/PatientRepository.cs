@@ -9,49 +9,36 @@ namespace Hospital.Repositories.PatientRepository
     {
         private readonly HospitalContext _context = context;
 
-        public async Task<IEnumerable<PatientWithUserResponse>> GetAllPatientsAsync()
+        public async Task<IEnumerable<Patient>> GetAllPatientsAsync(CancellationToken ct)
         {
             return await _context.Patients
                 .Include(_ => _.User)
-                .Select(_ => new PatientWithUserResponse
-                {
-                    Id = _.Id,
-                    FirstName = _.FirstName,
-                    LastName = _.LastName,
-                    GenderType = _.GenderType,
-                    BirthDate = _.BirthDate,
-                    Phone = _.Phone,
-                    User = new UserResponse
-                    {
-                        Email = _.User!.Email,
-                        Money = _.User!.Money
-                    }
-                }).ToListAsync();
+                .ToListAsync(ct);
         }
 
-        public async Task<Patient?> GetPatientAsync(int id)
+        public async Task<Patient?> GetPatientAsync(int id, CancellationToken ct)
         {
             return await _context.Patients
                 .Include(_ => _.User)
-                .FirstOrDefaultAsync(_ => _.Id == id);
+                .FirstOrDefaultAsync(_ => _.Id == id, ct);
         }
 
-        public async Task<Patient?> GetPatientByUserAsync(int userId)
+        public async Task<Patient?> GetPatientByUserAsync(int userId, CancellationToken ct)
         {
             return await _context.Patients
                 .Include(_ => _.User)
-                .FirstOrDefaultAsync(_ => _.UserId == userId);
+                .FirstOrDefaultAsync(_ => _.UserId == userId, ct);
         }
 
-        public async Task<decimal> GetPatientBalanceAsync(int userId)
+        public async Task<decimal?> GetPatientBalanceAsync(int userId, CancellationToken ct)
         {
             return await _context.Users
                 .Where(_ => _.Id == userId)
-                .Select(_ => _.Money)
-                .FirstOrDefaultAsync();
+                .Select(_ => (decimal?)_.Money)
+                .FirstOrDefaultAsync(ct);
         }
 
-        public Task DeletePatientAsync(Patient patient)
+        public Task DeletePatientAsync(Patient patient, CancellationToken ct = default)
         {
             _context.Patients.Remove(patient);
 

@@ -5,18 +5,18 @@ namespace Hospital.Services.DoctorService
 {
     public interface IDoctorService
     {
-        Task<IEnumerable<DoctorWithUserResponse>> GetAllDoctorsAsync();
+        Task<IEnumerable<DoctorWithUserResponse>> GetAllDoctorsAsync(CancellationToken ct);
 
         Task<IEnumerable<DoctorResponse>> GetAllDoctorsBySpecialtyAsync(int specialtyId, CancellationToken ct);
     
-        Task<DoctorWithUserResponse> GetDoctorByUserAsync(int userId);
+        Task<DoctorWithUserResponse> GetDoctorByUserAsync(int userId, CancellationToken ct);
 
-        Task CreateDoctorAsync(DoctorFullRequest model);
+        Task CreateDoctorAsync(DoctorFullRequest model, CancellationToken ct);
 
-        Task UpdateDoctorByUserAsync(DoctorRequest model, int userId);
+        Task UpdateDoctorByUserAsync(DoctorRequest model, int userId, CancellationToken ct);
         
-        Task UpdateDoctorAsync(DoctorFullRequest model, int doctorId);
+        Task UpdateDoctorAsync(DoctorFullRequest model, int doctorId, CancellationToken ct);
 
-        Task DeleteDoctorAsync(int doctorId);
+        Task DeleteDoctorAsync(int doctorId, CancellationToken ct);
     }
 }

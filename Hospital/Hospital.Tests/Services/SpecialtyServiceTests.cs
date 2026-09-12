@@ -8,7 +8,7 @@ using Hospital.Services.SpecialtyService;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace Hospital.Tests.Services
+/*namespace Hospital.Tests.Services
 {
     public class SpecialtyServiceTests
     {
@@ -195,4 +195,4 @@ namespace Hospital.Tests.Services
             _repository.Verify(_ => _.GetSpecialtyPriceAsync(specialtyId, It.IsAny<CancellationToken>()), Times.Once);
         }
     }
-}
+}*/

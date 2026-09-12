@@ -16,7 +16,7 @@ using System.Text;
 
 namespace Hospital.Services.AuthService
 {
-    public class AuthService(IAuthRepository repository, 
+    public class AuthService(IAuthRepository repository,
             IUnitOfWorkRepository unitOfWorkRepository,
             IConfiguration configuration,
             ILogger<AuthService> logger) : IAuthService
@@ -26,9 +26,9 @@ namespace Hospital.Services.AuthService
         private readonly IConfiguration _configuration = configuration;
         private readonly ILogger<AuthService> _logger = logger;
 
-        public async Task RegisterAsync(RegisterRequest model)
+        public async Task RegisterAsync(RegisterRequest model, CancellationToken ct)
         {
-            if (await _repository.IsEmailNotUniqueAsync(model.Email))
+            if (await _repository.IsEmailNotUniqueAsync(model.Email, ct))
             {
                 _logger.LogWarning("User with this {Email} email is already exist", model.Email);
                 throw new ConflictException(model.Email);
@@ -51,13 +51,13 @@ namespace Hospital.Services.AuthService
             user.PasswordHash = new PasswordHasher<User>()
                 .HashPassword(user, model.Password);
 
-            await _repository.RegisterAsync(user);
-            await _unitOfWorkRepository.SaveChangesAsync();
+            await _repository.RegisterAsync(user, ct);
+            await _unitOfWorkRepository.SaveChangesAsync(ct);
         }
 
-        public async Task<TokenResponse> LoginAsync(LoginRequest model)
+        public async Task<TokenResponse> LoginAsync(LoginRequest model, CancellationToken ct)
         {
-            var user = await _repository.GetUserByEmailAsync(model.Email);
+            var user = await _repository.GetUserByEmailAsync(model.Email, ct);
 
             if (user is null || 
                 new PasswordHasher <User>().VerifyHashedPassword(user,
@@ -71,20 +71,20 @@ namespace Hospital.Services.AuthService
             var token = new TokenResponse
             {
                 AccessToken = GetJwtToken(user),
-                RefreshToken = await GetRefreshTokenAsync(user)
+                RefreshToken = await GetRefreshTokenAsync(user, ct)
             };
 
             return token;
         }
 
-        public async Task<TokenResponse> RefreshTokenAsync(RefreshTokenRequest model)
+        public async Task<TokenResponse> RefreshTokenAsync(RefreshTokenRequest model, CancellationToken ct)
         {
-            var user = await ValidateRefreshTokenAsync(model.UserId, model.RefreshToken);
+            var user = await ValidateRefreshTokenAsync(model.UserId, model.RefreshToken, ct);
             
             var token = new TokenResponse
             {
                 AccessToken = GetJwtToken(user),
-                RefreshToken = await GetRefreshTokenAsync(user)
+                RefreshToken = await GetRefreshTokenAsync(user, ct)
             };
 
             return token;
@@ -118,7 +118,7 @@ namespace Hospital.Services.AuthService
             return new JwtSecurityTokenHandler().WriteToken(jwt);
         }
 
-        private async Task<string> GetRefreshTokenAsync(User user)
+        private async Task<string> GetRefreshTokenAsync(User user, CancellationToken ct)
         {
             var randomNumber = new byte[32];
             using var rng = RandomNumberGenerator.Create();
@@ -128,14 +128,14 @@ namespace Hospital.Services.AuthService
             user.RefreshToken = refreshToken;
             user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
 
-            await _unitOfWorkRepository.SaveChangesAsync();
+            await _unitOfWorkRepository.SaveChangesAsync(ct);
 
             return refreshToken;
         }
 
-        private async Task<User> ValidateRefreshTokenAsync(int userId, string refreshToken)
+        private async Task<User> ValidateRefreshTokenAsync(int userId, string refreshToken, CancellationToken ct)
         {
-            var user = await _repository.GetUserAsync(userId);
+            var user = await _repository.GetUserAsync(userId, ct);
 
             if (user is null 
                 || user.RefreshToken != refreshToken

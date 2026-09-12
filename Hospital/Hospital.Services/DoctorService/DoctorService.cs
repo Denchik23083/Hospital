@@ -30,9 +30,11 @@ namespace Hospital.Services.DoctorService
         private readonly INotificationRepository _notificationRepository = notificationRepository;
         private readonly IUnitOfWorkRepository _unitOfWorkRepository = unitOfWorkRepository;
 
-        public async Task<IEnumerable<DoctorWithUserResponse>> GetAllDoctorsAsync()
+        public async Task<IEnumerable<DoctorWithUserResponse>> GetAllDoctorsAsync(CancellationToken ct)
         {
-            return await _repository.GetAllDoctorsAsync();
+            var doctors = await _repository.GetAllDoctorsAsync(ct);
+
+            return _mapper.Map<IEnumerable<DoctorWithUserResponse>>(doctors);
         }
 
         public async Task<IEnumerable<DoctorResponse>> GetAllDoctorsBySpecialtyAsync(int specialtyId, CancellationToken ct)
@@ -42,9 +44,9 @@ namespace Hospital.Services.DoctorService
             return _mapper.Map<IEnumerable<DoctorResponse>>(doctors);
         }
 
-        public async Task<DoctorWithUserResponse> GetDoctorByUserAsync(int userId)
+        public async Task<DoctorWithUserResponse> GetDoctorByUserAsync(int userId, CancellationToken ct)
         {
-            var doctor = await _repository.GetDoctorByUserAsync(userId);
+            var doctor = await _repository.GetDoctorByUserAsync(userId, ct);
 
             if (doctor is null)
             {
@@ -55,11 +57,11 @@ namespace Hospital.Services.DoctorService
             return _mapper.Map<DoctorWithUserResponse>(doctor);
         }
 
-        public async Task CreateDoctorAsync(DoctorFullRequest model)
+        public async Task CreateDoctorAsync(DoctorFullRequest model, CancellationToken ct)
         {
             ValidateWorkDay(model.WorkDayStart, model.WorkDayEnd, _logger);
 
-            if (await _authRepository.IsEmailNotUniqueAsync(model.Email))
+            if (await _authRepository.IsEmailNotUniqueAsync(model.Email, ct))
             {
                 _logger.LogWarning("User with this {Email} email is already exist", model.Email);
                 throw new ConflictException(model.Email);
@@ -77,13 +79,13 @@ namespace Hospital.Services.DoctorService
             var mappedDoctor = _mapper.Map<Doctor>(model);
             mappedDoctor.User = user;
 
-            await _repository.CreateDoctorAsync(mappedDoctor);
-            await _unitOfWorkRepository.SaveChangesAsync();
+            await _repository.CreateDoctorAsync(mappedDoctor, ct);
+            await _unitOfWorkRepository.SaveChangesAsync(ct);
         }
 
-        public async Task UpdateDoctorByUserAsync(DoctorRequest model, int userId)
+        public async Task UpdateDoctorByUserAsync(DoctorRequest model, int userId, CancellationToken ct)
         {
-            var doctorToUpdate = await _repository.GetDoctorByUserAsync(userId);
+            var doctorToUpdate = await _repository.GetDoctorByUserAsync(userId, ct);
 
             if (doctorToUpdate is null)
             {
@@ -95,14 +97,14 @@ namespace Hospital.Services.DoctorService
             doctorToUpdate.LastName = model.LastName;
             doctorToUpdate.GenderType = model.GenderType;
 
-            await _unitOfWorkRepository.SaveChangesAsync();
+            await _unitOfWorkRepository.SaveChangesAsync(ct);
         }
 
-        public async Task UpdateDoctorAsync(DoctorFullRequest model, int doctorId)
+        public async Task UpdateDoctorAsync(DoctorFullRequest model, int doctorId, CancellationToken ct)
         {
             ValidateWorkDay(model.WorkDayStart, model.WorkDayEnd, _logger);
 
-            var doctorToUpdate = await _repository.GetDoctorAsync(doctorId);
+            var doctorToUpdate = await _repository.GetDoctorAsync(doctorId, ct);
 
             if (doctorToUpdate is null)
             {
@@ -118,7 +120,7 @@ namespace Hospital.Services.DoctorService
 
             if (doctorToUpdate.User.Email != model.Email)
             {
-                if (await _authRepository.IsEmailNotUniqueAsync(model.Email))
+                if (await _authRepository.IsEmailNotUniqueAsync(model.Email, ct))
                 {
                     _logger.LogWarning("User with this {Email} email is already exist", model.Email);
                     throw new ConflictException(model.Email);
@@ -141,12 +143,12 @@ namespace Hospital.Services.DoctorService
                 doctorToUpdate.User.PasswordHash = passwordHasher.HashPassword(doctorToUpdate.User, model.Password);
             }
 
-            await _unitOfWorkRepository.SaveChangesAsync();
+            await _unitOfWorkRepository.SaveChangesAsync(ct);
         }
 
-        public async Task DeleteDoctorAsync(int doctorId)
+        public async Task DeleteDoctorAsync(int doctorId, CancellationToken ct)
         {
-            var doctorToDelete = await _repository.GetDoctorAsync(doctorId);
+            var doctorToDelete = await _repository.GetDoctorAsync(doctorId, ct);
 
             if (doctorToDelete is null)
             {
@@ -166,11 +168,11 @@ namespace Hospital.Services.DoctorService
                 throw new SpecialtyNotFoundException("Specialty not found");
             }
 
-            await using var transaction = await _unitOfWorkRepository.BeginTransactionAsync();
+            await using var transaction = await _unitOfWorkRepository.BeginTransactionAsync(ct);
 
             try
             {
-                var bookings = await _bookingRepository.GetAllBookingsByDoctorAsync(doctorToDelete.Id);
+                var bookings = await _bookingRepository.GetAllBookingsByDoctorAsync(doctorToDelete.Id, ct);
 
                 var totalRefund = bookings.Sum(_ => doctorToDelete.Specialty.Price);
 
@@ -201,20 +203,20 @@ namespace Hospital.Services.DoctorService
                         UserId = booking.Patient.User.Id,
                         CreatedAt = DateTime.UtcNow,
                         Message = $"Ваша запись отменена. Просим прощения, врач {doctorToDelete.FirstName} {doctorToDelete.LastName} был удалён."
-                    });
+                    }, ct);
                 }
 
                 doctorToDelete.User.Money -= totalRefund;
 
-                await _repository.DeleteDoctorAsync(doctorToDelete);
+                await _repository.DeleteDoctorAsync(doctorToDelete, ct);
 
-                await _unitOfWorkRepository.SaveChangesAsync();
+                await _unitOfWorkRepository.SaveChangesAsync(ct);
 
-                await transaction.CommitAsync();
+                await transaction.CommitAsync(ct);
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync();
+                await transaction.RollbackAsync(ct);
 
                 _logger.LogError(ex, "Error during doctor transaction");
 

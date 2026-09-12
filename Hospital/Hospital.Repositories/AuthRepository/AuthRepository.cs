@@ -8,24 +8,24 @@ namespace Hospital.Repositories.AuthRepository
     {
         private readonly HospitalContext _context = context;
 
-        public async Task<bool> IsEmailNotUniqueAsync(string email)
+        public async Task<bool> IsEmailNotUniqueAsync(string email, CancellationToken ct)
         {
-            return await _context.Users.AnyAsync(u => u.Email == email);
+            return await _context.Users.AnyAsync(u => u.Email == email, ct);
         }
 
-        public async Task<User?> GetUserByEmailAsync(string email)
+        public async Task<User?> GetUserByEmailAsync(string email, CancellationToken ct)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email, ct);
         }
 
-        public async Task<User?> GetUserAsync(int id)
+        public async Task<User?> GetUserAsync(int id, CancellationToken ct)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
+            return await _context.Users.FirstOrDefaultAsync(u => u.Id == id, ct);
         }
 
-        public async Task RegisterAsync(User user)
+        public async Task RegisterAsync(User user, CancellationToken ct)
         {
-            await _context.Users.AddAsync(user);
+            await _context.Users.AddAsync(user, ct);
         }
     }
 }

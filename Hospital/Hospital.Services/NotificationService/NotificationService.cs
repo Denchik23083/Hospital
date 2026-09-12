@@ -34,8 +34,8 @@ namespace Hospital.Services.NotificationService
                 throw new NotificationNotFoundException("Notification not found");
             }
 
-            await _repository.DeleteNotificationAsync(notificationToDelete);
-            await _unitOfWorkRepository.SaveChangesAsync();
+            await _repository.DeleteNotificationAsync(notificationToDelete, ct);
+            await _unitOfWorkRepository.SaveChangesAsync(ct);
         }
     }
 }

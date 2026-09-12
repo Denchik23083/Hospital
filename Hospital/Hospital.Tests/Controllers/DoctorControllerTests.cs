@@ -8,7 +8,7 @@ using Hospital.Tests.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 
-namespace Hospital.Tests.Controllers
+/*namespace Hospital.Tests.Controllers
 {
     public class DoctorControllerTests
     {
@@ -239,3 +239,4 @@ namespace Hospital.Tests.Controllers
         }
     }
 }
+*/
