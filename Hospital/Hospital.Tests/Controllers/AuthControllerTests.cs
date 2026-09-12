@@ -7,8 +7,6 @@ using Hospital.Services.AuthService;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 
-/*
-
 namespace Hospital.Tests.Controllers
 {
     public class AuthControllerTests
@@ -31,14 +29,14 @@ namespace Hospital.Tests.Controllers
                 new DateOnly(2003, 01, 01), GenderType.Male);
 
             _service
-                .Setup(s => s.RegisterAsync(register))
+                .Setup(s => s.RegisterAsync(register, It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            var result = await _controller.RegisterAsync(register);
+            var result = await _controller.RegisterAsync(register, CancellationToken.None);
 
             result.Should().BeOfType<CreatedResult>();
 
-            _service.Verify(_ => _.RegisterAsync(register), Times.Once);
+            _service.Verify(_ => _.RegisterAsync(register, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -53,16 +51,16 @@ namespace Hospital.Tests.Controllers
             };
 
             _service
-                .Setup(s => s.LoginAsync(login))
+                .Setup(s => s.LoginAsync(login, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(tokenResponse);
 
-            var result = await _controller.LoginAsync(login);
+            var result = await _controller.LoginAsync(login, CancellationToken.None);
 
             var actionResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
 
             actionResult.Value.Should().Be(tokenResponse);
 
-            _service.Verify(_ => _.LoginAsync(login), Times.Once);
+            _service.Verify(_ => _.LoginAsync(login, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -77,17 +75,16 @@ namespace Hospital.Tests.Controllers
             };
 
             _service
-                .Setup(s => s.RefreshTokenAsync(refresh))
+                .Setup(s => s.RefreshTokenAsync(refresh, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(tokenResponse);
 
-            var result = await _controller.RefreshTokenAsync(refresh);
+            var result = await _controller.RefreshTokenAsync(refresh, CancellationToken.None);
 
             var actionResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
 
             actionResult.Value.Should().Be(tokenResponse);
 
-            _service.Verify(_ => _.RefreshTokenAsync(refresh), Times.Once);
+            _service.Verify(_ => _.RefreshTokenAsync(refresh, It.IsAny<CancellationToken>()), Times.Once);
         }
     }
 }
-*/

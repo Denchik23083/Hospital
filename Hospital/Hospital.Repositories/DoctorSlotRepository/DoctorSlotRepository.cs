@@ -22,6 +22,7 @@ namespace Hospital.Repositories.DoctorSlotRepository
         public async Task<IEnumerable<DoctorSlot>> GetAllDoctorSlotsTimesByDoctorAsync(int doctorId, DateOnly date, CancellationToken ct)   
         {
             return await _context.DoctorSlots
+                .AsNoTracking()
                 .Include(_ => _.Bookings)
                 .ThenInclude(_ => _.Patient)
                 .Where(_ => _.DoctorId == doctorId && _.Date == date)
@@ -44,6 +45,7 @@ namespace Hospital.Repositories.DoctorSlotRepository
         public async Task<IEnumerable<DoctorSlot>> GetAllDoctorSlotsTimeByDateAsync(int doctorId, DateOnly date, DateOnly today, TimeSpan currentTime, CancellationToken ct)
         {
             return await _context.DoctorSlots
+                .AsNoTracking()
                 .Where(_ => _.DoctorId == doctorId
                     && _.Date == date
                     && !_.Bookings.Any(_ => _.BookingStatus == BookingStatus.Active)

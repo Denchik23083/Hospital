@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using Hospital.Core.Models.Requests;
 using Hospital.Core.Models.Response;
+using Hospital.Db.Entities;
 using Hospital.Db.Utilities;
 using Hospital.Hospital.Controllers;
 using Hospital.Services.PatientService;
@@ -8,7 +9,7 @@ using Hospital.Tests.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 
-/*namespace Hospital.Tests.Controllers
+namespace Hospital.Tests.Controllers
 {
     public class PatientControllerTests
     {
@@ -90,18 +91,18 @@ using Moq;
             };
 
             _service
-                .Setup(_ => _.GetPatientByUserAsync(userId))
+                .Setup(_ => _.GetPatientByUserAsync(userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(patientWithUser);
 
             _controller.ControllerContext = TestUserFactory.CreateControllerContext(userId);
 
-            var result = await _controller.GetPatientByUserAsync();
+            var result = await _controller.GetPatientByUserAsync(CancellationToken.None);
 
             var actionResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
 
             actionResult.Value.Should().BeEquivalentTo(patientWithUser);
 
-            _service.Verify(_ => _.GetPatientByUserAsync(userId), Times.Once);
+            _service.Verify(_ => _.GetPatientByUserAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -111,18 +112,18 @@ using Moq;
             var balance = 10000m;
 
             _service
-                .Setup(_ => _.GetPatientBalanceAsync(userId))
+                .Setup(_ => _.GetPatientBalanceAsync(userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(balance);
 
             _controller.ControllerContext = TestUserFactory.CreateControllerContext(userId);
 
-            var result = await _controller.GetPatientBalanceAsync();
+            var result = await _controller.GetPatientBalanceAsync(CancellationToken.None);
 
             var actionResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
 
             actionResult.Value.Should().Be(balance);
 
-            _service.Verify(_ => _.GetPatientBalanceAsync(userId), Times.Once);
+            _service.Verify(_ => _.GetPatientBalanceAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -135,14 +136,16 @@ using Moq;
                 "+38077777777", "pedro@gmail.com", "1111");
 
             _service
-                .Setup(_ => _.UpdatePatientAsync(model, userId))
+                .Setup(_ => _.UpdatePatientAsync(model, userId, It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
             _controller.ControllerContext = TestUserFactory.CreateControllerContext(userId);
 
-            var result = await _controller.UpdatePatientAsync(model);
+            var result = await _controller.UpdatePatientAsync(model, CancellationToken.None);
 
             result.Should().BeOfType<NoContentResult>();
+
+            _service.Verify(_ => _.UpdatePatientAsync(model, userId, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -153,14 +156,16 @@ using Moq;
             var model = new PatientReplenishBalanceRequest(500m);
 
             _service
-                .Setup(_ => _.ReplenishBalanceAsync(model, userId))
+                .Setup(_ => _.ReplenishBalanceAsync(model, userId, It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
             _controller.ControllerContext = TestUserFactory.CreateControllerContext(userId);
 
-            var result = await _controller.ReplenishBalanceAsync(model);
+            var result = await _controller.ReplenishBalanceAsync(model, CancellationToken.None);
 
             result.Should().BeOfType<NoContentResult>();
+
+            _service.Verify(_ => _.ReplenishBalanceAsync(model, userId, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -169,12 +174,14 @@ using Moq;
             var patientId = 4;
 
             _service
-                .Setup(_ => _.DeletePatientAsync(patientId))
+                .Setup(_ => _.DeletePatientAsync(patientId, It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            var result = await _controller.DeletePatientAsync(patientId);
+            var result = await _controller.DeletePatientAsync(patientId, CancellationToken.None);
 
             result.Should().BeOfType<NoContentResult>();
+
+            _service.Verify(_ => _.DeletePatientAsync(patientId, It.IsAny<CancellationToken>()), Times.Once);
         }
     }
-}*/
+}

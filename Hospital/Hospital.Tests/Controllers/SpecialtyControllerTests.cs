@@ -7,7 +7,7 @@ using Hospital.Services.SpecialtyService;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 
-/*namespace Hospital.Tests.Controllers
+namespace Hospital.Tests.Controllers
 {
     public class SpecialtyControllerTests
     {
@@ -162,4 +162,3 @@ using Moq;
         }
     }
 }
-*/

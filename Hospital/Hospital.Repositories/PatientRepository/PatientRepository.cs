@@ -12,6 +12,7 @@ namespace Hospital.Repositories.PatientRepository
         public async Task<IEnumerable<Patient>> GetAllPatientsAsync(CancellationToken ct)
         {
             return await _context.Patients
+                .AsNoTracking()
                 .Include(_ => _.User)
                 .ToListAsync(ct);
         }

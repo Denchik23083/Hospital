@@ -8,7 +8,7 @@ using Hospital.Tests.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 
-/*namespace Hospital.Tests.Controllers
+namespace Hospital.Tests.Controllers
 {
     public class DoctorControllerTests
     {
@@ -92,16 +92,16 @@ using Moq;
             };
 
             _service
-                .Setup(_ => _.GetAllDoctorsAsync())
+                .Setup(_ => _.GetAllDoctorsAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(doctors);
 
-            var result = await _controller.GetAllDoctorsAsync();
+            var result = await _controller.GetAllDoctorsAsync(CancellationToken.None);
 
             var actionResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
 
             actionResult.Value.Should().BeEquivalentTo(doctors);
 
-            _service.Verify(_ => _.GetAllDoctorsAsync(), Times.Once);
+            _service.Verify(_ => _.GetAllDoctorsAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -132,18 +132,18 @@ using Moq;
             };
 
             _service
-                .Setup(_ => _.GetDoctorByUserAsync(userId))
+                .Setup(_ => _.GetDoctorByUserAsync(userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(doctor);
 
             _controller.ControllerContext = TestUserFactory.CreateControllerContext(userId);
 
-            var result = await _controller.GetDoctorByUserAsync();
+            var result = await _controller.GetDoctorByUserAsync(CancellationToken.None);
 
             var actionResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
 
             actionResult.Value.Should().BeEquivalentTo(doctor);
 
-            _service.Verify(_ => _.GetDoctorByUserAsync(userId), Times.Once);
+            _service.Verify(_ => _.GetDoctorByUserAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -163,14 +163,14 @@ using Moq;
             };
 
             _service
-                .Setup(_ => _.CreateDoctorAsync(doctorRequest))
+                .Setup(_ => _.CreateDoctorAsync(doctorRequest, It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            var result = await _controller.CreateDoctorAsync(doctorRequest);
+            var result = await _controller.CreateDoctorAsync(doctorRequest, CancellationToken.None);
 
             result.Should().BeOfType<CreatedResult>();
 
-            _service.Verify(_ => _.CreateDoctorAsync(doctorRequest), Times.Once);
+            _service.Verify(_ => _.CreateDoctorAsync(doctorRequest, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -181,16 +181,16 @@ using Moq;
             var doctorRequest = new DoctorRequest("Foo", "Too", GenderType.Female);
 
             _service
-                .Setup(_ => _.UpdateDoctorByUserAsync(doctorRequest, userId))
+                .Setup(_ => _.UpdateDoctorByUserAsync(doctorRequest, userId, It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
             _controller.ControllerContext = TestUserFactory.CreateControllerContext(userId);
 
-            var result = await _controller.UpdateDoctorByUserAsync(doctorRequest);
+            var result = await _controller.UpdateDoctorByUserAsync(doctorRequest, CancellationToken.None);
 
             result.Should().BeOfType<NoContentResult>();
 
-            _service.Verify(_ => _.UpdateDoctorByUserAsync(doctorRequest, userId), Times.Once);
+            _service.Verify(_ => _.UpdateDoctorByUserAsync(doctorRequest, userId, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -212,14 +212,14 @@ using Moq;
             };
 
             _service
-                .Setup(_ => _.UpdateDoctorAsync(doctorRequest, doctorId))
+                .Setup(_ => _.UpdateDoctorAsync(doctorRequest, doctorId, It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            var result = await _controller.UpdateDoctorAsync(doctorRequest, doctorId);
+            var result = await _controller.UpdateDoctorAsync(doctorRequest, doctorId, CancellationToken.None);
 
             result.Should().BeOfType<NoContentResult>();
 
-            _service.Verify(_ => _.UpdateDoctorAsync(doctorRequest, doctorId), Times.Once);
+            _service.Verify(_ => _.UpdateDoctorAsync(doctorRequest, doctorId, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -228,15 +228,14 @@ using Moq;
             var doctorId = 1;
 
             _service
-                .Setup(_ => _.DeleteDoctorAsync(doctorId))
+                .Setup(_ => _.DeleteDoctorAsync(doctorId, It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            var result = await _controller.DeleteDoctorAsync(doctorId);
+            var result = await _controller.DeleteDoctorAsync(doctorId, CancellationToken.None);
 
             result.Should().BeOfType<NoContentResult>();
 
-            _service.Verify(_ => _.DeleteDoctorAsync(doctorId), Times.Once);
+            _service.Verify(_ => _.DeleteDoctorAsync(doctorId, It.IsAny<CancellationToken>()), Times.Once);
         }
     }
 }
-*/

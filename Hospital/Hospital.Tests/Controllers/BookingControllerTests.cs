@@ -7,7 +7,7 @@ using Hospital.Tests.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 
-/*namespace Hospital.Tests.Controllers
+namespace Hospital.Tests.Controllers
 {
     public class BookingControllerTests
     {
@@ -69,18 +69,18 @@ using Moq;
             };
 
             _service
-                .Setup(_ => _.GetAllPatientBookingsAsync(userId))
+                .Setup(_ => _.GetAllPatientBookingsAsync(userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(bookings);
 
             _controller.ControllerContext = TestUserFactory.CreateControllerContext(userId);
 
-            var result = await _controller.GetAllPatientBookingsAsync();
+            var result = await _controller.GetAllPatientBookingsAsync(CancellationToken.None);
 
             var actionResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
 
             actionResult.Value.Should().BeEquivalentTo(bookings);
 
-            _service.Verify(_ => _.GetAllPatientBookingsAsync(userId), Times.Once);
+            _service.Verify(_ => _.GetAllPatientBookingsAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -90,16 +90,16 @@ using Moq;
             var userId = 4;
 
             _service
-                .Setup(_ => _.CreateBookingAsync(slotId, userId))
+                .Setup(_ => _.CreateBookingAsync(slotId, userId, It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
             _controller.ControllerContext = TestUserFactory.CreateControllerContext(userId);
 
-            var result = await _controller.CreateBookingAsync(slotId);
+            var result = await _controller.CreateBookingAsync(slotId, CancellationToken.None);
 
             result.Should().BeOfType<CreatedResult>();
 
-            _service.Verify(_ => _.CreateBookingAsync(slotId, userId), Times.Once);
+            _service.Verify(_ => _.CreateBookingAsync(slotId, userId, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -109,16 +109,16 @@ using Moq;
             var userId = 4;
 
             _service
-                .Setup(_ => _.CompleteBookingAsync(id, userId))
+                .Setup(_ => _.CompleteBookingAsync(id, userId, It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
             _controller.ControllerContext = TestUserFactory.CreateControllerContext(userId);
 
-            var result = await _controller.CompleteBookingAsync(id);
+            var result = await _controller.CompleteBookingAsync(id, CancellationToken.None);
 
             result.Should().BeOfType<NoContentResult>();
 
-            _service.Verify(_ => _.CompleteBookingAsync(id, userId), Times.Once);
+            _service.Verify(_ => _.CompleteBookingAsync(id, userId, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -128,16 +128,16 @@ using Moq;
             var userId = 4;
 
             _service
-                .Setup(_ => _.CancelBookingAsync(id, userId))
+                .Setup(_ => _.CancelBookingAsync(id, userId, It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
             _controller.ControllerContext = TestUserFactory.CreateControllerContext(userId);
 
-            var result = await _controller.CancelBookingAsync(id);
+            var result = await _controller.CancelBookingAsync(id, CancellationToken.None);
 
             result.Should().BeOfType<NoContentResult>();
 
-            _service.Verify(_ => _.CancelBookingAsync(id, userId), Times.Once);
+            _service.Verify(_ => _.CancelBookingAsync(id, userId, It.IsAny<CancellationToken>()), Times.Once);
         }
     }
-}*/
+}

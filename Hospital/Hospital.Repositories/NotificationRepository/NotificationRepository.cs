@@ -11,6 +11,7 @@ namespace Hospital.Repositories.NotificationRepository
         public async Task<IEnumerable<Notification>> GetAllNotificationsAsync(int userId, CancellationToken ct)
         {
             return await _context.Notifications
+                .AsNoTracking()
                 .Where(_ => _.UserId == userId)
                 .ToListAsync(ct);
         }

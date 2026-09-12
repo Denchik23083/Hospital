@@ -7,7 +7,7 @@ using Hospital.Tests.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 
-/*namespace Hospital.Tests.Controllers
+namespace Hospital.Tests.Controllers
 {
     public class DoctorSlotControllerTests
     {
@@ -33,18 +33,18 @@ using Moq;
             };
 
             _service
-                .Setup(_ => _.GetAllDoctorSlotsDatesByDoctorAsync(userId))
+                .Setup(_ => _.GetAllDoctorSlotsDatesByDoctorAsync(userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(dates);
 
             _controller.ControllerContext = TestUserFactory.CreateControllerContext(userId);
 
-            var result = await _controller.GetAllDoctorSlotsDatesByDoctorAsync();
+            var result = await _controller.GetAllDoctorSlotsDatesByDoctorAsync(CancellationToken.None);
 
             var actionResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
 
             actionResult.Value.Should().BeEquivalentTo(dates);
 
-            _service.Verify(_ => _.GetAllDoctorSlotsDatesByDoctorAsync(userId), Times.Once);
+            _service.Verify(_ => _.GetAllDoctorSlotsDatesByDoctorAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -87,18 +87,18 @@ using Moq;
             };
 
             _service
-                .Setup(_ => _.GetAllDoctorSlotsTimesByDoctorAsync(date, userId))
+                .Setup(_ => _.GetAllDoctorSlotsTimesByDoctorAsync(date, userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(doctorSlotsBooking);
 
             _controller.ControllerContext = TestUserFactory.CreateControllerContext(userId);
 
-            var result = await _controller.GetAllDoctorSlotsTimesByDoctorAsync(date);
+            var result = await _controller.GetAllDoctorSlotsTimesByDoctorAsync(date, CancellationToken.None);
 
             var actionResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
 
             actionResult.Value.Should().BeEquivalentTo(doctorSlotsBooking);
 
-            _service.Verify(_ => _.GetAllDoctorSlotsTimesByDoctorAsync(date, userId), Times.Once);
+            _service.Verify(_ => _.GetAllDoctorSlotsTimesByDoctorAsync(date, userId, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -115,18 +115,18 @@ using Moq;
             };
 
             _service
-                .Setup(_ => _.GetAllDoctorSlotsDatesAsync(doctorId, userId))
+                .Setup(_ => _.GetAllDoctorSlotsDatesAsync(doctorId, userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(dates);
 
             _controller.ControllerContext = TestUserFactory.CreateControllerContext(userId);
 
-            var result = await _controller.GetAllDoctorSlotsDatesAsync(doctorId);
+            var result = await _controller.GetAllDoctorSlotsDatesAsync(doctorId, CancellationToken.None);
 
             var actionResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
 
             actionResult.Value.Should().BeEquivalentTo(dates);
 
-            _service.Verify(_ => _.GetAllDoctorSlotsDatesAsync(doctorId, userId), Times.Once);
+            _service.Verify(_ => _.GetAllDoctorSlotsDatesAsync(doctorId, userId, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -157,18 +157,18 @@ using Moq;
             };
 
             _service
-                .Setup(_ => _.GetAllDoctorSlotsTimeByDateAsync(doctorId, date, userId))
+                .Setup(_ => _.GetAllDoctorSlotsTimeByDateAsync(doctorId, date, userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(doctorSlots);
 
             _controller.ControllerContext = TestUserFactory.CreateControllerContext(userId);
 
-            var result = await _controller.GetAllDoctorSlotsTimeByDateAsync(doctorId, date);
+            var result = await _controller.GetAllDoctorSlotsTimeByDateAsync(doctorId, date, CancellationToken.None);
 
             var actionResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
 
             actionResult.Value.Should().BeEquivalentTo(doctorSlots);
 
-            _service.Verify(_ => _.GetAllDoctorSlotsTimeByDateAsync(doctorId, date, userId), Times.Once);
+            _service.Verify(_ => _.GetAllDoctorSlotsTimeByDateAsync(doctorId, date, userId, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -184,16 +184,16 @@ using Moq;
             };
 
             _service
-                .Setup(_ => _.GetAllAdminDoctorSlotsDatesAsync(doctorId))
+                .Setup(_ => _.GetAllAdminDoctorSlotsDatesAsync(doctorId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(dates);
 
-            var result = await _controller.GetAllAdminDoctorSlotsDatesAsync(doctorId);
+            var result = await _controller.GetAllAdminDoctorSlotsDatesAsync(doctorId, CancellationToken.None);
 
             var actionResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
 
             actionResult.Value.Should().BeEquivalentTo(dates);
 
-            _service.Verify(_ => _.GetAllAdminDoctorSlotsDatesAsync(doctorId), Times.Once);
+            _service.Verify(_ => _.GetAllAdminDoctorSlotsDatesAsync(doctorId, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -223,16 +223,16 @@ using Moq;
             };
 
             _service
-                .Setup(_ => _.GetAllAdminDoctorSlotsTimeByDateAsync(doctorId, date))
+                .Setup(_ => _.GetAllAdminDoctorSlotsTimeByDateAsync(doctorId, date, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(doctorSlots);
 
-            var result = await _controller.GetAllAdminDoctorSlotsTimeByDateAsync(doctorId, date);
+            var result = await _controller.GetAllAdminDoctorSlotsTimeByDateAsync(doctorId, date, CancellationToken.None);
 
             var actionResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
 
             actionResult.Value.Should().BeEquivalentTo(doctorSlots);
 
-            _service.Verify(_ => _.GetAllAdminDoctorSlotsTimeByDateAsync(doctorId, date), Times.Once);
+            _service.Verify(_ => _.GetAllAdminDoctorSlotsTimeByDateAsync(doctorId, date, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -242,16 +242,16 @@ using Moq;
             var date = new DateOnly(2026, 02, 03);
 
             _service
-                .Setup(_ => _.AddDoctorSlotsAsync(date, userId))
+                .Setup(_ => _.AddDoctorSlotsAsync(date, userId, It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
             _controller.ControllerContext = TestUserFactory.CreateControllerContext(userId);
 
-            var result = await _controller.AddDoctorSlotsAsync(date);
+            var result = await _controller.AddDoctorSlotsAsync(date, CancellationToken.None);
 
             result.Should().BeOfType<CreatedResult>();
 
-            _service.Verify(_ => _.AddDoctorSlotsAsync(date, userId), Times.Once);
+            _service.Verify(_ => _.AddDoctorSlotsAsync(date, userId, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -260,17 +260,16 @@ using Moq;
             var userId = 4;
 
             _service
-                .Setup(_ => _.DeleteDoctorSlotsAsync(userId))
+                .Setup(_ => _.DeleteDoctorSlotsAsync(userId, It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
             _controller.ControllerContext = TestUserFactory.CreateControllerContext(userId);
 
-            var result = await _controller.DeleteDoctorSlotsAsync();
+            var result = await _controller.DeleteDoctorSlotsAsync(CancellationToken.None);
 
             result.Should().BeOfType<NoContentResult>();
 
-            _service.Verify(_ => _.DeleteDoctorSlotsAsync(userId), Times.Once);
+            _service.Verify(_ => _.DeleteDoctorSlotsAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
         }
     }
 }
-*/

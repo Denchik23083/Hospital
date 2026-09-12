@@ -12,6 +12,7 @@ namespace Hospital.Repositories.BookingRepository
         public async Task<IEnumerable<Booking>> GetAllPatientBookingsAsync(int patientId, CancellationToken ct)
         {
             return await _context.Bookings
+                .AsNoTracking()
                 .Where(_ => _.PatientId == patientId)
                 .Include(_ => _.DoctorSlot)
                 .ThenInclude(_ => _!.Doctor)

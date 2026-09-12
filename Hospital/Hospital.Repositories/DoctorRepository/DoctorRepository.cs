@@ -12,6 +12,7 @@ namespace Hospital.Repositories.DoctorRepository
         public async Task<IEnumerable<Doctor>> GetAllDoctorsAsync(CancellationToken ct)
         {
             return await _context.Doctors
+                .AsNoTracking()
                 .Include(_ => _.User)
                 .Include(_ => _.Specialty)
                 .ToListAsync(ct);
@@ -20,6 +21,7 @@ namespace Hospital.Repositories.DoctorRepository
         public async Task<IEnumerable<Doctor>> GetAllDoctorsBySpecialtyAsync(int specialtyId, CancellationToken ct)
         {
             return await _context.Doctors
+                .AsNoTracking()
                 .Where(_ => _.SpecialtyId == specialtyId)
                 .ToListAsync(ct);
         }
