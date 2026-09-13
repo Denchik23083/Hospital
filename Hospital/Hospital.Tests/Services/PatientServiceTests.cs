@@ -16,7 +16,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-/*namespace Hospital.Tests.Services
+namespace Hospital.Tests.Services
 {
     public class PatientServiceTests
     {
@@ -53,14 +53,14 @@ using Moq;
             var userId = 1;
 
             _repository
-                .Setup(_ => _.GetPatientByUserAsync(userId))
+                .Setup(_ => _.GetPatientByUserAsync(userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync((Patient?)null);
 
-            var action = async () => await _service.GetPatientByUserAsync(userId);
+            var action = async () => await _service.GetPatientByUserAsync(userId, CancellationToken.None);
 
             await action.Should().ThrowAsync<PatientNotFoundException>();
 
-            _repository.Verify(_ => _.GetPatientByUserAsync(userId), Times.Once);
+            _repository.Verify(_ => _.GetPatientByUserAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
             _mapper.Verify(_ => _.Map<PatientWithUserResponse>(It.IsAny<Patient>()), Times.Never);
         }
 
@@ -74,15 +74,15 @@ using Moq;
                 "+38077777777", "pedro@gmail.com", "1111");
 
             _repository
-                .Setup(_ => _.GetPatientByUserAsync(userId))
+                .Setup(_ => _.GetPatientByUserAsync(userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync((Patient?)null);
 
-            var action = async () => await _service.UpdatePatientAsync(model, userId);
+            var action = async () => await _service.UpdatePatientAsync(model, userId, CancellationToken.None);
 
             await action.Should().ThrowAsync<PatientNotFoundException>();
 
-            _repository.Verify(_ => _.GetPatientByUserAsync(userId), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+            _repository.Verify(_ => _.GetPatientByUserAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -106,15 +106,15 @@ using Moq;
             };
 
             _repository
-                .Setup(_ => _.GetPatientByUserAsync(userId))
+                .Setup(_ => _.GetPatientByUserAsync(userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(patientToUpdate);
 
-            var action = async () => await _service.UpdatePatientAsync(model, userId);
+            var action = async () => await _service.UpdatePatientAsync(model, userId, CancellationToken.None);
 
             await action.Should().ThrowAsync<UserNotFoundException>();
 
-            _repository.Verify(_ => _.GetPatientByUserAsync(userId), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+            _repository.Verify(_ => _.GetPatientByUserAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -144,21 +144,21 @@ using Moq;
             };
 
             _repository
-                .Setup(_ => _.GetPatientByUserAsync(userId))
+                .Setup(_ => _.GetPatientByUserAsync(userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(patientToUpdate);
 
             _unitOfWorkRepository
-                .Setup(_ => _.SaveChangesAsync())
+                .Setup(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            await _service.UpdatePatientAsync(model, userId);
+            await _service.UpdatePatientAsync(model, userId, CancellationToken.None);
 
             patientToUpdate.User.Email.Should().Be(model.Email);
 
-            _authRespository.Verify(_ => _.IsEmailNotUniqueAsync(It.IsAny<string>()), Times.Never);
+            _repository.Verify(_ => _.GetPatientByUserAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
 
-            _repository.Verify(_ => _.GetPatientByUserAsync(userId), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Once);
+            _authRespository.Verify(_ => _.IsEmailNotUniqueAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -188,22 +188,23 @@ using Moq;
             };
 
             _repository
-                .Setup(_ => _.GetPatientByUserAsync(userId))
+                .Setup(_ => _.GetPatientByUserAsync(userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(patientToUpdate);
 
             _authRespository
-                .Setup(_ => _.IsEmailNotUniqueAsync(model.Email))
+                .Setup(_ => _.IsEmailNotUniqueAsync(model.Email, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
-            var action = async () => await _service.UpdatePatientAsync(model, userId);
+            var action = async () => await _service.UpdatePatientAsync(model, userId, CancellationToken.None);
 
             await action.Should().ThrowAsync<ConflictException>();
 
             patientToUpdate.User.Email.Should().Be("too@gmail.com");
 
-            _repository.Verify(_ => _.GetPatientByUserAsync(userId), Times.Once);
-            _authRespository.Verify(_ => _.IsEmailNotUniqueAsync(model.Email), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+            _repository.Verify(_ => _.GetPatientByUserAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
+            _authRespository.Verify(_ => _.IsEmailNotUniqueAsync(model.Email, It.IsAny<CancellationToken>()), Times.Once);
+            
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -233,21 +234,21 @@ using Moq;
             };
 
             _repository
-                .Setup(_ => _.GetPatientByUserAsync(userId))
+                .Setup(_ => _.GetPatientByUserAsync(userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(patientToUpdate);
 
             _unitOfWorkRepository
-                .Setup(_ => _.SaveChangesAsync())
+                .Setup(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            await _service.UpdatePatientAsync(model, userId);
+            await _service.UpdatePatientAsync(model, userId, CancellationToken.None);
 
             patientToUpdate.User.PasswordHash.Should().Be("old-password-hash");
 
             patientToUpdate.User.Email.Should().Be("too@gmail.com");
 
-            _repository.Verify(_ => _.GetPatientByUserAsync(userId), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Once);
+            _repository.Verify(_ => _.GetPatientByUserAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -258,15 +259,15 @@ using Moq;
             var model = new PatientReplenishBalanceRequest(500m);
 
             _repository
-                .Setup(_ => _.GetPatientByUserAsync(userId))
+                .Setup(_ => _.GetPatientByUserAsync(userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync((Patient?)null);
 
-            var action = async () => await _service.ReplenishBalanceAsync(model, userId);
+            var action = async () => await _service.ReplenishBalanceAsync(model, userId, CancellationToken.None);
 
             await action.Should().ThrowAsync<PatientNotFoundException>();
 
-            _repository.Verify(_ => _.GetPatientByUserAsync(userId), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+            _repository.Verify(_ => _.GetPatientByUserAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -288,15 +289,15 @@ using Moq;
             };
 
             _repository
-                .Setup(_ => _.GetPatientByUserAsync(userId))
+                .Setup(_ => _.GetPatientByUserAsync(userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(patientToUpdate);
 
-            var action = async () => await _service.ReplenishBalanceAsync(model, userId);
+            var action = async () => await _service.ReplenishBalanceAsync(model, userId, CancellationToken.None);
 
             await action.Should().ThrowAsync<UserNotFoundException>();
 
-            _repository.Verify(_ => _.GetPatientByUserAsync(userId), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+            _repository.Verify(_ => _.GetPatientByUserAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -305,15 +306,15 @@ using Moq;
             var patientId = 4;
 
             _repository
-                .Setup(_ => _.GetPatientAsync(patientId))
+                .Setup(_ => _.GetPatientAsync(patientId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync((Patient?)null);
 
-            var action = async () => await _service.DeletePatientAsync(patientId);
+            var action = async () => await _service.DeletePatientAsync(patientId, CancellationToken.None);
 
             await action.Should().ThrowAsync<PatientNotFoundException>();
 
-            _repository.Verify(_ => _.GetPatientAsync(patientId), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+            _repository.Verify(_ => _.GetPatientAsync(patientId, It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -333,15 +334,15 @@ using Moq;
             };
 
             _repository
-                .Setup(_ => _.GetPatientAsync(patientId))
+                .Setup(_ => _.GetPatientAsync(patientId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(patientToDelete);
 
-            var action = async () => await _service.DeletePatientAsync(patientId);
+            var action = async () => await _service.DeletePatientAsync(patientId, CancellationToken.None);
 
             await action.Should().ThrowAsync<UserNotFoundException>();
 
-            _repository.Verify(_ => _.GetPatientAsync(patientId), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+            _repository.Verify(_ => _.GetPatientAsync(patientId, It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -378,30 +379,30 @@ using Moq;
             };
 
             _repository
-                .Setup(_ => _.GetPatientAsync(patientId))
+                .Setup(_ => _.GetPatientAsync(patientId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(patientToDelete);
 
             _unitOfWorkRepository
-                .Setup(_ => _.BeginTransactionAsync())
+                .Setup(_ => _.BeginTransactionAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(_transaction.Object);
 
             _bookingRespository
-                .Setup(_ => _.GetAllBookingsByPatientAsync(patientId))
+                .Setup(_ => _.GetAllBookingsByPatientAsync(patientId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(bookings);
 
-            var action = async () => await _service.DeletePatientAsync(patientId);
+            var action = async () => await _service.DeletePatientAsync(patientId, CancellationToken.None);
 
             await action.Should().ThrowAsync<DoctorNotFoundException>();
 
-            _repository.Verify(_ => _.GetPatientAsync(patientId), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.BeginTransactionAsync(), Times.Once);
-            _bookingRespository.Verify(_ => _.GetAllBookingsByPatientAsync(patientId), Times.Once);
+            _repository.Verify(_ => _.GetPatientAsync(patientId, It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.BeginTransactionAsync(It.IsAny<CancellationToken>()), Times.Once);
+            _bookingRespository.Verify(_ => _.GetAllBookingsByPatientAsync(patientId, It.IsAny<CancellationToken>()), Times.Once);
             _transaction.Verify(_ => _.RollbackAsync(It.IsAny<CancellationToken>()), Times.Once);
 
-            _notificationRespository.Verify(_ => _.AddNotificationAsync(It.IsAny<Notification>()), Times.Never);
+            _notificationRespository.Verify(_ => _.AddNotificationAsync(It.IsAny<Notification>(), It.IsAny<CancellationToken>()), Times.Never);
             _transaction.Verify(_ => _.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
-            _repository.Verify(_ => _.DeletePatientAsync(patientToDelete), Times.Never);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+            _repository.Verify(_ => _.DeletePatientAsync(patientToDelete, It.IsAny<CancellationToken>()), Times.Never);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -454,30 +455,30 @@ using Moq;
             };
 
             _repository
-                .Setup(_ => _.GetPatientAsync(patientId))
+                .Setup(_ => _.GetPatientAsync(patientId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(patientToDelete);
 
             _unitOfWorkRepository
-                .Setup(_ => _.BeginTransactionAsync())
+                .Setup(_ => _.BeginTransactionAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(_transaction.Object);
 
             _bookingRespository
-                .Setup(_ => _.GetAllBookingsByPatientAsync(patientId))
+                .Setup(_ => _.GetAllBookingsByPatientAsync(patientId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(bookings);
 
-            var action = async () => await _service.DeletePatientAsync(patientId);
+            var action = async () => await _service.DeletePatientAsync(patientId, CancellationToken.None);
 
             await action.Should().ThrowAsync<InsufficientFundsException>();
 
-            _repository.Verify(_ => _.GetPatientAsync(patientId), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.BeginTransactionAsync(), Times.Once);
-            _bookingRespository.Verify(_ => _.GetAllBookingsByPatientAsync(patientId), Times.Once);
+            _repository.Verify(_ => _.GetPatientAsync(patientId, It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.BeginTransactionAsync(It.IsAny<CancellationToken>()), Times.Once);
+            _bookingRespository.Verify(_ => _.GetAllBookingsByPatientAsync(patientId, It.IsAny<CancellationToken>()), Times.Once);
             _transaction.Verify(_ => _.RollbackAsync(It.IsAny<CancellationToken>()), Times.Once);
 
-            _notificationRespository.Verify(_ => _.AddNotificationAsync(It.IsAny<Notification>()), Times.Never);
+            _notificationRespository.Verify(_ => _.AddNotificationAsync(It.IsAny<Notification>(), It.IsAny<CancellationToken>()), Times.Never);
             _transaction.Verify(_ => _.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
-            _repository.Verify(_ => _.DeletePatientAsync(patientToDelete), Times.Never);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+            _repository.Verify(_ => _.DeletePatientAsync(patientToDelete, It.IsAny<CancellationToken>()), Times.Never);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         //Method
@@ -602,18 +603,18 @@ using Moq;
             };
 
             _repository
-                .Setup(_ => _.GetPatientByUserAsync(userId))
+                .Setup(_ => _.GetPatientByUserAsync(userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(patient);
 
             _mapper
                 .Setup(_ => _.Map<PatientWithUserResponse>(patient))
                 .Returns(mappedPatient);
 
-            var result = await _service.GetPatientByUserAsync(userId);
+            var result = await _service.GetPatientByUserAsync(userId, CancellationToken.None);
 
             result.Should().BeEquivalentTo(mappedPatient);
 
-            _repository.Verify(_ => _.GetPatientByUserAsync(userId), Times.Once);
+            _repository.Verify(_ => _.GetPatientByUserAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
             _mapper.Verify(_ => _.Map<PatientWithUserResponse>(patient), Times.Once);
         }
 
@@ -624,14 +625,14 @@ using Moq;
             var balance = 10000m;
 
             _repository
-                .Setup(_ => _.GetPatientBalanceAsync(userId))
+                .Setup(_ => _.GetPatientBalanceAsync(userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(balance);
 
-            var result = await _service.GetPatientBalanceAsync(userId);
+            var result = await _service.GetPatientBalanceAsync(userId, CancellationToken.None);
 
             result.Should().Be(balance);
 
-            _repository.Verify(_ => _.GetPatientBalanceAsync(userId), Times.Once);
+            _repository.Verify(_ => _.GetPatientBalanceAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -661,18 +662,18 @@ using Moq;
             };
 
             _repository
-                .Setup(_ => _.GetPatientByUserAsync(userId))
+                .Setup(_ => _.GetPatientByUserAsync(userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(patientToUpdate);
 
             _authRespository
-                .Setup(_ => _.IsEmailNotUniqueAsync(model.Email))
+                .Setup(_ => _.IsEmailNotUniqueAsync(model.Email, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(false);
 
             _unitOfWorkRepository
-                .Setup(_ => _.SaveChangesAsync())
+                .Setup(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            await _service.UpdatePatientAsync(model, userId);
+            await _service.UpdatePatientAsync(model, userId, CancellationToken.None);
 
             patientToUpdate.FirstName.Should().Be(model.FirstName);
             patientToUpdate.LastName.Should().Be(model.LastName);
@@ -689,9 +690,9 @@ using Moq;
 
             verifyResult.Should().Be(PasswordVerificationResult.Success);
 
-            _repository.Verify(_ => _.GetPatientByUserAsync(userId), Times.Once);
-            _authRespository.Verify(_ => _.IsEmailNotUniqueAsync(model.Email), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Once);
+            _repository.Verify(_ => _.GetPatientByUserAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
+            _authRespository.Verify(_ => _.IsEmailNotUniqueAsync(model.Email, It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -718,19 +719,19 @@ using Moq;
             };
 
             _repository
-                .Setup(_ => _.GetPatientByUserAsync(userId))
+                .Setup(_ => _.GetPatientByUserAsync(userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(patientToUpdate);
 
             _unitOfWorkRepository
-                .Setup(_ => _.SaveChangesAsync())
+                .Setup(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            await _service.ReplenishBalanceAsync(model, userId);
+            await _service.ReplenishBalanceAsync(model, userId, CancellationToken.None);
 
             patientToUpdate.User.Money.Should().Be(10000m);
 
-            _repository.Verify(_ => _.GetPatientByUserAsync(userId), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Once);
+            _repository.Verify(_ => _.GetPatientByUserAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -755,36 +756,36 @@ using Moq;
             };
 
             _repository
-                .Setup(_ => _.GetPatientAsync(patientId))
+                .Setup(_ => _.GetPatientAsync(patientId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(patientToDelete);
 
             _unitOfWorkRepository
-                .Setup(_ => _.BeginTransactionAsync())
+                .Setup(_ => _.BeginTransactionAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(_transaction.Object);
 
             _bookingRespository
-                .Setup(_ => _.GetAllBookingsByPatientAsync(patientId))
+                .Setup(_ => _.GetAllBookingsByPatientAsync(patientId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync([]);
 
             _repository
-                .Setup(_ => _.DeletePatientAsync(patientToDelete))
+                .Setup(_ => _.DeletePatientAsync(patientToDelete, It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
             _unitOfWorkRepository
-                .Setup(_ => _.SaveChangesAsync())
+                .Setup(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            await _service.DeletePatientAsync(patientId);
+            await _service.DeletePatientAsync(patientId, CancellationToken.None);
 
-            _repository.Verify(_ => _.GetPatientAsync(patientId), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.BeginTransactionAsync(), Times.Once);
-            _bookingRespository.Verify(_ => _.GetAllBookingsByPatientAsync(patientId), Times.Once);
-            _repository.Verify(_ => _.DeletePatientAsync(patientToDelete), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Once);
+            _repository.Verify(_ => _.GetPatientAsync(patientId, It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.BeginTransactionAsync(It.IsAny<CancellationToken>()), Times.Once);
+            _bookingRespository.Verify(_ => _.GetAllBookingsByPatientAsync(patientId, It.IsAny<CancellationToken>()), Times.Once);
+            _repository.Verify(_ => _.DeletePatientAsync(patientToDelete, It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
             _transaction.Verify(_ => _.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
 
             _transaction.Verify(_ => _.RollbackAsync(It.IsAny<CancellationToken>()), Times.Never);
-            _notificationRespository.Verify(_ => _.AddNotificationAsync(It.IsAny<Notification>()),Times.Never);
+            _notificationRespository.Verify(_ => _.AddNotificationAsync(It.IsAny<Notification>(), It.IsAny<CancellationToken>()),Times.Never);
         }
 
         [Fact]
@@ -837,50 +838,50 @@ using Moq;
             };
 
             _repository
-                .Setup(_ => _.GetPatientAsync(patientId))
+                .Setup(_ => _.GetPatientAsync(patientId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(patientToDelete);
 
             _unitOfWorkRepository
-                .Setup(_ => _.BeginTransactionAsync())
+                .Setup(_ => _.BeginTransactionAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(_transaction.Object);
 
             _bookingRespository
-                .Setup(_ => _.GetAllBookingsByPatientAsync(patientId))
+                .Setup(_ => _.GetAllBookingsByPatientAsync(patientId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(bookings);
 
             _notificationRespository
-                .Setup(_ => _.AddNotificationAsync(It.IsAny<Notification>()))
+                .Setup(_ => _.AddNotificationAsync(It.IsAny<Notification>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
             _repository
-                .Setup(_ => _.DeletePatientAsync(patientToDelete))
+                .Setup(_ => _.DeletePatientAsync(patientToDelete, It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
             _unitOfWorkRepository
-                .Setup(_ => _.SaveChangesAsync())
+                .Setup(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            await _service.DeletePatientAsync(patientId);
+            await _service.DeletePatientAsync(patientId, CancellationToken.None);
 
             patientToDelete.User.Money.Should().Be(9600m);
             doctorUser.Money.Should().Be(400m);
 
-            _repository.Verify(_ => _.GetPatientAsync(patientId), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.BeginTransactionAsync(), Times.Once);
-            _bookingRespository.Verify(_ => _.GetAllBookingsByPatientAsync(patientId), Times.Once);
-            _repository.Verify(_ => _.DeletePatientAsync(patientToDelete), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Once);
+            _repository.Verify(_ => _.GetPatientAsync(patientId, It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.BeginTransactionAsync(It.IsAny<CancellationToken>()), Times.Once);
+            _bookingRespository.Verify(_ => _.GetAllBookingsByPatientAsync(patientId, It.IsAny<CancellationToken>()), Times.Once);
+            _repository.Verify(_ => _.DeletePatientAsync(patientToDelete, It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
             _transaction.Verify(_ => _.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
 
             _notificationRespository.Verify(_ => _.AddNotificationAsync(
                 It.Is<Notification>(notification =>
                     notification.UserId == doctorUser.Id &&
                     notification.Message.Contains("Boris") &&
-                    notification.Message.Contains("Britva"))),
+                    notification.Message.Contains("Britva")),
+                    It.IsAny<CancellationToken>()),
                 Times.Once);
 
             _transaction.Verify(_ => _.RollbackAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
     }
 }
-*/

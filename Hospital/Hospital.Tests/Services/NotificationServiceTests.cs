@@ -9,7 +9,7 @@ using Hospital.Services.NotificationService;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-/*namespace Hospital.Tests.Services
+namespace Hospital.Tests.Services
 {
     public class NotificationServiceTests
     {
@@ -121,19 +121,18 @@ using Moq;
                 .ReturnsAsync(notificationToDelete);
 
             _repository
-                .Setup(_ => _.DeleteNotificationAsync(notificationToDelete))
+                .Setup(_ => _.DeleteNotificationAsync(notificationToDelete, It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
             _unitOfWorkRepository
-                .Setup(_ => _.SaveChangesAsync())
+                .Setup(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
             await _service.DeleteNotificationAsync(id, userId, CancellationToken.None);
 
             _repository.Verify(_ => _.GetNotificationAsync(id, userId, It.IsAny<CancellationToken>()), Times.Once);
-            _repository.Verify(_ => _.DeleteNotificationAsync(notificationToDelete), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Once);
+            _repository.Verify(_ => _.DeleteNotificationAsync(notificationToDelete, It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
     }
 }
-*/

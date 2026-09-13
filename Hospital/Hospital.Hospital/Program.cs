@@ -86,7 +86,6 @@ builder.Services.AddAutoMapper(au =>
 {
     au.CreateMap<Patient, PatientWithUserResponse>();
     au.CreateMap<Patient, PatientResponse>();
-    au.CreateMap<Booking, BookingResponse>();
     au.CreateMap<Doctor, DoctorWithUserResponse>();
     au.CreateMap<Doctor, DoctorResponse>();
     au.CreateMap<DoctorSlot, DoctorSlotResponse>();
@@ -94,6 +93,19 @@ builder.Services.AddAutoMapper(au =>
     au.CreateMap<User, UserResponse>();
     au.CreateMap<Notification, NotificationResponse>();
     au.CreateMap<DoctorFullRequest, Doctor>();
+    
+    au.CreateMap<DoctorSlot, DoctorSlotBookingResponse>()
+        .ForMember(dest => dest.LastBooking, opt => opt.MapFrom(src =>
+            src.Bookings.OrderByDescending(b => b.CreatedAt).FirstOrDefault()));
+
+    au.CreateMap<DoctorSlot, DoctorSlotWithDoctorResponse>()
+        .ForMember(dest => dest.DoctorResponse, opt => opt.MapFrom(src => src.Doctor));
+
+    au.CreateMap<Booking, BookingPatientResponse>()
+        .ForMember(dest => dest.PatientResponse, opt => opt.MapFrom(src => src.Patient));
+
+    au.CreateMap<Booking, BookingResponse>()
+        .ForMember(dest => dest.DoctorSlotWithDoctorResponse, opt => opt.MapFrom(src => src.DoctorSlot));
 });
 
 var app = builder.Build();

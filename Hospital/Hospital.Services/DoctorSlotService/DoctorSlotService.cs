@@ -57,21 +57,7 @@ namespace Hospital.Services.DoctorSlotService
 
             var slots = await _repository.GetAllDoctorSlotsTimesByDoctorAsync(doctor.Id, date, ct);
 
-            return slots.Select(slot => new DoctorSlotBookingResponse
-            {
-                Id = slot.Id,
-                Date = slot.Date,
-                StartTime = slot.StartTime,
-                EndTime = slot.EndTime,
-                LastBooking = slot.Bookings
-                    .OrderByDescending(b => b.CreatedAt)
-                    .Select(b => new BookingPatientResponse
-                    {
-                        Id = b.Id,
-                        BookingStatus = b.BookingStatus.ToString(),
-                        PatientResponse = _mapper.Map<PatientResponse>(b.Patient)
-                    }).FirstOrDefault()
-            });
+            return _mapper.Map<IEnumerable<DoctorSlotBookingResponse>>(slots);
         }
 
         public async Task<IEnumerable<DateOnly>> GetAllDoctorSlotsDatesAsync(int doctorId, int userId, CancellationToken ct)

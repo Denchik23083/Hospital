@@ -16,7 +16,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-/*namespace Hospital.Tests.Services
+namespace Hospital.Tests.Services
 {
     public class DoctorServiceTests
     {
@@ -53,14 +53,14 @@ using Moq;
             var userId = 2;
 
             _repository
-                .Setup(_ => _.GetDoctorByUserAsync(userId))
+                .Setup(_ => _.GetDoctorByUserAsync(userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync((Doctor?)null);
 
-            var action = async () => await _service.GetDoctorByUserAsync(userId);
+            var action = async () => await _service.GetDoctorByUserAsync(userId, CancellationToken.None);
 
             await action.Should().ThrowAsync<DoctorNotFoundException>();
 
-            _repository.Verify(_ => _.GetDoctorByUserAsync(userId), Times.Once);
+            _repository.Verify(_ => _.GetDoctorByUserAsync(userId, CancellationToken.None), Times.Once);
             _mapper.Verify(_ => _.Map<DoctorWithUserResponse>(It.IsAny<Doctor>()), Times.Never);
         }
 
@@ -87,14 +87,14 @@ using Moq;
                 Password = "1111"
             };
 
-            var action = async () => await _service.CreateDoctorAsync(doctorToAdd);
+            var action = async () => await _service.CreateDoctorAsync(doctorToAdd, CancellationToken.None);
 
             await action.Should().ThrowAsync<DoctorWorkTimeException>();
 
-            _authRespository.Verify(_ => _.IsEmailNotUniqueAsync(It.IsAny<string>()), Times.Never);
+            _authRespository.Verify(_ => _.IsEmailNotUniqueAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
             _mapper.Verify(_ => _.Map<Doctor>(It.IsAny<DoctorFullRequest>()), Times.Never);
-            _repository.Verify(_ => _.CreateDoctorAsync(It.IsAny<Doctor>()), Times.Never);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+            _repository.Verify(_ => _.CreateDoctorAsync(It.IsAny<Doctor>(), It.IsAny<CancellationToken>()), Times.Never);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -114,16 +114,16 @@ using Moq;
             };
 
             _authRespository
-                .Setup(_ => _.IsEmailNotUniqueAsync(doctorToAdd.Email))
+                .Setup(_ => _.IsEmailNotUniqueAsync(doctorToAdd.Email, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
-            var action = async () => await _service.CreateDoctorAsync(doctorToAdd);
+            var action = async () => await _service.CreateDoctorAsync(doctorToAdd, CancellationToken.None);
 
             await action.Should().ThrowAsync<ConflictException>();
 
             _mapper.Verify(_ => _.Map<Doctor>(It.IsAny<DoctorFullRequest>()), Times.Never);
-            _repository.Verify(_ => _.CreateDoctorAsync(It.IsAny<Doctor>()), Times.Never);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+            _repository.Verify(_ => _.CreateDoctorAsync(It.IsAny<Doctor>(), It.IsAny<CancellationToken>()), Times.Never);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -134,15 +134,15 @@ using Moq;
             var doctorRequest = new DoctorRequest("Foo", "Too", GenderType.Female);
 
             _repository
-                .Setup(_ => _.GetDoctorByUserAsync(userId))
+                .Setup(_ => _.GetDoctorByUserAsync(userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync((Doctor?)null);
 
-            var action = async () => await _service.UpdateDoctorByUserAsync(doctorRequest, userId);
+            var action = async () => await _service.UpdateDoctorByUserAsync(doctorRequest, userId, CancellationToken.None);
 
             await action.Should().ThrowAsync<DoctorNotFoundException>();
 
-            _repository.Verify(_ => _.GetDoctorByUserAsync(userId), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+            _repository.Verify(_ => _.GetDoctorByUserAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Theory]
@@ -170,13 +170,13 @@ using Moq;
                 Password = "1111"
             };
 
-            var action = async () => await _service.UpdateDoctorAsync(doctorRequest, doctorId);
+            var action = async () => await _service.UpdateDoctorAsync(doctorRequest, doctorId, CancellationToken.None);
 
             await action.Should().ThrowAsync<DoctorWorkTimeException>();
 
-            _repository.Verify(_ => _.GetDoctorAsync(doctorId), Times.Never);
-            _authRespository.Verify(_ => _.IsEmailNotUniqueAsync(It.IsAny<string>()), Times.Never);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+            _repository.Verify(_ => _.GetDoctorAsync(doctorId, It.IsAny<CancellationToken>()), Times.Never);
+            _authRespository.Verify(_ => _.IsEmailNotUniqueAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -198,16 +198,16 @@ using Moq;
             };
 
             _repository
-                .Setup(_ => _.GetDoctorAsync(doctorId))
+                .Setup(_ => _.GetDoctorAsync(doctorId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync((Doctor?)null);
 
-            var action = async () => await _service.UpdateDoctorAsync(doctorRequest, doctorId);
+            var action = async () => await _service.UpdateDoctorAsync(doctorRequest, doctorId, CancellationToken.None);
 
             await action.Should().ThrowAsync<DoctorNotFoundException>();
 
-            _repository.Verify(_ => _.GetDoctorAsync(doctorId), Times.Once);
-            _authRespository.Verify(_ => _.IsEmailNotUniqueAsync(doctorRequest.Email), Times.Never);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+            _repository.Verify(_ => _.GetDoctorAsync(doctorId, It.IsAny<CancellationToken>()), Times.Once);
+            _authRespository.Verify(_ => _.IsEmailNotUniqueAsync(doctorRequest.Email, It.IsAny<CancellationToken>()), Times.Never);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -247,16 +247,16 @@ using Moq;
             };
 
             _repository
-                .Setup(_ => _.GetDoctorAsync(doctorId))
+                .Setup(_ => _.GetDoctorAsync(doctorId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(doctorToUpdate);
 
-            var action = async () => await _service.UpdateDoctorAsync(doctorRequest, doctorId);
+            var action = async () => await _service.UpdateDoctorAsync(doctorRequest, doctorId, CancellationToken.None);
 
             await action.Should().ThrowAsync<UserNotFoundException>();
 
-            _repository.Verify(_ => _.GetDoctorAsync(doctorId), Times.Once);
-            _authRespository.Verify(_ => _.IsEmailNotUniqueAsync(doctorRequest.Email), Times.Never);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+            _repository.Verify(_ => _.GetDoctorAsync(doctorId, It.IsAny<CancellationToken>()), Times.Once);
+            _authRespository.Verify(_ => _.IsEmailNotUniqueAsync(doctorRequest.Email, It.IsAny<CancellationToken>()), Times.Never);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -301,20 +301,20 @@ using Moq;
             };
 
             _repository
-                .Setup(_ => _.GetDoctorAsync(doctorId))
+                .Setup(_ => _.GetDoctorAsync(doctorId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(doctorToUpdate);
 
             _authRespository
-                .Setup(_ => _.IsEmailNotUniqueAsync(doctorRequest.Email))
+                .Setup(_ => _.IsEmailNotUniqueAsync(doctorRequest.Email, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
-            var action = async () => await _service.UpdateDoctorAsync(doctorRequest, doctorId);
+            var action = async () => await _service.UpdateDoctorAsync(doctorRequest, doctorId, CancellationToken.None);
 
             await action.Should().ThrowAsync<ConflictException>();
 
-            _repository.Verify(_ => _.GetDoctorAsync(doctorId), Times.Once);
-            _authRespository.Verify(_ => _.IsEmailNotUniqueAsync(doctorRequest.Email), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+            _repository.Verify(_ => _.GetDoctorAsync(doctorId, It.IsAny<CancellationToken>()), Times.Once);
+            _authRespository.Verify(_ => _.IsEmailNotUniqueAsync(doctorRequest.Email, It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -360,21 +360,21 @@ using Moq;
             };
 
             _repository
-                .Setup(_ => _.GetDoctorAsync(doctorId))
+                .Setup(_ => _.GetDoctorAsync(doctorId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(doctorToUpdate);
 
             _unitOfWorkRepository
-                .Setup(_ => _.SaveChangesAsync())
+                .Setup(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            await _service.UpdateDoctorAsync(doctorRequest, doctorId);
+            await _service.UpdateDoctorAsync(doctorRequest, doctorId, CancellationToken.None);
 
             doctorToUpdate.User.PasswordHash.Should().Be("old-password-hash");
 
             doctorToUpdate.User.Email.Should().Be("doctor1@gmail.com");
 
-            _repository.Verify(_ => _.GetDoctorAsync(doctorId), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Once);
+            _repository.Verify(_ => _.GetDoctorAsync(doctorId, It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -383,15 +383,15 @@ using Moq;
             var doctorId = 1;
 
             _repository
-                .Setup(_ => _.GetDoctorAsync(doctorId))
+                .Setup(_ => _.GetDoctorAsync(doctorId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync((Doctor?)null);
 
-            var action = async () => await _service.DeleteDoctorAsync(doctorId);
+            var action = async () => await _service.DeleteDoctorAsync(doctorId, CancellationToken.None);
 
             await action.Should().ThrowAsync<DoctorNotFoundException>();
 
-            _repository.Verify(_ => _.GetDoctorAsync(doctorId), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+            _repository.Verify(_ => _.GetDoctorAsync(doctorId, It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -417,15 +417,15 @@ using Moq;
             };
 
             _repository
-                .Setup(_ => _.GetDoctorAsync(doctorId))
+                .Setup(_ => _.GetDoctorAsync(doctorId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(doctorToDelete);
 
-            var action = async () => await _service.DeleteDoctorAsync(doctorId);
+            var action = async () => await _service.DeleteDoctorAsync(doctorId, CancellationToken.None);
 
             await action.Should().ThrowAsync<UserNotFoundException>();
 
-            _repository.Verify(_ => _.GetDoctorAsync(doctorId), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+            _repository.Verify(_ => _.GetDoctorAsync(doctorId, It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -449,15 +449,15 @@ using Moq;
             };
 
             _repository
-                .Setup(_ => _.GetDoctorAsync(doctorId))
+                .Setup(_ => _.GetDoctorAsync(doctorId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(doctorToDelete);
 
-            var action = async () => await _service.DeleteDoctorAsync(doctorId);
+            var action = async () => await _service.DeleteDoctorAsync(doctorId, CancellationToken.None);
 
             await action.Should().ThrowAsync<SpecialtyNotFoundException>();
 
-            _repository.Verify(_ => _.GetDoctorAsync(doctorId), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+            _repository.Verify(_ => _.GetDoctorAsync(doctorId, It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -510,37 +510,37 @@ using Moq;
             };
 
             _repository
-                .Setup(_ => _.GetDoctorAsync(doctorId))
+                .Setup(_ => _.GetDoctorAsync(doctorId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(doctorToDelete);
 
             _unitOfWorkRepository
-                .Setup(_ => _.BeginTransactionAsync())
+                .Setup(_ => _.BeginTransactionAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(_transaction.Object);
 
             _bookingRespository
-                .Setup(_ => _.GetAllBookingsByDoctorAsync(doctorId))
+                .Setup(_ => _.GetAllBookingsByDoctorAsync(doctorId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(bookings);
 
             _repository
-                .Setup(_ => _.DeleteDoctorAsync(doctorToDelete))
+                .Setup(_ => _.DeleteDoctorAsync(doctorToDelete, It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
             _unitOfWorkRepository
-                .Setup(_ => _.SaveChangesAsync())
+                .Setup(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            var action = async () => await _service.DeleteDoctorAsync(doctorId);
+            var action = async () => await _service.DeleteDoctorAsync(doctorId, CancellationToken.None);
 
             await action.Should().ThrowAsync<InsufficientFundsException>();
 
-            _repository.Verify(_ => _.GetDoctorAsync(doctorId), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.BeginTransactionAsync(), Times.Once);
-            _bookingRespository.Verify(_ => _.GetAllBookingsByDoctorAsync(doctorId), Times.Once);
+            _repository.Verify(_ => _.GetDoctorAsync(doctorId, It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.BeginTransactionAsync(It.IsAny<CancellationToken>()), Times.Once);
+            _bookingRespository.Verify(_ => _.GetAllBookingsByDoctorAsync(doctorId, It.IsAny<CancellationToken>()), Times.Once);
             _transaction.Verify(_ => _.RollbackAsync(It.IsAny<CancellationToken>()), Times.Once);
 
-            _notificationRespository.Verify(_ => _.AddNotificationAsync(It.IsAny<Notification>()), Times.Never);
-            _repository.Verify(_ => _.DeleteDoctorAsync(doctorToDelete), Times.Never);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+            _notificationRespository.Verify(_ => _.AddNotificationAsync(It.IsAny<Notification>(), It.IsAny<CancellationToken>()), Times.Never);
+            _repository.Verify(_ => _.DeleteDoctorAsync(doctorToDelete, It.IsAny<CancellationToken>()), Times.Never);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
             _transaction.Verify(_ => _.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
@@ -587,37 +587,37 @@ using Moq;
             };
 
             _repository
-                .Setup(_ => _.GetDoctorAsync(doctorId))
+                .Setup(_ => _.GetDoctorAsync(doctorId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(doctorToDelete);
 
             _unitOfWorkRepository
-                .Setup(_ => _.BeginTransactionAsync())
+                .Setup(_ => _.BeginTransactionAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(_transaction.Object);
 
             _bookingRespository
-                .Setup(_ => _.GetAllBookingsByDoctorAsync(doctorId))
+                .Setup(_ => _.GetAllBookingsByDoctorAsync(doctorId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(bookings);
 
             _repository
-                .Setup(_ => _.DeleteDoctorAsync(doctorToDelete))
+                .Setup(_ => _.DeleteDoctorAsync(doctorToDelete, It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
             _unitOfWorkRepository
-                .Setup(_ => _.SaveChangesAsync())
+                .Setup(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            var action = async () => await _service.DeleteDoctorAsync(doctorId);
+            var action = async () => await _service.DeleteDoctorAsync(doctorId, CancellationToken.None);
 
             await action.Should().ThrowAsync<PatientNotFoundException>();
 
-            _repository.Verify(_ => _.GetDoctorAsync(doctorId), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.BeginTransactionAsync(), Times.Once);
-            _bookingRespository.Verify(_ => _.GetAllBookingsByDoctorAsync(doctorId), Times.Once);
+            _repository.Verify(_ => _.GetDoctorAsync(doctorId, It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.BeginTransactionAsync(It.IsAny<CancellationToken>()), Times.Once);
+            _bookingRespository.Verify(_ => _.GetAllBookingsByDoctorAsync(doctorId, It.IsAny<CancellationToken>()), Times.Once);
             _transaction.Verify(_ => _.RollbackAsync(It.IsAny<CancellationToken>()), Times.Once);
 
-            _notificationRespository.Verify(_ => _.AddNotificationAsync(It.IsAny<Notification>()), Times.Never);
-            _repository.Verify(_ => _.DeleteDoctorAsync(doctorToDelete), Times.Never);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+            _notificationRespository.Verify(_ => _.AddNotificationAsync(It.IsAny<Notification>(), It.IsAny<CancellationToken>()), Times.Never);
+            _repository.Verify(_ => _.DeleteDoctorAsync(doctorToDelete, It.IsAny<CancellationToken>()), Times.Never);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
             _transaction.Verify(_ => _.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
@@ -667,37 +667,37 @@ using Moq;
             };
 
             _repository
-                .Setup(_ => _.GetDoctorAsync(doctorId))
+                .Setup(_ => _.GetDoctorAsync(doctorId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(doctorToDelete);
 
             _unitOfWorkRepository
-                .Setup(_ => _.BeginTransactionAsync())
+                .Setup(_ => _.BeginTransactionAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(_transaction.Object);
 
             _bookingRespository
-                .Setup(_ => _.GetAllBookingsByDoctorAsync(doctorId))
+                .Setup(_ => _.GetAllBookingsByDoctorAsync(doctorId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(bookings);
 
             _repository
-                .Setup(_ => _.DeleteDoctorAsync(doctorToDelete))
+                .Setup(_ => _.DeleteDoctorAsync(doctorToDelete, It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
             _unitOfWorkRepository
-                .Setup(_ => _.SaveChangesAsync())
+                .Setup(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            var action = async () => await _service.DeleteDoctorAsync(doctorId);
+            var action = async () => await _service.DeleteDoctorAsync(doctorId, CancellationToken.None);
 
             await action.Should().ThrowAsync<UserNotFoundException>();
 
-            _repository.Verify(_ => _.GetDoctorAsync(doctorId), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.BeginTransactionAsync(), Times.Once);
-            _bookingRespository.Verify(_ => _.GetAllBookingsByDoctorAsync(doctorId), Times.Once);
+            _repository.Verify(_ => _.GetDoctorAsync(doctorId, CancellationToken.None), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.BeginTransactionAsync(It.IsAny<CancellationToken>()), Times.Once);
+            _bookingRespository.Verify(_ => _.GetAllBookingsByDoctorAsync(doctorId, It.IsAny<CancellationToken>()), Times.Once);
             _transaction.Verify(_ => _.RollbackAsync(It.IsAny<CancellationToken>()), Times.Once);
 
-            _notificationRespository.Verify(_ => _.AddNotificationAsync(It.IsAny<Notification>()), Times.Never);
-            _repository.Verify(_ => _.DeleteDoctorAsync(doctorToDelete), Times.Never);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+            _notificationRespository.Verify(_ => _.AddNotificationAsync(It.IsAny<Notification>(), It.IsAny<CancellationToken>()), Times.Never);
+            _repository.Verify(_ => _.DeleteDoctorAsync(doctorToDelete, It.IsAny<CancellationToken>()), Times.Never);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(   It.IsAny<CancellationToken>()), Times.Never);
             _transaction.Verify(_ => _.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
@@ -705,7 +705,7 @@ using Moq;
         [Fact]
         public async Task GetAllDoctorsAsync_ShouldReturnListDoctors()
         {
-            var doctors = new List<DoctorWithUserResponse>
+            var doctorsResponse = new List<DoctorWithUserResponse>
             {
                 new()
                 {
@@ -772,15 +772,87 @@ using Moq;
                 }
             };
 
+            var doctors = new List<Doctor>
+            {
+                new()
+                {
+                    Id = 1,
+                    FirstName = "Foo",
+                    LastName = "Too",
+                    ExperienceYears = 4,
+                    GenderType = GenderType.Male,
+                    WorkDayStart = new TimeSpan(9, 0, 0),
+                    WorkDayEnd = new TimeSpan(17, 0, 0),
+                    Specialty = new Specialty
+                    {
+                        Id = 2,
+                        Name = "Кардиология",
+                        Price = 80
+                    },
+                    User = new User
+                    {
+                        Email = "doctor24@gmail.com",
+                        Money = 100m
+                    }
+                },
+                new()
+                {
+                    Id = 2,
+                    FirstName = "Глеб",
+                    LastName = "Романенко",
+                    ExperienceYears = 2,
+                    GenderType = GenderType.Male,
+                    WorkDayStart = new TimeSpan(9, 0, 0),
+                    WorkDayEnd = new TimeSpan(17, 0, 0),
+                    Specialty = new Specialty
+                    {
+                        Id = 1,
+                        Name = "Терапия",
+                        Price = 40
+                    },
+                    User = new User
+                    {
+                        Email = "doctor1@gmail.com",
+                        Money = 500m
+                    }
+                },
+                new()
+                {
+                    Id = 3,
+                    FirstName = "Варвара",
+                    LastName = "Черноус",
+                    ExperienceYears = 2,
+                    GenderType = GenderType.Female,
+                    WorkDayStart = new TimeSpan(9, 0, 0),
+                    WorkDayEnd = new TimeSpan(17, 0, 0),
+                    Specialty = new Specialty
+                    {
+                        Id = 1,
+                        Name = "Терапия",
+                        Price = 40
+                    },
+                    User = new User
+                    {
+                        Email = "doctor4@gmail.com",
+                        Money = 400m
+                    }
+                }
+            };
+
             _repository
-                .Setup(_ => _.GetAllDoctorsAsync())
+                .Setup(_ => _.GetAllDoctorsAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(doctors);
 
-            var result = await _service.GetAllDoctorsAsync();
+            _mapper
+                .Setup(_ => _.Map<IEnumerable<DoctorWithUserResponse>>(doctors))
+                .Returns(doctorsResponse);
 
-            result.Should().BeEquivalentTo(doctors);
+            var result = await _service.GetAllDoctorsAsync(CancellationToken.None);
 
-            _repository.Verify(_ => _.GetAllDoctorsAsync(), Times.Once);
+            result.Should().BeEquivalentTo(doctorsResponse);
+
+            _repository.Verify(_ => _.GetAllDoctorsAsync(It.IsAny<CancellationToken>()), Times.Once);
+            _mapper.Verify(_ => _.Map<IEnumerable<DoctorWithUserResponse>>(doctors), Times.Once);
         }
 
         [Fact]
@@ -945,18 +1017,18 @@ using Moq;
             };
 
             _repository
-                .Setup(_ => _.GetDoctorByUserAsync(userId))
+                .Setup(_ => _.GetDoctorByUserAsync(userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(doctor);
 
             _mapper
                 .Setup(_ => _.Map<DoctorWithUserResponse>(doctor))
                 .Returns(mappedDoctor);
 
-            var result = await _service.GetDoctorByUserAsync(userId);
+            var result = await _service.GetDoctorByUserAsync(userId, CancellationToken.None);
 
             result.Should().BeEquivalentTo(mappedDoctor);
 
-            _repository.Verify(_ => _.GetDoctorByUserAsync(userId), Times.Once);
+            _repository.Verify(_ => _.GetDoctorByUserAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
             _mapper.Verify(_ => _.Map<DoctorWithUserResponse>(doctor), Times.Once);
         }
 
@@ -988,7 +1060,7 @@ using Moq;
             };
 
             _authRespository
-                .Setup(_ => _.IsEmailNotUniqueAsync(doctorToAdd.Email))
+                .Setup(_ => _.IsEmailNotUniqueAsync(doctorToAdd.Email, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(false);
 
             _mapper
@@ -996,14 +1068,14 @@ using Moq;
                 .Returns(doctor);
 
             _repository
-                .Setup(_ => _.CreateDoctorAsync(doctor))
+                .Setup(_ => _.CreateDoctorAsync(doctor, It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
             _unitOfWorkRepository
-                .Setup(_ => _.SaveChangesAsync())
+                .Setup(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            await _service.CreateDoctorAsync(doctorToAdd);
+            await _service.CreateDoctorAsync(doctorToAdd, CancellationToken.None);
 
             doctor.User.Should().NotBeNull();
             doctor.User.Email.Should().Be("doctor24@gmail.com");
@@ -1015,10 +1087,10 @@ using Moq;
 
             verifyResult.Should().Be(PasswordVerificationResult.Success);
 
-            _authRespository.Verify(_ => _.IsEmailNotUniqueAsync(doctorToAdd.Email), Times.Once);
+            _authRespository.Verify(_ => _.IsEmailNotUniqueAsync(doctorToAdd.Email, It.IsAny<CancellationToken>()), Times.Once);
             _mapper.Verify(_ => _.Map<Doctor>(doctorToAdd), Times.Once);
-            _repository.Verify(_ => _.CreateDoctorAsync(doctor), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Once);
+            _repository.Verify(_ => _.CreateDoctorAsync(doctor, It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -1052,21 +1124,21 @@ using Moq;
             };
 
             _repository
-                .Setup(_ => _.GetDoctorByUserAsync(userId))
+                .Setup(_ => _.GetDoctorByUserAsync(userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(doctorToUpdate);
 
             _unitOfWorkRepository
-                .Setup(_ => _.SaveChangesAsync())
+                .Setup(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            await _service.UpdateDoctorByUserAsync(doctorRequest, userId);
+            await _service.UpdateDoctorByUserAsync(doctorRequest, userId, CancellationToken.None);
 
             doctorToUpdate.FirstName.Should().Be(doctorRequest.FirstName);
             doctorToUpdate.LastName.Should().Be(doctorRequest.LastName);
             doctorToUpdate.GenderType.Should().Be(doctorRequest.GenderType);
 
-            _repository.Verify(_ => _.GetDoctorByUserAsync(userId), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Once);
+            _repository.Verify(_ => _.GetDoctorByUserAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -1111,18 +1183,18 @@ using Moq;
             };
 
             _repository
-                .Setup(_ => _.GetDoctorAsync(doctorId))
+                .Setup(_ => _.GetDoctorAsync(doctorId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(doctorToUpdate);
 
             _authRespository
-                .Setup(_ => _.IsEmailNotUniqueAsync(doctorRequest.Email))
+                .Setup(_ => _.IsEmailNotUniqueAsync(doctorRequest.Email, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(false);
 
             _unitOfWorkRepository
-                .Setup(_ => _.SaveChangesAsync())
+                .Setup(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            await _service.UpdateDoctorAsync(doctorRequest, doctorId);
+            await _service.UpdateDoctorAsync(doctorRequest, doctorId, CancellationToken.None);
 
             doctorToUpdate.FirstName.Should().Be(doctorRequest.FirstName);
             doctorToUpdate.LastName.Should().Be(doctorRequest.LastName);
@@ -1139,9 +1211,9 @@ using Moq;
 
             verifyResult.Should().Be(PasswordVerificationResult.Success);
 
-            _repository.Verify(_ => _.GetDoctorAsync(doctorId), Times.Once);
-            _authRespository.Verify(_ => _.IsEmailNotUniqueAsync(doctorRequest.Email), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Once);
+            _repository.Verify(_ => _.GetDoctorAsync(doctorId, It.IsAny<CancellationToken>()), Times.Once);
+            _authRespository.Verify(_ => _.IsEmailNotUniqueAsync(doctorRequest.Email, It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -1172,36 +1244,36 @@ using Moq;
             };
 
             _repository
-                .Setup(_ => _.GetDoctorAsync(doctorId))
+                .Setup(_ => _.GetDoctorAsync(doctorId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(doctorToDelete);
 
             _unitOfWorkRepository
-                .Setup(_ => _.BeginTransactionAsync())
+                .Setup(_ => _.BeginTransactionAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(_transaction.Object);
 
             _bookingRespository
-                .Setup(_ => _.GetAllBookingsByDoctorAsync(doctorId))
+                .Setup(_ => _.GetAllBookingsByDoctorAsync(doctorId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync([]);
 
             _repository
-                .Setup(_ => _.DeleteDoctorAsync(doctorToDelete))
+                .Setup(_ => _.DeleteDoctorAsync(doctorToDelete, It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
             _unitOfWorkRepository
-                .Setup(_ => _.SaveChangesAsync())
+                .Setup(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            await _service.DeleteDoctorAsync(doctorId);
+            await _service.DeleteDoctorAsync(doctorId, CancellationToken.None);
 
-            _repository.Verify(_ => _.GetDoctorAsync(doctorId), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.BeginTransactionAsync(), Times.Once);
-            _bookingRespository.Verify(_ => _.GetAllBookingsByDoctorAsync(doctorId), Times.Once);
-            _repository.Verify(_ => _.DeleteDoctorAsync(doctorToDelete), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Once);
+            _repository.Verify(_ => _.GetDoctorAsync(doctorId, It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.BeginTransactionAsync(It.IsAny<CancellationToken>()), Times.Once);
+            _bookingRespository.Verify(_ => _.GetAllBookingsByDoctorAsync(doctorId, It.IsAny<CancellationToken>()), Times.Once);
+            _repository.Verify(_ => _.DeleteDoctorAsync(doctorToDelete, It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
             _transaction.Verify(_ => _.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
 
             _transaction.Verify(_ => _.RollbackAsync(It.IsAny<CancellationToken>()), Times.Never);
-            _notificationRespository.Verify(_ => _.AddNotificationAsync(It.IsAny<Notification>()), Times.Never);
+            _notificationRespository.Verify(_ => _.AddNotificationAsync(It.IsAny<Notification>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -1254,46 +1326,46 @@ using Moq;
             };
 
             _repository
-                .Setup(_ => _.GetDoctorAsync(doctorId))
+                .Setup(_ => _.GetDoctorAsync(doctorId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(doctorToDelete);
 
             _unitOfWorkRepository
-                .Setup(_ => _.BeginTransactionAsync())
+                .Setup(_ => _.BeginTransactionAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(_transaction.Object);
 
             _bookingRespository
-                .Setup(_ => _.GetAllBookingsByDoctorAsync(doctorId))
+                .Setup(_ => _.GetAllBookingsByDoctorAsync(doctorId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(bookings);
 
             _repository
-                .Setup(_ => _.DeleteDoctorAsync(doctorToDelete))
+                .Setup(_ => _.DeleteDoctorAsync(doctorToDelete, It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
             _unitOfWorkRepository
-                .Setup(_ => _.SaveChangesAsync())
+                .Setup(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            await _service.DeleteDoctorAsync(doctorId);
+            await _service.DeleteDoctorAsync(doctorId, CancellationToken.None);
 
             doctorToDelete.User.Money.Should().Be(600m);
             patientUser.Money.Should().Be(400m);
 
-            _repository.Verify(_ => _.GetDoctorAsync(doctorId), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.BeginTransactionAsync(), Times.Once);
-            _bookingRespository.Verify(_ => _.GetAllBookingsByDoctorAsync(doctorId), Times.Once);
-            _repository.Verify(_ => _.DeleteDoctorAsync(doctorToDelete), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Once);
+            _repository.Verify(_ => _.GetDoctorAsync(doctorId, It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.BeginTransactionAsync(It.IsAny<CancellationToken>()), Times.Once);
+            _bookingRespository.Verify(_ => _.GetAllBookingsByDoctorAsync(doctorId, It.IsAny<CancellationToken>()), Times.Once);
+            _repository.Verify(_ => _.DeleteDoctorAsync(doctorToDelete, It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
             _transaction.Verify(_ => _.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
 
             _notificationRespository.Verify(_ => _.AddNotificationAsync(
                 It.Is<Notification>(notification =>
                     notification.UserId == patientUser.Id &&
                     notification.Message.Contains("Foo") &&
-                    notification.Message.Contains("Too"))),
+                    notification.Message.Contains("Too")),
+                    It.IsAny<CancellationToken>()),
                 Times.Once);
             
             _transaction.Verify(_ => _.RollbackAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
     }
 }
-*/

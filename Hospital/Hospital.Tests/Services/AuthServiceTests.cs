@@ -12,7 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-/*namespace Hospital.Tests.Services
+namespace Hospital.Tests.Services
 {
     public class AuthServiceTests
     {
@@ -43,17 +43,17 @@ using Moq;
                 new DateOnly(2003, 01, 01), GenderType.Male);
 
             _repository
-                .Setup(_ => _.IsEmailNotUniqueAsync(register.Email))
+                .Setup(_ => _.IsEmailNotUniqueAsync(register.Email, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
-            var action = async () => await _service.RegisterAsync(register);
+            var action = async () => await _service.RegisterAsync(register, CancellationToken.None);
 
             await action.Should().ThrowAsync<ConflictException>();
 
-            _repository.Verify(_ => _.IsEmailNotUniqueAsync(register.Email), Times.Once);
+            _repository.Verify(_ => _.IsEmailNotUniqueAsync(register.Email, It.IsAny<CancellationToken>()), Times.Once);
 
-            _repository.Verify(_ => _.RegisterAsync(It.IsAny<User>()), Times.Never);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+            _repository.Verify(_ => _.RegisterAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()), Times.Never);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -62,16 +62,16 @@ using Moq;
             var login = new LoginRequest("foo@gmail.com", "0000");
 
             _repository
-                .Setup(_ => _.GetUserByEmailAsync(login.Email))
+                .Setup(_ => _.GetUserByEmailAsync(login.Email, It.IsAny<CancellationToken>()))
                 .ReturnsAsync((User?)null);
 
-            var action = async () => await _service.LoginAsync(login);
+            var action = async () => await _service.LoginAsync(login, CancellationToken.None);
 
             await action.Should().ThrowAsync<UnauthorizedException>();
 
-            _repository.Verify(_ => _.GetUserByEmailAsync(login.Email), Times.Once);
+            _repository.Verify(_ => _.GetUserByEmailAsync(login.Email, It.IsAny<CancellationToken>()), Times.Once);
 
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -89,16 +89,16 @@ using Moq;
             var login = new LoginRequest("foo@gmail.com", "1111");
 
             _repository
-                .Setup(_ => _.GetUserByEmailAsync(login.Email))
+                .Setup(_ => _.GetUserByEmailAsync(login.Email, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(user);
 
-            var action = async () => await _service.LoginAsync(login);
+            var action = async () => await _service.LoginAsync(login, CancellationToken.None);
 
             await action.Should().ThrowAsync<UnauthorizedException>();
 
-            _repository.Verify(_ => _.GetUserByEmailAsync(login.Email), Times.Once);
+            _repository.Verify(_ => _.GetUserByEmailAsync(login.Email, It.IsAny<CancellationToken>()), Times.Once);
 
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -109,16 +109,16 @@ using Moq;
             var refresh = new RefreshTokenRequest(userId, "refresh-token");
 
             _repository
-                .Setup(_ => _.GetUserAsync(userId))
+                .Setup(_ => _.GetUserAsync(userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync((User?)null);
 
-            var action = async () => await _service.RefreshTokenAsync(refresh);
+            var action = async () => await _service.RefreshTokenAsync(refresh, CancellationToken.None);
 
             await action.Should().ThrowAsync<UnauthorizedException>();
 
-            _repository.Verify(_ => _.GetUserAsync(userId), Times.Once);
+            _repository.Verify(_ => _.GetUserAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
 
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -140,18 +140,18 @@ using Moq;
                 .HashPassword(user, "0000");
 
             _repository
-                .Setup(_ => _.GetUserAsync(userId))
+                .Setup(_ => _.GetUserAsync(userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(user);
 
             var refresh = new RefreshTokenRequest(user.Id, fakeRefreshToken);
 
-            var action = async () => await _service.RefreshTokenAsync(refresh);
+            var action = async () => await _service.RefreshTokenAsync(refresh, CancellationToken.None);
 
             await action.Should().ThrowAsync<UnauthorizedException>();
 
-            _repository.Verify(_ => _.GetUserAsync(userId), Times.Once);
+            _repository.Verify(_ => _.GetUserAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
 
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -172,18 +172,18 @@ using Moq;
                 .HashPassword(user, "0000");
 
             _repository
-                .Setup(_ => _.GetUserAsync(userId))
+                .Setup(_ => _.GetUserAsync(userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(user);
 
             var refresh = new RefreshTokenRequest(user.Id, "refresh-token");
 
-            var action = async () => await _service.RefreshTokenAsync(refresh);
+            var action = async () => await _service.RefreshTokenAsync(refresh, CancellationToken.None);
 
             await action.Should().ThrowAsync<UnauthorizedException>();
 
-            _repository.Verify(_ => _.GetUserAsync(userId), Times.Once);
+            _repository.Verify(_ => _.GetUserAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
 
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Never);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         //Method
@@ -198,19 +198,19 @@ using Moq;
             User? user = null;
 
             _repository
-                .Setup(_ => _.IsEmailNotUniqueAsync(register.Email))
+                .Setup(_ => _.IsEmailNotUniqueAsync(register.Email, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(false);
 
             _repository
-                .Setup(_ => _.RegisterAsync(It.IsAny<User>()))
-                .Callback<User>(u => user = u)
+                .Setup(_ => _.RegisterAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()))
+                .Callback<User, CancellationToken>((u, ct) => user = u)
                 .Returns(Task.CompletedTask);
 
             _unitOfWorkRepository
-                .Setup(_ => _.SaveChangesAsync())
+                .Setup(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            await _service.RegisterAsync(register);
+            await _service.RegisterAsync(register, CancellationToken.None);
 
             user.Should().NotBeNull();
 
@@ -232,9 +232,9 @@ using Moq;
 
             verifyResult.Should().Be(PasswordVerificationResult.Success);
 
-            _repository.Verify(_ => _.IsEmailNotUniqueAsync(register.Email), Times.Once);
-            _repository.Verify(_ => _.RegisterAsync(It.IsAny<User>()), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Once);
+            _repository.Verify(_ => _.IsEmailNotUniqueAsync(register.Email, It.IsAny<CancellationToken>()), Times.Once);
+            _repository.Verify(_ => _.RegisterAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -252,14 +252,14 @@ using Moq;
             var login = new LoginRequest("foo@gmail.com", "0000");
 
             _repository
-                .Setup(_ => _.GetUserByEmailAsync(login.Email))
+                .Setup(_ => _.GetUserByEmailAsync(login.Email, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(user);
 
             _unitOfWorkRepository
-                .Setup(_ => _.SaveChangesAsync())
+                .Setup(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            var result = await _service.LoginAsync(login);
+            var result = await _service.LoginAsync(login, CancellationToken.None);
 
             result.AccessToken.Should().NotBeNullOrWhiteSpace();
             result.RefreshToken.Should().NotBeNullOrWhiteSpace();
@@ -267,8 +267,8 @@ using Moq;
             user.RefreshToken.Should().Be(result.RefreshToken);
             user.RefreshTokenExpiryTime.Should().BeAfter(DateTime.UtcNow);
 
-            _repository.Verify(_ => _.GetUserByEmailAsync(login.Email), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Once);
+            _repository.Verify(_ => _.GetUserByEmailAsync(login.Email, It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -289,14 +289,14 @@ using Moq;
                 .HashPassword(user, "0000");
 
             _repository
-                .Setup(_ => _.GetUserAsync(userId))
+                .Setup(_ => _.GetUserAsync(userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(user);
 
             var oldRefreshToken = user.RefreshToken;
 
             var refresh = new RefreshTokenRequest(user.Id, oldRefreshToken);
 
-            var result = await _service.RefreshTokenAsync(refresh);
+            var result = await _service.RefreshTokenAsync(refresh, CancellationToken.None);
 
             result.AccessToken.Should().NotBeNullOrWhiteSpace();
             result.RefreshToken.Should().NotBeNullOrWhiteSpace();
@@ -305,9 +305,8 @@ using Moq;
             user.RefreshToken.Should().Be(result.RefreshToken);
             user.RefreshTokenExpiryTime.Should().BeAfter(DateTime.UtcNow);
 
-            _repository.Verify(_ => _.GetUserAsync(userId), Times.Once);
-            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(), Times.Once);
+            _repository.Verify(_ => _.GetUserAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWorkRepository.Verify(_ => _.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
     }
 }
-*/
