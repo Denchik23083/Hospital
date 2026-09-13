@@ -5,7 +5,7 @@ using Hospital.Repositories.UnitOfWorkRepository;
 using Hospital.Tests.Helpers;
 using Microsoft.EntityFrameworkCore;
 
-/*namespace Hospital.Tests.Repositories
+namespace Hospital.Tests.Repositories
 {
     public class UnitOfWorkRepositoryTests
     {
@@ -21,7 +21,7 @@ using Microsoft.EntityFrameworkCore;
         [Fact]
         public async Task BeginTransactionAsync_ShouldThrowInvalidOperationException_WhenUsingInMemoryDatabase()
         {
-            var action = async () => await _repository.BeginTransactionAsync();
+            var action = async () => await _repository.BeginTransactionAsync(CancellationToken.None);
 
             await action.Should().ThrowAsync<InvalidOperationException>();
         }
@@ -36,7 +36,7 @@ using Microsoft.EntityFrameworkCore;
             };
 
             await _context.Specialties.AddAsync(specialty);
-            await _repository.SaveChangesAsync();
+            await _repository.SaveChangesAsync(CancellationToken.None);
 
             var result = await _context.Specialties.FirstOrDefaultAsync();
 
@@ -46,4 +46,3 @@ using Microsoft.EntityFrameworkCore;
         }
     }
 }
-*/

@@ -6,7 +6,7 @@ using Hospital.Repositories.AuthRepository;
 using Hospital.Tests.Helpers;
 using Microsoft.EntityFrameworkCore;
 
-/*namespace Hospital.Tests.Repositories
+namespace Hospital.Tests.Repositories
 {
     public class AuthRepositoryTests
     {
@@ -34,7 +34,7 @@ using Microsoft.EntityFrameworkCore;
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
 
-            var result = await _repository.IsEmailNotUniqueAsync(email);
+            var result = await _repository.IsEmailNotUniqueAsync(email, CancellationToken.None);
 
             result.Should().BeTrue();
         }
@@ -54,7 +54,7 @@ using Microsoft.EntityFrameworkCore;
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
 
-            var result = await _repository.IsEmailNotUniqueAsync(email);
+            var result = await _repository.IsEmailNotUniqueAsync(email, CancellationToken.None);
 
             result.Should().BeFalse();
         }
@@ -101,7 +101,7 @@ using Microsoft.EntityFrameworkCore;
             await _context.Users.AddRangeAsync(users);
             await _context.SaveChangesAsync();
 
-            var result = await _repository.GetUserByEmailAsync(email);
+            var result = await _repository.GetUserByEmailAsync(email, CancellationToken.None);
 
             result.Should().NotBeNull();
 
@@ -156,7 +156,7 @@ using Microsoft.EntityFrameworkCore;
             await _context.Users.AddRangeAsync(users);
             await _context.SaveChangesAsync();
 
-            var result = await _repository.GetUserAsync(id);
+            var result = await _repository.GetUserAsync(id, CancellationToken.None);
 
             result.Should().NotBeNull();
 
@@ -206,4 +206,3 @@ using Microsoft.EntityFrameworkCore;
         }
     }
 }
-*/

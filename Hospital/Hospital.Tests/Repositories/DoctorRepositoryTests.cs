@@ -7,7 +7,7 @@ using Hospital.Repositories.DoctorRepository;
 using Hospital.Tests.Helpers;
 using Microsoft.EntityFrameworkCore;
 
-/*namespace Hospital.Tests.Repositories
+namespace Hospital.Tests.Repositories
 {
     public class DoctorRepositoryTests
     {
@@ -88,79 +88,15 @@ using Microsoft.EntityFrameworkCore;
                 }
             };
 
-            var doctorsResponse = new List<DoctorWithUserResponse>
-            {
-                new()
-                {
-                    Id = 1,
-                    FirstName = "Foo",
-                    LastName = "Too",
-                    ExperienceYears = 4,
-                    GenderType = GenderType.Male,
-                    WorkDayStart = new TimeSpan(9, 0, 0),
-                    WorkDayEnd = new TimeSpan(17, 0, 0),
-                    Specialty = new SpecialtyResponse
-                    {
-                        Id = 2,
-                        Name = "Кардиология",
-                        Price = 80
-                    },
-                    User = new UserResponse
-                    {
-                        Email = "doctor24@gmail.com",
-                        Money = 100m
-                    }
-                },
-                new()
-                {
-                    Id = 2,
-                    FirstName = "Глеб",
-                    LastName = "Романенко",
-                    ExperienceYears = 2,
-                    GenderType = GenderType.Male,
-                    WorkDayStart = new TimeSpan(9, 0, 0),
-                    WorkDayEnd = new TimeSpan(17, 0, 0),
-                    Specialty = new SpecialtyResponse
-                    {
-                        Id = 1,
-                        Name = "Терапия",
-                        Price = 40
-                    },
-                    User = new UserResponse
-                    {
-                        Email = "doctor1@gmail.com",
-                        Money = 500m
-                    }
-                },
-                new()
-                {
-                    Id = 3,
-                    FirstName = "Варвара",
-                    LastName = "Черноус",
-                    ExperienceYears = 2,
-                    GenderType = GenderType.Female,
-                    WorkDayStart = new TimeSpan(9, 0, 0),
-                    WorkDayEnd = new TimeSpan(17, 0, 0),
-                    Specialty = new SpecialtyResponse
-                    {
-                        Id = 1,
-                        Name = "Терапия",
-                        Price = 40
-                    },
-                    User = new UserResponse
-                    {
-                        Email = "doctor4@gmail.com",
-                        Money = 400m
-                    }
-                }
-            };
-
             await _context.Doctors.AddRangeAsync(doctors);
             await _context.SaveChangesAsync();
 
-            var result = await _repository.GetAllDoctorsAsync();
+            var result = await _repository.GetAllDoctorsAsync(CancellationToken.None);
 
-            result.Should().BeEquivalentTo(doctorsResponse);
+            result.Should().BeEquivalentTo(doctors, options => options
+                .IgnoringCyclicReferences()
+                .Excluding(p => p.User!.Doctor)
+                .Excluding(d => d.Specialty!.Doctors));
         }
 
         [Fact]
@@ -302,7 +238,7 @@ using Microsoft.EntityFrameworkCore;
             await _context.Doctors.AddRangeAsync(doctors);
             await _context.SaveChangesAsync();
 
-            var result = await _repository.GetDoctorAsync(id);
+            var result = await _repository.GetDoctorAsync(id, CancellationToken.None);
 
             result.Should().NotBeNull();
             result.Id.Should().Be(id);
@@ -397,7 +333,7 @@ using Microsoft.EntityFrameworkCore;
             await _context.Doctors.AddRangeAsync(doctors);
             await _context.SaveChangesAsync();
 
-            var result = await _repository.GetDoctorByUserAsync(userId);
+            var result = await _repository.GetDoctorByUserAsync(userId, CancellationToken.None);
 
             result.Should().NotBeNull();
             result.Id.Should().Be(2);
@@ -445,7 +381,7 @@ using Microsoft.EntityFrameworkCore;
                 }
             };
 
-            await _repository.CreateDoctorAsync(doctorToAdd);
+            await _repository.CreateDoctorAsync(doctorToAdd, CancellationToken.None);
             await _context.SaveChangesAsync();
 
             var doctor = await _context.Doctors.FirstOrDefaultAsync();
@@ -559,4 +495,3 @@ using Microsoft.EntityFrameworkCore;
         }
     }
 }
-*/

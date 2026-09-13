@@ -7,7 +7,7 @@ using Hospital.Repositories.PatientRepository;
 using Hospital.Tests.Helpers;
 using Microsoft.EntityFrameworkCore;
 
-/*namespace Hospital.Tests.Repositories
+namespace Hospital.Tests.Repositories
 {
     public class PatientRepositoryTests
     {
@@ -59,50 +59,12 @@ using Microsoft.EntityFrameworkCore;
                 }
             };
 
-            var patientsFromDb = new List<Patient>
-            {
-                new()
-                {
-                    Id = 1,
-                    FirstName = "Denys",
-                    LastName = "Stark",
-                    BirthDate = new DateOnly(2000, 01, 01),
-                    GenderType = GenderType.Male,
-                    Phone = "+4977777777",
-                    User = new User
-                    {
-                        Id = 1,
-                        Email = "foo@gmail.com",
-                        Money = 10000m,
-                        RoleType = RoleType.Patient,
-                    },
-                    UserId = 1
-                },
-                new()
-                {
-                    Id = 2,
-                    FirstName = "Ivan",
-                    LastName = "Vanko",
-                    BirthDate = new DateOnly(1990, 02, 02),
-                    GenderType = GenderType.Male,
-                    Phone = "+49000000",
-                    User = new User
-                    {
-                        Id = 2,
-                        Email = "too@gmail.com",
-                        Money = 7000m,
-                        RoleType = RoleType.Patient,
-                    },
-                    UserId = 2
-                }
-            };
-
             await _context.Patients.AddRangeAsync(patients);
             await _context.SaveChangesAsync();
 
             var result = await _repository.GetAllPatientsAsync(CancellationToken.None);
 
-            result.Should().BeEquivalentTo(patientsFromDb, options => options
+            result.Should().BeEquivalentTo(patients, options => options
                 .IgnoringCyclicReferences()
                 .Excluding(p => p.User!.Patient));
         }
@@ -153,7 +115,7 @@ using Microsoft.EntityFrameworkCore;
             await _context.Patients.AddRangeAsync(patients);
             await _context.SaveChangesAsync();
 
-            var result = await _repository.GetPatientAsync(id);
+            var result = await _repository.GetPatientAsync(id, CancellationToken.None);
 
             result.Should().NotBeNull();
             result.Id.Should().Be(id);
@@ -213,7 +175,7 @@ using Microsoft.EntityFrameworkCore;
             await _context.Patients.AddRangeAsync(patients);
             await _context.SaveChangesAsync();
 
-            var result = await _repository.GetPatientByUserAsync(userId);
+            var result = await _repository.GetPatientByUserAsync(userId, CancellationToken.None);
 
             result.Should().NotBeNull();
             result.Id.Should().Be(1);
@@ -274,7 +236,7 @@ using Microsoft.EntityFrameworkCore;
             await _context.Patients.AddRangeAsync(patients);
             await _context.SaveChangesAsync();
 
-            var result = await _repository.GetPatientBalanceAsync(userId);
+            var result = await _repository.GetPatientBalanceAsync(userId, CancellationToken.None);
 
             result.Should().Be(balance);
         }
@@ -342,4 +304,3 @@ using Microsoft.EntityFrameworkCore;
         }
     }
 }
-*/

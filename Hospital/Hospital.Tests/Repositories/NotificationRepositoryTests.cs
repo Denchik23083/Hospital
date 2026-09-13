@@ -6,7 +6,7 @@ using Hospital.Repositories.NotificationRepository;
 using Hospital.Tests.Helpers;
 using Microsoft.EntityFrameworkCore;
 
-/*namespace Hospital.Tests.Repositories
+namespace Hospital.Tests.Repositories
 {
     public class NotificationRepositoryTests
     {
@@ -135,7 +135,7 @@ using Microsoft.EntityFrameworkCore;
                 UserId = 10
             };
 
-            await _repository.AddNotificationAsync(notification);
+            await _repository.AddNotificationAsync(notification, CancellationToken.None);
             await _context.SaveChangesAsync();
 
             var result = await _context.Notifications.FirstOrDefaultAsync();
@@ -195,4 +195,3 @@ using Microsoft.EntityFrameworkCore;
         }
     }
 }
-*/

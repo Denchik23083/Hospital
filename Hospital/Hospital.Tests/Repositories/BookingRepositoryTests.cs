@@ -7,7 +7,7 @@ using Hospital.Repositories.BookingRepository;
 using Hospital.Tests.Helpers;
 using Microsoft.EntityFrameworkCore;
 
-/*namespace Hospital.Tests.Repositories
+namespace Hospital.Tests.Repositories
 {
     public class BookingRepositoryTests
     {
@@ -80,19 +80,22 @@ using Microsoft.EntityFrameworkCore;
                 }
             };
 
-            var bookingsResponse = new List<BookingResponse>
+            var bookingsFromDb = new List<Booking>
             {
                 new()
                 {
                     Id = 1,
-                    BookingStatus = BookingStatus.Active.ToString(),
-                    DoctorSlotWithDoctorResponse = new DoctorSlotWithDoctorResponse
+                    PatientId = patientId,
+                    DoctorSlotId = 1,
+                    BookingStatus = BookingStatus.Active,
+                    DoctorSlot = new DoctorSlot
                     {
                         Id = 1,
                         Date = new DateOnly(2026, 02, 03),
                         StartTime = new TimeSpan(9, 00, 00),
                         EndTime = new TimeSpan(9, 30, 00),
-                        DoctorResponse = new DoctorResponse
+                        DoctorId = 1,
+                        Doctor = new Doctor
                         {
                             Id = 1,
                             FirstName = "Foo",
@@ -105,14 +108,17 @@ using Microsoft.EntityFrameworkCore;
                 new()
                 {
                     Id = 2,
-                    BookingStatus = BookingStatus.Cancelled.ToString(),
-                    DoctorSlotWithDoctorResponse = new DoctorSlotWithDoctorResponse
+                    PatientId = patientId,
+                    DoctorSlotId = 2,
+                    BookingStatus = BookingStatus.Cancelled,
+                    DoctorSlot = new DoctorSlot
                     {
                         Id = 2,
                         Date = new DateOnly(2026, 02, 03),
                         StartTime = new TimeSpan(9, 30, 00),
                         EndTime = new TimeSpan(10, 00, 00),
-                        DoctorResponse = new DoctorResponse
+                        DoctorId = 1,
+                        Doctor = new Doctor
                         {
                             Id = 1,
                             FirstName = "Foo",
@@ -127,9 +133,13 @@ using Microsoft.EntityFrameworkCore;
             await _context.Bookings.AddRangeAsync(bookings);
             await _context.SaveChangesAsync();
 
-            var result = await _repository.GetAllPatientBookingsAsync(patientId);
+            var result = await _repository.GetAllPatientBookingsAsync(patientId, CancellationToken.None);
 
-            result.Should().BeEquivalentTo(bookingsResponse);
+            result.Should().BeEquivalentTo(bookingsFromDb, options => options
+                .IgnoringCyclicReferences()
+                .Excluding(ctx => ctx.Path.Contains("Bookings"))
+                .Excluding(ctx => ctx.Path.Contains("DoctorSlots"))
+                .Excluding(ctx => ctx.Path.EndsWith("CreatedAt")));
         }
 
         [Fact]
@@ -198,7 +208,7 @@ using Microsoft.EntityFrameworkCore;
             await _context.Bookings.AddRangeAsync(bookings);
             await _context.SaveChangesAsync();
 
-            var result = await _repository.GetAllBookingsByDoctorAsync(doctorId);
+            var result = await _repository.GetAllBookingsByDoctorAsync(doctorId, CancellationToken.None);
 
             result.Should().ContainSingle();
 
@@ -265,7 +275,7 @@ using Microsoft.EntityFrameworkCore;
             await _context.Bookings.AddRangeAsync(bookings);
             await _context.SaveChangesAsync();
 
-            var result = await _repository.GetAllBookingsByPatientAsync(patientId);
+            var result = await _repository.GetAllBookingsByPatientAsync(patientId, CancellationToken.None);
 
             result.Should().ContainSingle();
 
@@ -305,7 +315,7 @@ using Microsoft.EntityFrameworkCore;
             await _context.Bookings.AddAsync(booking);
             await _context.SaveChangesAsync();
 
-            var result = await _repository.GetBookingWithDoctorAsync(bookingId, doctorId);
+            var result = await _repository.GetBookingWithDoctorAsync(bookingId, doctorId, CancellationToken.None);
 
             result.Should().NotBeNull();
 
@@ -346,7 +356,7 @@ using Microsoft.EntityFrameworkCore;
             await _context.Bookings.AddAsync(booking);
             await _context.SaveChangesAsync();
 
-            var result = await _repository.GetBookingWithPatientAsync(bookingId, patientId);
+            var result = await _repository.GetBookingWithPatientAsync(bookingId, patientId, CancellationToken.None);
 
             result.Should().NotBeNull();
 
@@ -386,7 +396,7 @@ using Microsoft.EntityFrameworkCore;
             await _context.Bookings.AddAsync(booking);
             await _context.SaveChangesAsync();
 
-            var result = await _repository.HasActiveBookingWithDoctorAsync(patientId, doctorId);
+            var result = await _repository.HasActiveBookingWithDoctorAsync(patientId, doctorId, CancellationToken.None);
 
             result.Should().BeTrue();
         }
@@ -437,7 +447,7 @@ using Microsoft.EntityFrameworkCore;
             await _context.Bookings.AddRangeAsync(bookings);
             await _context.SaveChangesAsync();
 
-            var result = await _repository.HasActiveBookingWithDoctorAsync(patientId, doctorId);
+            var result = await _repository.HasActiveBookingWithDoctorAsync(patientId, doctorId, CancellationToken.None);
 
             result.Should().BeFalse();
         }
@@ -454,7 +464,7 @@ using Microsoft.EntityFrameworkCore;
                 CreatedAt = new DateTime(2026, 02, 03, 10, 00, 00)
             };
 
-            await _repository.AddBookingAsync(booking);
+            await _repository.AddBookingAsync(booking, CancellationToken.None);
             await _context.SaveChangesAsync();
 
             var result = await _context.Bookings.FirstOrDefaultAsync(_ => _.Id == booking.Id);
@@ -469,4 +479,3 @@ using Microsoft.EntityFrameworkCore;
         }
     }
 }
-*/

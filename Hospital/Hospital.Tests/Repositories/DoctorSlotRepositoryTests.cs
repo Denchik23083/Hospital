@@ -7,7 +7,7 @@ using Hospital.Repositories.DoctorSlotRepository;
 using Hospital.Tests.Helpers;
 using Microsoft.EntityFrameworkCore;
 
-/*namespace Hospital.Tests.Repositories
+namespace Hospital.Tests.Repositories
 {
     public class DoctorSlotRepositoryTests
     {
@@ -87,7 +87,7 @@ using Microsoft.EntityFrameworkCore;
             await _context.DoctorSlots.AddRangeAsync(doctorSlots);
             await _context.SaveChangesAsync();
 
-            var result = await _repository.GetAllDoctorSlotsDatesByDoctorAsync(doctorId);
+            var result = await _repository.GetAllDoctorSlotsDatesByDoctorAsync(doctorId, CancellationToken.None);
 
             result.Should().BeEquivalentTo(dates);
         }
@@ -112,6 +112,8 @@ using Microsoft.EntityFrameworkCore;
                         new Booking
                         {
                             Id = 1,
+                            PatientId = 1,
+                            DoctorSlotId = 1,
                             CreatedAt = new DateTime(2026, 02, 01, 10, 00, 00),
                             BookingStatus = BookingStatus.Active,
                             Patient = new Patient
@@ -127,6 +129,8 @@ using Microsoft.EntityFrameworkCore;
                         new Booking
                         {
                             Id = 2,
+                            PatientId = 2,
+                            DoctorSlotId = 1,
                             CreatedAt = new DateTime(2026, 01, 01, 10, 00, 00),
                             BookingStatus = BookingStatus.Cancelled,
                             Patient = new Patient
@@ -168,45 +172,73 @@ using Microsoft.EntityFrameworkCore;
                 }
             };
 
-            var doctorSlotsBooking = new List<DoctorSlotBookingResponse>
+            var doctorSlotsFromDb = new List<DoctorSlot>
             {
                 new()
                 {
                     Id = 1,
                     Date = date,
+                    DoctorId = doctorId,
                     StartTime = new TimeSpan(09, 00, 00),
                     EndTime = new TimeSpan(09, 30, 00),
-                    LastBooking = new BookingPatientResponse
-                    {
-                        Id = 1,
-                        BookingStatus = BookingStatus.Active.ToString(),
-                        PatientResponse = new PatientResponse
+                    Bookings =
+                    [
+                        new Booking
                         {
                             Id = 1,
-                            FirstName = "Foo",
-                            LastName = "Too",
-                            BirthDate = new DateOnly(2003, 08, 03),
-                            GenderType = GenderType.Male,
-                            Phone = "49999999"
+                            PatientId = 1,
+                            DoctorSlotId = 1,
+                            CreatedAt = new DateTime(2026, 02, 01, 10, 00, 00),
+                            BookingStatus = BookingStatus.Active,
+                            Patient = new Patient
+                            {
+                                Id = 1,
+                                FirstName = "Foo",
+                                LastName = "Too",
+                                BirthDate = new DateOnly(2003, 08, 03),
+                                GenderType = GenderType.Male,
+                                Phone = "49999999"
+                            }
+                        },
+                        new Booking
+                        {
+                            Id = 2,
+                            PatientId = 2,
+                            DoctorSlotId = 1,
+                            CreatedAt = new DateTime(2026, 01, 01, 10, 00, 00),
+                            BookingStatus = BookingStatus.Cancelled,
+                            Patient = new Patient
+                            {
+                                Id = 2,
+                                FirstName = "Old",
+                                LastName = "Patient",
+                                BirthDate = new DateOnly(2000, 01, 01),
+                                GenderType = GenderType.Male,
+                                Phone = "111111"
+                            }
                         }
-                    }
+                    ]
                 },
                 new()
                 {
                     Id = 2,
                     Date = date,
+                    DoctorId = doctorId,
                     StartTime = new TimeSpan(09, 30, 00),
                     EndTime = new TimeSpan(10, 00, 00),
-                    LastBooking = null
+                    Bookings = []
                 }
             };
 
             await _context.DoctorSlots.AddRangeAsync(doctorSlots);
             await _context.SaveChangesAsync();
 
-            var result = await _repository.GetAllDoctorSlotsTimesByDoctorAsync(doctorId, date);
+            var result = await _repository.GetAllDoctorSlotsTimesByDoctorAsync(doctorId, date, CancellationToken.None);
 
-            result.Should().BeEquivalentTo(doctorSlotsBooking);
+            result.Should().BeEquivalentTo(doctorSlotsFromDb, options => options
+                .IgnoringCyclicReferences()
+                .Excluding(ctx => ctx.Path.Contains("Patient.Bookings"))
+                .Excluding(ctx => ctx.Path.Contains("DoctorSlot")));
         }
 
         [Fact]
@@ -214,6 +246,7 @@ using Microsoft.EntityFrameworkCore;
         {
             var doctorId = 2;
             var today = new DateOnly(2026, 02, 01);
+            var currentTime = DateTime.UtcNow.TimeOfDay;
 
             var doctorSlots = new List<DoctorSlot>
             {
@@ -281,7 +314,7 @@ using Microsoft.EntityFrameworkCore;
             await _context.DoctorSlots.AddRangeAsync(doctorSlots);
             await _context.SaveChangesAsync();
 
-            var result = await _repository.GetAllDoctorSlotsDatesAsync(doctorId, today);
+            var result = await _repository.GetAllDoctorSlotsDatesAsync(doctorId, today, currentTime, CancellationToken.None);
 
             result.Should().BeEquivalentTo(dates);
         }
@@ -291,6 +324,8 @@ using Microsoft.EntityFrameworkCore;
         {
             var doctorId = 2;
             var date = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
+            var today = new DateOnly(2026, 02, 01);
+            var currentTime = DateTime.UtcNow.TimeOfDay;
 
             var doctorSlots = new List<DoctorSlot>
             {
@@ -370,7 +405,7 @@ using Microsoft.EntityFrameworkCore;
             await _context.DoctorSlots.AddRangeAsync(doctorSlots);
             await _context.SaveChangesAsync();
 
-            var result = await _repository.GetAllDoctorSlotsTimeByDateAsync(doctorId, date);
+            var result = await _repository.GetAllDoctorSlotsTimeByDateAsync(doctorId, date, today, currentTime, CancellationToken.None);
 
             result.Should().BeEquivalentTo(doctorSlotsResponse);
         }
@@ -437,7 +472,7 @@ using Microsoft.EntityFrameworkCore;
             await _context.DoctorSlots.AddRangeAsync(doctorSlots);
             await _context.SaveChangesAsync();
 
-            var result = await _repository.GetAllExpiredDoctorSlotsAsync(doctorId);
+            var result = await _repository.GetAllExpiredDoctorSlotsAsync(doctorId, CancellationToken.None);
 
             result.Should().BeEquivalentTo([1, 2]);
         }
@@ -488,7 +523,7 @@ using Microsoft.EntityFrameworkCore;
             await _context.DoctorSlots.AddAsync(doctorSlot);
             await _context.SaveChangesAsync();
 
-            var result = await _repository.GetDoctorSlotAsync(slotId);
+            var result = await _repository.GetDoctorSlotAsync(slotId, CancellationToken.None);
 
             result.Should().NotBeNull();
 
@@ -541,7 +576,7 @@ using Microsoft.EntityFrameworkCore;
             await _context.DoctorSlots.AddRangeAsync(doctorSlots);
             await _context.SaveChangesAsync();
 
-            var result = await _repository.DoctorSlotsAlreadyExistsAsync(doctorId, date);
+            var result = await _repository.DoctorSlotsAlreadyExistsAsync(doctorId, date, CancellationToken.None);
 
             result.Should().BeTrue();
         }
@@ -575,7 +610,7 @@ using Microsoft.EntityFrameworkCore;
             await _context.DoctorSlots.AddRangeAsync(doctorSlots);
             await _context.SaveChangesAsync();
 
-            var result = await _repository.DoctorSlotsAlreadyExistsAsync(doctorId, date);
+            var result = await _repository.DoctorSlotsAlreadyExistsAsync(doctorId, date, CancellationToken.None);
 
             result.Should().BeFalse();
         }
@@ -614,7 +649,7 @@ using Microsoft.EntityFrameworkCore;
                 },
             };
 
-            await _repository.AddDoctorSlotsAsync(doctorSlots);
+            await _repository.AddDoctorSlotsAsync(doctorSlots, CancellationToken.None);
             await _context.SaveChangesAsync();
 
             var result = await _context.DoctorSlots.ToListAsync();
@@ -627,10 +662,9 @@ using Microsoft.EntityFrameworkCore;
         {
             var expiredDoctorSlots = new List<int> { 1, 2, 3 };
 
-            var action = async () => await _repository.DeleteDoctorSlotsAsync(expiredDoctorSlots);
+            var action = async () => await _repository.DeleteDoctorSlotsAsync(expiredDoctorSlots, CancellationToken.None);
 
             await action.Should().ThrowAsync<InvalidOperationException>();
         }
     }
 }
-*/
