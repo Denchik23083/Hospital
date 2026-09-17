@@ -1,0 +1,35 @@
+name: Build and Push Backend Images
+
+on:
+  push:
+    branches: [ "main", "master" ]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: actions/docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push Auth API
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Hospital.Auth/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/hospital-auth:latest
+
+      - name: Build and Push Hospital API
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Hospital.Hospital/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/hospital-hospital:latest
