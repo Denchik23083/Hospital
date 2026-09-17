@@ -21,7 +21,7 @@ jobs:
       - name: Build and Push Auth API
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./Hospital
           file: ./Hospital/Hospital.Auth/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/hospital-auth:latest
@@ -29,7 +29,7 @@ jobs:
       - name: Build and Push Hospital API
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./Hospital
           file: ./Hospital/Hospital.Hospital/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/hospital-hospital:latest
