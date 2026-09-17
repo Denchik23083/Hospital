@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: hospital-sqlserver
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "${SA_PASSWORD:-YourStrong!Passw0rd}"
+    ports:
+      - "1433:1433"
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P 'YourStrong!Passw0rd' -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 40s
+
+  hospital-auth:
+    image: ВАШ_ЛОГИН/hospital-auth:latest
+    container_name: hospital-auth
+    ports:
+      - "5001:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: "Server=sqlserver;Database=HospitalDb;User Id=sa;Password=${SA_PASSWORD:-YourStrong!Passw0rd};TrustServerCertificate=True"
+      SecretKey: "${JWT_SECRET:-SuperSecretKeyForJWTTokenGeneration123456!}"
+      Issuer: "${JWT_ISSUER:-HospitalAuthServer}"
+      Audience: "${JWT_AUDIENCE:-HospitalClient}"
+      SeedAdmin__Email: "${ADMIN_EMAIL:-admin@gmail.com}"
+      SeedAdmin__Password: "${ADMIN_PASSWORD:-0000}"
+      SeedDoctor__Password: "${DOCTOR_PASSWORD:-0000}"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+
+  hospital-hospital:
+    image: ВАШ_ЛОГИН/hospital-hospital:latest
+    container_name: hospital-hospital
+    ports:
+      - "6001:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: "Server=sqlserver;Database=HospitalDb;User Id=sa;Password=${SA_PASSWORD:-YourStrong!Passw0rd};TrustServerCertificate=True"
+      SecretKey: "${JWT_SECRET:-SuperSecretKeyForJWTTokenGeneration123456!}"
+      Issuer: "${JWT_ISSUER:-HospitalAuthServer}"
+      Audience: "${JWT_AUDIENCE:-HospitalClient}"
+      SeedAdmin__Email: "${ADMIN_EMAIL:-admin@gmail.com}"
+      SeedAdmin__Password: "${ADMIN_PASSWORD:-0000}"
+      SeedDoctor__Password: "${DOCTOR_PASSWORD:-0000}"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      hospital-auth:
+        condition: service_started
+
+  frontend:
+    image: ВАШ_ЛОГИН/hospital-frontend:latest
+    container_name: hospital-frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - hospital-auth
+      - hospital-hospital

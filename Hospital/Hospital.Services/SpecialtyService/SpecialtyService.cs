@@ -8,11 +8,11 @@ namespace Hospital.Services.SpecialtyService
 {
     public class SpecialtyService(ISpecialtyRepository repository, 
             IMapper mapper,
-            ILogger logger) : ISpecialtyService
+            ILogger<SpecialtyService> logger) : ISpecialtyService
     {
         private readonly ISpecialtyRepository _repository = repository;
         private readonly IMapper _mapper = mapper;
-        private readonly ILogger _logger = logger;
+        private readonly ILogger<SpecialtyService> _logger = logger;
 
         public async Task<IEnumerable<SpecialtyResponse>> GetAllSpecialtiesAsync(CancellationToken ct)
         {

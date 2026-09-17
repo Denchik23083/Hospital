@@ -11,10 +11,8 @@ services:
       SecretKey: "${JWT_SECRET}"
       Issuer: "${JWT_ISSUER}"
       Audience: "${JWT_AUDIENCE}"
-
       SeedAdmin__Email: "${ADMIN_EMAIL}"
       SeedAdmin__Password: "${ADMIN_PASSWORD}"
-
       SeedDoctor__Password: "${DOCTOR_PASSWORD}"
     depends_on:
       sqlserver:
@@ -32,12 +30,12 @@ services:
       SecretKey: "${JWT_SECRET}"
       Issuer: "${JWT_ISSUER}"
       Audience: "${JWT_AUDIENCE}"
-
       SeedAdmin__Email: "${ADMIN_EMAIL}"
       SeedAdmin__Password: "${ADMIN_PASSWORD}"
-
       SeedDoctor__Password: "${DOCTOR_PASSWORD}"
     depends_on:
+      sqlserver:
+        condition: service_healthy
       hospital-auth:
         condition: service_started
 
