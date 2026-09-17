@@ -17,7 +17,7 @@ services:
       start_period: 40s
 
   hospital-auth:
-    image: ВАШ_ЛОГИН/hospital-auth:latest
+    image: denchik23083/hospital-auth:latest
     container_name: hospital-auth
     ports:
       - "5001:8080"
@@ -35,7 +35,7 @@ services:
         condition: service_healthy
 
   hospital-hospital:
-    image: ВАШ_ЛОГИН/hospital-hospital:latest
+    image: denchik23083/hospital-hospital:latest
     container_name: hospital-hospital
     ports:
       - "6001:8080"
@@ -55,7 +55,7 @@ services:
         condition: service_started
 
   frontend:
-    image: ВАШ_ЛОГИН/hospital-frontend:latest
+    image: denchik23083/hospital-frontend:latest
     container_name: hospital-frontend
     ports:
       - "4200:80"
