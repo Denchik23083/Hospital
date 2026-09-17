@@ -22,7 +22,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./Hospital.Auth/Dockerfile
+          file: ./Hospital/Hospital.Auth/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/hospital-auth:latest
 
@@ -30,6 +30,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./Hospital.Hospital/Dockerfile
+          file: ./Hospital/Hospital.Hospital/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/hospital-hospital:latest
